@@ -5,15 +5,12 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-
 import javax.mail.MessagingException;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
-
 import org.apache.log4j.Logger;
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
-
 import com.oddrock.common.awt.RobotManager;
 import com.oddrock.common.email.EmailManager;
 import com.oddrock.common.file.FileUtils;
