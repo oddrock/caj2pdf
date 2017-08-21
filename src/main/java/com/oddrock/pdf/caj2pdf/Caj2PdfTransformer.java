@@ -5,15 +5,18 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+
 import javax.mail.MessagingException;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
+
 import org.apache.log4j.Logger;
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
+
 import com.oddrock.common.awt.RobotManager;
-import com.oddrock.common.email.EmailSender;
 import com.oddrock.common.file.FileUtils;
+import com.oddrock.common.mail.MailSender;
 import com.oddrock.common.media.WavPlayer;
 import com.oddrock.common.windows.ClipboardUtils;
 import com.oddrock.common.windows.CmdExecutor;
@@ -153,11 +156,11 @@ public class Caj2PdfTransformer {
 		if(Prop.get("notice.mail.sender.type").equalsIgnoreCase("qq")){
 			senderAccount = Prop.get("notice.mail.sender.qq.account");
 			senderPasswd = Prop.get("notice.mail.sender.qq.passwd");
-			EmailSender.sendEmailFastByAuth(senderAccount, senderPasswd, recverAccounts, content, Prop.get("notice.mail.sender.qq.smtpport"));
+			MailSender.sendEmailFastByAuth(senderAccount, senderPasswd, recverAccounts, content, Prop.get("notice.mail.sender.qq.smtpport"));
 		}else if(Prop.get("notice.mail.sender.type").equalsIgnoreCase("163")) {
 			senderAccount = Prop.get("notice.mail.sender.163.account");
 			senderPasswd = Prop.get("notice.mail.sender.163.passwd");
-			EmailSender.sendEmailFast(senderAccount, senderPasswd, recverAccounts, content);
+			MailSender.sendEmailFast(senderAccount, senderPasswd, recverAccounts, content);
 		}
 	}
 	
@@ -174,9 +177,7 @@ public class Caj2PdfTransformer {
 	}
 	
 	public static void main(String[] args) throws AWTException, NativeHookException, MessagingException, UnsupportedAudioFileException, IOException, LineUnavailableException {
-		//String cajFilePath = "C:\\_XPS13_Doc\\Work\\项目\\上海联通能力集成平台\\2017-06-28 联通征文\\论文参考文献\\4.基于Dubbox的分布式服务架构设计与实现_谢璐俊.caj";
 		Caj2PdfTransformer trans = new Caj2PdfTransformer();
-		//trans.transCaj2Pdf(cajFilePath, "C:\\Users\\oddro\\Desktop\\pdfceshi");
 		trans.transCaj2PdfBatch();
 	}
 
