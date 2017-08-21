@@ -12,7 +12,7 @@ import org.apache.log4j.Logger;
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
 import com.oddrock.common.awt.RobotManager;
-import com.oddrock.common.email.EmailManager;
+import com.oddrock.common.email.EmailSender;
 import com.oddrock.common.file.FileUtils;
 import com.oddrock.common.media.WavPlayer;
 import com.oddrock.common.windows.ClipboardUtils;
@@ -153,11 +153,11 @@ public class Caj2PdfTransformer {
 		if(Prop.get("notice.mail.sender.type").equalsIgnoreCase("qq")){
 			senderAccount = Prop.get("notice.mail.sender.qq.account");
 			senderPasswd = Prop.get("notice.mail.sender.qq.passwd");
-			EmailManager.sendEmailFastByAuth(senderAccount, senderPasswd, recverAccounts, content, Prop.get("notice.mail.sender.qq.smtpport"));
+			EmailSender.sendEmailFastByAuth(senderAccount, senderPasswd, recverAccounts, content, Prop.get("notice.mail.sender.qq.smtpport"));
 		}else if(Prop.get("notice.mail.sender.type").equalsIgnoreCase("163")) {
 			senderAccount = Prop.get("notice.mail.sender.163.account");
 			senderPasswd = Prop.get("notice.mail.sender.163.passwd");
-			EmailManager.sendEmailFast(senderAccount, senderPasswd, recverAccounts, content);
+			EmailSender.sendEmailFast(senderAccount, senderPasswd, recverAccounts, content);
 		}
 	}
 	
