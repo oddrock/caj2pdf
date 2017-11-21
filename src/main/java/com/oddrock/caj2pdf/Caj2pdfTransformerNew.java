@@ -40,10 +40,10 @@ public class Caj2pdfTransformerNew {
 	/*
 	 * 关闭福昕PDF阅读器
 	 */
-	/*private CmdResult closeFoxit() {
+	private CmdResult closeFoxit() {
 		return CmdExecutor.getSingleInstance().exeCmd(
 				"taskkill /f /im \"" + Prop.get("foxit.appname") + "\"");
-	}*/
+	}
 	
 	/*
 	 * 关闭caj阅读器
@@ -199,6 +199,8 @@ public class Caj2pdfTransformerNew {
 			logger.warn("等待关闭caj");
 			wait(Prop.getInt("interval.waitmillis"));
 		}
+		closeFoxit();
+		wait(Prop.getInt("interval.waitmillis"));
 		logger.warn("完成打印，文件位置："+dstFile.getCanonicalPath());
 	}
 	
