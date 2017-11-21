@@ -5,11 +5,9 @@ import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-
 import org.apache.log4j.Logger;
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
-
 import com.oddrock.common.awt.RobotManager;
 import com.oddrock.common.pic.BufferedImageUtils;
 import com.oddrock.common.pic.PictureComparator;
@@ -34,18 +32,18 @@ public class Caj2pdfTransformerNew {
 	/*
 	 * 关闭Notepad++
 	 */
-	private CmdResult closeNotepadpp() {
+	/*private CmdResult closeNotepadpp() {
 		return CmdExecutor.getSingleInstance().exeCmd(
 				"taskkill /f /im \"" + Prop.get("notice.txt.notepadpp.appname") + "\"");
-	}
+	}*/
 	
 	/*
 	 * 关闭福昕PDF阅读器
 	 */
-	private CmdResult closeFoxit() {
+	/*private CmdResult closeFoxit() {
 		return CmdExecutor.getSingleInstance().exeCmd(
 				"taskkill /f /im \"" + Prop.get("foxit.appname") + "\"");
-	}
+	}*/
 	
 	/*
 	 * 关闭caj阅读器
@@ -104,7 +102,7 @@ public class Caj2pdfTransformerNew {
 	}
 	
 	// 是否要覆盖文件
-	private boolean isOverwrite() throws IOException{
+	/*private boolean isOverwrite() throws IOException{
 		boolean flag = false;
 		BufferedImage image = robotMngr.createScreenCapture(Prop.getInt("cajviewer.mark.overwrite.x")
 				,Prop.getInt("cajviewer.mark.overwrite.y")
@@ -114,7 +112,7 @@ public class Caj2pdfTransformerNew {
 			flag = true;
 		}
 		return flag;
-	}
+	}*/
 	
 	// 是否正在打印
 	private boolean isPrintnow() throws IOException{
@@ -177,6 +175,7 @@ public class Caj2pdfTransformerNew {
 		wait(Prop.getInt("interval.waitmillis"));
 		robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_V);
 		wait(Prop.getInt("interval.waitmillis"));
+		// 点击确定俺妞妞
 		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_S);
 		boolean printnow = false;
 		robotMngr.pressKey(KeyEvent.VK_Y);
