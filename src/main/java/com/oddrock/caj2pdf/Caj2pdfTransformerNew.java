@@ -25,6 +25,11 @@ import com.oddrock.common.windows.CmdExecutor;
 import com.oddrock.common.windows.CmdResult;
 import com.oddrock.common.windows.GlobalKeyListener;
 
+/**
+ * 自动化从caj打印pdf
+ * @author oddrock
+ *
+ */
 public class Caj2pdfTransformerNew {
 	private static Logger logger = Logger.getLogger(Caj2pdfTransformerNew.class);
 	private RobotManager robotMngr;
