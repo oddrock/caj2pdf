@@ -2,6 +2,8 @@
 /.settings
 .classpath
 .project
-TODO.md
 /src/main/resources/
+/images/
+/sounds/
 notice.wav
+TODO.md
