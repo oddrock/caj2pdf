@@ -101,19 +101,6 @@ public class Caj2pdfTransformerNew {
 		return flag;
 	}
 	
-	// 是否要覆盖文件
-	/*private boolean isOverwrite() throws IOException{
-		boolean flag = false;
-		BufferedImage image = robotMngr.createScreenCapture(Prop.getInt("cajviewer.mark.overwrite.x")
-				,Prop.getInt("cajviewer.mark.overwrite.y")
-				,Prop.getInt("cajviewer.mark.overwrite.width")
-				,Prop.getInt("cajviewer.mark.overwrite.height"));
-		if(PictureComparator.compare(image, BufferedImageUtils.read(Prop.get("cajviewer.mark.overwrite.picfilepath")))>=0.9){
-			flag = true;
-		}
-		return flag;
-	}*/
-	
 	// 是否正在打印
 	private boolean isPrintnow() throws IOException{
 		boolean flag = false;
