@@ -24,7 +24,6 @@ import com.oddrock.common.windows.ClipboardUtils;
 import com.oddrock.common.windows.CmdExecutor;
 import com.oddrock.common.windows.CmdResult;
 import com.oddrock.common.windows.GlobalKeyListener;
-import com.oddrock.pdf.caj2pdf.Prop;
 
 public class Caj2pdfTransformerNew {
 	private static Logger logger = Logger.getLogger(Caj2pdfTransformerNew.class);
@@ -169,6 +168,8 @@ public class Caj2pdfTransformerNew {
 	 * @throws InterruptedException
 	 */
 	public void caj2pdf(String srcCajFilePath) throws IOException, InterruptedException{
+		// 鼠标挪开，避免挡事
+		robotMngr.moveMouseToRightDownCorner(Prop.getInt("xgap"),Prop.getInt("ygap"));
 		closeCaj();
 		while(isCajOpen()){
 			logger.warn("等待关闭caj");
@@ -244,7 +245,9 @@ public class Caj2pdfTransformerNew {
 			caj2pdf(file.getCanonicalPath());
 		}
 		logger.warn("完成"+ srcDir.getCanonicalPath() +"目录下所有caj打印成pdf！");
+		// 完成后声音通知
 		noticeSound();
+		// 完成后短信通知
 		noticeMail();
 	}
 	
