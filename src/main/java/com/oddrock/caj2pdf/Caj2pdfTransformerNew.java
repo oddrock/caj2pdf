@@ -5,10 +5,19 @@ import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+
+import javax.mail.MessagingException;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
+
 import org.apache.log4j.Logger;
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
+
 import com.oddrock.common.awt.RobotManager;
+import com.oddrock.common.mail.MailSender;
+import com.oddrock.common.media.WavPlayer;
 import com.oddrock.common.pic.BufferedImageUtils;
 import com.oddrock.common.pic.PictureComparator;
 import com.oddrock.common.windows.ClipboardUtils;
@@ -118,6 +127,41 @@ public class Caj2pdfTransformerNew {
 		Thread.sleep(millis);
 	}
 	
+	// 邮件通知
+	private void noticeMail() throws UnsupportedEncodingException, MessagingException{
+		if(!Prop.getBool("notice.mail.flag")){
+			return;
+		}
+		String content="所有caj文件转换为PDF已完成！！！";
+		String senderAccount = null;
+		String senderPasswd = null;
+		String recverAccounts = Prop.get("notice.mail.recver.accounts");
+		if(Prop.get("notice.mail.sender.type").equalsIgnoreCase("qq")){
+			senderAccount = Prop.get("notice.mail.sender.qq.account");
+			senderPasswd = Prop.get("notice.mail.sender.qq.passwd");
+			MailSender.sendEmailFastByAuth(senderAccount, senderPasswd, recverAccounts, content, Prop.get("notice.mail.sender.qq.smtpport"));
+		}else if(Prop.get("notice.mail.sender.type").equalsIgnoreCase("163")) {
+			senderAccount = Prop.get("notice.mail.sender.163.account");
+			senderPasswd = Prop.get("notice.mail.sender.163.passwd");
+			MailSender.sendEmailFast(senderAccount, senderPasswd, recverAccounts, content);
+		}
+	}
+	
+	// 声音通知
+	private void noticeSound(){
+		if(Prop.getBool("notice.sound.flag")){
+			try {
+				WavPlayer.play(Prop.get("notice.sound.wavpath"), Prop.getInt("notice.sound.playcount"));
+			} catch (UnsupportedAudioFileException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (LineUnavailableException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	/**
 	 * 打印单个文件
 	 * @param srcCajFilePath
@@ -191,7 +235,7 @@ public class Caj2pdfTransformerNew {
 		logger.warn("完成打印，文件位置："+dstFile.getCanonicalPath());
 	}
 	
-	public void caj2pdfBatch(String srcDirPath) throws IOException, InterruptedException{
+	public void caj2pdfBatch(String srcDirPath) throws IOException, InterruptedException, MessagingException{
 		File srcDir = new File(srcDirPath);
 		if(!srcDir.exists() || !srcDir.isDirectory()){
 			return;
@@ -200,9 +244,11 @@ public class Caj2pdfTransformerNew {
 			caj2pdf(file.getCanonicalPath());
 		}
 		logger.warn("完成"+ srcDir.getCanonicalPath() +"目录下所有caj打印成pdf！");
+		noticeSound();
+		noticeMail();
 	}
 	
-	public static void main(String[] args) throws AWTException, NativeHookException, IOException, InterruptedException {
+	public static void main(String[] args) throws AWTException, NativeHookException, IOException, InterruptedException, MessagingException {
 		Caj2pdfTransformerNew cts = new Caj2pdfTransformerNew();
 		String srcDirPath = Prop.get("srcdirpath");
 		cts.caj2pdfBatch(srcDirPath);	
