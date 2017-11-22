@@ -1,4 +1,5 @@
 package com.oddrock.caj2pdf;
+
 import com.oddrock.common.prop.PropertiesReader;
 
 public class Prop {
@@ -9,6 +10,8 @@ public class Prop {
 	
 	private static void load(){
 		PR.addFilePath("caj2pdf.properties");
+		PR.loadProperties();
+		PR.addFilePath(PR.getValue("properties.filepath"));
 		PR.loadProperties();
 	}
 	
