@@ -34,6 +34,7 @@ import com.oddrock.common.windows.GlobalKeyListener;
 public class Caj2pdfTransformerNew {
 	private static Logger logger = Logger.getLogger(Caj2pdfTransformerNew.class);
 	private RobotManager robotMngr;
+	private boolean test = false;
 	public Caj2pdfTransformerNew() throws AWTException, NativeHookException {
 		super();
 		robotMngr = new RobotManager();
@@ -73,6 +74,13 @@ public class Caj2pdfTransformerNew {
 	private CmdResult openCaj(String cajFilePath){
 		return CmdExecutor.getSingleInstance().exeCmd(
 				Prop.get("cajviewer.path") + " \"" + cajFilePath + "\"");
+	}
+	
+	/*
+	 * 打开空的caj
+	 */
+	private CmdResult openCaj(){
+		return CmdExecutor.getSingleInstance().exeCmd(Prop.get("cajviewer.path"));
 	}
 	
 	// 测试Caj是否打开
@@ -213,7 +221,7 @@ public class Caj2pdfTransformerNew {
 		wait(Prop.getInt("interval.waitmillis"));
 		robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_V);
 		wait(Prop.getInt("interval.waitmillis"));
-		// 点击确定俺妞妞
+		// 点击确定按钮
 		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_S);
 		boolean printnow = false;
 		robotMngr.pressKey(KeyEvent.VK_Y);
@@ -263,15 +271,12 @@ public class Caj2pdfTransformerNew {
 	 * @param y
 	 * @param width
 	 * @param height
-	 * @param filepath
+	 * @param parentDirPath
 	 * @throws IOException
 	 */
-	public void captureImageAndSave(int x, int y, int width, int height, String filepath) throws IOException {
-		BufferedImage image = robotMngr.createScreenCapture(Prop.getInt("cajviewer.mark.printready.x")
-				,Prop.getInt("cajviewer.mark.printready.y")
-				,Prop.getInt("cajviewer.mark.printready.width")
-				,Prop.getInt("cajviewer.mark.printready.height"));
-		BufferedImageUtils.write(image, filepath);
+	public void captureImageAndSave(int x, int y, int width, int height, String parentDirPath, String fileNameWithoutSuffix) throws IOException {
+		BufferedImage image = robotMngr.createScreenCapture(x, y ,width, height);
+		BufferedImageUtils.write(image, parentDirPath, fileNameWithoutSuffix);
 	}
 	
 	/**
@@ -288,11 +293,10 @@ public class Caj2pdfTransformerNew {
 		if(dirpath==null) {
 			dirpath = System.getProperty("user.dir");
 		}
-		captureImageAndSave(x, y, width, height, 
-				new File(dirpath, DateUtils.timeStrWithMillis()).getCanonicalPath());
+		captureImageAndSave(x, y, width, height, dirpath, DateUtils.timeStrWithMillisWithoutPunctuation());
 	}
 	
-	public static void main(String[] args) throws AWTException, NativeHookException, IOException, InterruptedException, MessagingException {
+	public static void main(String[] args) throws AWTException, NativeHookException, IOException, InterruptedException, MessagingException {		
 		String method = "start";
 		if(args.length>=1) {
 			method = args[0].trim(); 
@@ -305,6 +309,8 @@ public class Caj2pdfTransformerNew {
 		// 第一个启动参数为captureimage，表示进行截图
 		}else if("captureimage".equalsIgnoreCase(method)) {
 			if(args.length>=5) {
+				cts.openCaj();
+				Thread.sleep(10000);
 				cts.captureImageAndSave(Integer.parseInt(args[1]), Integer.parseInt(args[2]), Integer.parseInt(args[3]), Integer.parseInt(args[4]));
 			}
 		}
