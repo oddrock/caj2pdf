@@ -355,6 +355,7 @@ public class Caj2pdfTransformerNew {
 		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_S);
 		// 点击确定覆盖按钮
 		robotMngr.pressKey(KeyEvent.VK_ENTER);
+		wait(Prop.getInt("interval.waitlongmillis"));
 		return dstFile;
 	}
 	
@@ -367,7 +368,6 @@ public class Caj2pdfTransformerNew {
 			logger.warn("等待关闭caj");
 			wait(Prop.getInt("interval.waitmillis"));
 		}
-		closeFoxit();
 		wait(Prop.getInt("interval.waitmillis"));
 		logger.warn("完成打印，文件位置："+dstFile.getCanonicalPath());
 	}
@@ -411,6 +411,7 @@ public class Caj2pdfTransformerNew {
 		noticeSound();
 		// 完成后短信通知
 		noticeMail();
+		closeFoxit();
 	}
 	
 	/**
@@ -445,7 +446,7 @@ public class Caj2pdfTransformerNew {
 	}
 	
 	public static void main(String[] args) throws AWTException, NativeHookException, IOException, InterruptedException, MessagingException {		
-		/*String method = Prop.get("caj2pdf.start");
+		String method = Prop.get("caj2pdf.start");
 		if(args.length>=1) {
 			method = args[0].trim(); 
 		}
@@ -469,8 +470,6 @@ public class Caj2pdfTransformerNew {
 				Thread.sleep(Prop.getInt("captureimage.waitmillis"));
 				cts.captureImageAndSave(Integer.parseInt(args[1]), Integer.parseInt(args[2]), Integer.parseInt(args[3]), Integer.parseInt(args[4]));
 			}
-		}*/
-		
-		new Caj2pdfTransformerNew().closeFoxit();
+		}
 	}
 }
