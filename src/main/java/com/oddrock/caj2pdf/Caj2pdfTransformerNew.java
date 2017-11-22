@@ -34,7 +34,6 @@ import com.oddrock.common.windows.GlobalKeyListener;
 public class Caj2pdfTransformerNew {
 	private static Logger logger = Logger.getLogger(Caj2pdfTransformerNew.class);
 	private RobotManager robotMngr;
-	private boolean test = false;
 	public Caj2pdfTransformerNew() throws AWTException, NativeHookException {
 		super();
 		robotMngr = new RobotManager();
@@ -133,6 +132,11 @@ public class Caj2pdfTransformerNew {
 		if(PictureComparator.compare(image, BufferedImageUtils.read(Prop.get("cajviewer.mark.printnow.picfilepath")))>=0.9){
 			flag = true;
 		}
+		//BufferedImageUtils.write(image, Prop.get("captureimage.savedirpath"));
+		/*captureImageAndSave(Prop.getInt("cajviewer.mark.printnow.x")
+				,Prop.getInt("cajviewer.mark.printnow.y")
+				,Prop.getInt("cajviewer.mark.printnow.width")
+				,Prop.getInt("cajviewer.mark.printnow.height"));*/
 		return flag;
 	}
 	
@@ -265,6 +269,150 @@ public class Caj2pdfTransformerNew {
 		noticeMail();
 	}
 	
+	/*
+	 * 第一步，打开caj
+	 */
+	private File caj2pdf_abbyy_step1_opencaj(String srcCajFilePath) throws IOException, InterruptedException {
+		// 鼠标挪开，避免挡事
+		robotMngr.moveMouseToRightDownCorner(Prop.getInt("xgap"),Prop.getInt("ygap"));
+		closeCaj();
+		while(isCajOpen()){
+			logger.warn("等待关闭caj");
+			wait(Prop.getInt("interval.waitmillis"));
+		}
+		wait(Prop.getInt("interval.waitmillis"));
+		File srcFile = new File(srcCajFilePath);
+		if(!srcFile.exists() || !srcFile.isFile() || !srcFile.getName().endsWith(".caj")){
+			return null;
+		}
+		openCaj(srcFile.getCanonicalPath());
+		return srcFile;
+	}
+	
+	/**
+	 * 第二步，打开打印机
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	private void caj2pdf_abbyy_step2_openprinter() throws IOException, InterruptedException {
+		// 检查caj是否完全打开，没有就等待
+		while(!isCajOpen()){
+			logger.warn("等待打开caj");
+			wait(Prop.getInt("interval.waitmillis"));
+		}
+		// 打开打印机
+		robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_P);
+	}
+	
+	/*
+	 * 第三步，开始打印
+	 */
+	private void caj2pdf_abbyy_step3_startprint() throws IOException, InterruptedException {
+		// 检查打印机是否打开，没有就等待
+		while(!isPrintReady()){
+			logger.warn("等待打开打印机");
+			wait(Prop.getInt("interval.waitmillis"));
+		}
+		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_O);
+	}
+	
+	/*
+	 * 第四步，等待完成打印
+	 */
+	private void caj2pdf_abbyy_step4_waitprintfinished() throws IOException, InterruptedException {
+		boolean hasprinted = false;
+		while(true){
+			if(isPrintnow()){
+				hasprinted = true;
+			}else if(hasprinted){
+				break;
+			}
+			if(hasprinted){
+				logger.warn("等待打印完毕");
+			}else{
+				logger.warn("等待开始打印");
+			}
+			wait(Prop.getInt("interval.waitminmillis"));
+		}
+		wait(Prop.getInt("interval.waitmillis"));
+	}
+	
+	private File caj2pdf_abbyy_step5_inputfilename(File srcFile) throws IOException, InterruptedException {
+		// 检查是否要输入文件名了，没有就等待
+		while(!isInputfilename()){
+			logger.warn("等待输入文件名");
+			wait(Prop.getInt("interval.waitmillis"));
+		}
+		File dstFile = new File(srcFile.getParent(), srcFile.getName().replaceAll(".caj$", ""));
+		// 将生成的pdf文件名复制到文本框
+		ClipboardUtils.setSysClipboardText(dstFile.getCanonicalPath());
+		wait(Prop.getInt("interval.waitmillis"));
+		robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_A);
+		wait(Prop.getInt("interval.waitmillis"));
+		robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_V);
+		wait(Prop.getInt("interval.waitmillis"));
+		// 点击确定按钮
+		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_S);
+		// 点击确定覆盖按钮
+		robotMngr.pressKey(KeyEvent.VK_ENTER);
+		return dstFile;
+	}
+	
+	/*
+	 * 结束并通知
+	 */
+	private void caj2pdf_abbyy_step6_end(File dstFile) throws IOException, InterruptedException {
+		closeCaj();
+		while(isCajOpen()){
+			logger.warn("等待关闭caj");
+			wait(Prop.getInt("interval.waitmillis"));
+		}
+		closeFoxit();
+		wait(Prop.getInt("interval.waitmillis"));
+		logger.warn("完成打印，文件位置："+dstFile.getCanonicalPath());
+	}
+	
+	
+	/**
+	 * 第二种caj2pdf方式，适用于ABBYY
+	 * @param srcCajFilePath
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void caj2pdf_abbyy(String srcCajFilePath) throws IOException, InterruptedException{
+		File srcFile = caj2pdf_abbyy_step1_opencaj(srcCajFilePath);
+		if(srcFile==null) {
+			return;
+		}
+		caj2pdf_abbyy_step2_openprinter();
+		caj2pdf_abbyy_step3_startprint();
+		caj2pdf_abbyy_step4_waitprintfinished();
+		File dstFile = caj2pdf_abbyy_step5_inputfilename(srcFile);
+		caj2pdf_abbyy_step6_end(dstFile);	
+	}
+	
+	/**
+	 * 第二种caj2pdf方式，适用于ABBYY
+	 * @param srcDirPath
+	 * @throws IOException
+	 * @throws InterruptedException
+	 * @throws MessagingException
+	 */
+	public void caj2pdfBatch_abbyy(String srcDirPath) throws IOException, InterruptedException, MessagingException{
+		File srcDir = new File(srcDirPath);
+		if(!srcDir.exists() || !srcDir.isDirectory()){
+			return;
+		}
+		for(File file : srcDir.listFiles()){
+			caj2pdf_abbyy(file.getCanonicalPath());
+		}
+		logger.warn("完成"+ srcDir.getCanonicalPath() +"目录下所有caj打印成pdf！");
+		// 完成后声音通知
+		noticeSound();
+		// 完成后短信通知
+		noticeMail();
+	}
+	
 	/**
 	 * 截图并保存为文件
 	 * @param x
@@ -297,22 +445,32 @@ public class Caj2pdfTransformerNew {
 	}
 	
 	public static void main(String[] args) throws AWTException, NativeHookException, IOException, InterruptedException, MessagingException {		
-		String method = "start";
+		/*String method = Prop.get("caj2pdf.start");
 		if(args.length>=1) {
 			method = args[0].trim(); 
+		}
+		if(method==null) {
+			method = "start";
 		}
 		Caj2pdfTransformerNew cts = new Caj2pdfTransformerNew();
 		// 第一个启动参数为start，表示做caj2pdf的转换。
 		if("start".equalsIgnoreCase(method)) {
 			String srcDirPath = Prop.get("srcdirpath");
 			cts.caj2pdfBatch(srcDirPath);	
+		// 第一个启动参数为start_abbyy，表示做基于abbyy的caj2pdf转换
+		}else if("start_abbyy".equalsIgnoreCase(method)) {
+			logger.warn("开始abbyy方式打印");
+			String srcDirPath = Prop.get("srcdirpath");
+			cts.caj2pdfBatch_abbyy(srcDirPath);	
 		// 第一个启动参数为captureimage，表示进行截图
 		}else if("captureimage".equalsIgnoreCase(method)) {
 			if(args.length>=5) {
 				cts.openCaj();
-				Thread.sleep(10000);
+				Thread.sleep(Prop.getInt("captureimage.waitmillis"));
 				cts.captureImageAndSave(Integer.parseInt(args[1]), Integer.parseInt(args[2]), Integer.parseInt(args[3]), Integer.parseInt(args[4]));
 			}
-		}
+		}*/
+		
+		new Caj2pdfTransformerNew().closeFoxit();
 	}
 }
