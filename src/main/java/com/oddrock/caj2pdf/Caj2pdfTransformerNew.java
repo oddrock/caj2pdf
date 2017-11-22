@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
 
+import com.oddrock.common.DateUtils;
 import com.oddrock.common.awt.RobotManager;
 import com.oddrock.common.mail.MailSender;
 import com.oddrock.common.media.WavPlayer;
@@ -256,9 +257,56 @@ public class Caj2pdfTransformerNew {
 		noticeMail();
 	}
 	
+	/**
+	 * 截图并保存为文件
+	 * @param x
+	 * @param y
+	 * @param width
+	 * @param height
+	 * @param filepath
+	 * @throws IOException
+	 */
+	public void captureImageAndSave(int x, int y, int width, int height, String filepath) throws IOException {
+		BufferedImage image = robotMngr.createScreenCapture(Prop.getInt("cajviewer.mark.printready.x")
+				,Prop.getInt("cajviewer.mark.printready.y")
+				,Prop.getInt("cajviewer.mark.printready.width")
+				,Prop.getInt("cajviewer.mark.printready.height"));
+		BufferedImageUtils.write(image, filepath);
+	}
+	
+	/**
+	 * 截图并保存为文件，文件名为带毫秒数的时间字符串
+	 * @param x
+	 * @param y
+	 * @param width
+	 * @param height
+	 * @throws IOException
+	 */
+	public void captureImageAndSave(int x, int y, int width, int height) throws IOException {
+		// 图片的保存目录从属性文件中取，如果没有定义，就放在当前目录
+		String dirpath = Prop.get("captureimage.savedirpath");
+		if(dirpath==null) {
+			dirpath = System.getProperty("user.dir");
+		}
+		captureImageAndSave(x, y, width, height, 
+				new File(dirpath, DateUtils.timeStrWithMillis()).getCanonicalPath());
+	}
+	
 	public static void main(String[] args) throws AWTException, NativeHookException, IOException, InterruptedException, MessagingException {
+		String method = "start";
+		if(args.length>=1) {
+			method = args[0].trim(); 
+		}
 		Caj2pdfTransformerNew cts = new Caj2pdfTransformerNew();
-		String srcDirPath = Prop.get("srcdirpath");
-		cts.caj2pdfBatch(srcDirPath);	
+		// 第一个启动参数为start，表示做caj2pdf的转换。
+		if("start".equalsIgnoreCase(method)) {
+			String srcDirPath = Prop.get("srcdirpath");
+			cts.caj2pdfBatch(srcDirPath);	
+		// 第一个启动参数为captureimage，表示进行截图
+		}else if("captureimage".equalsIgnoreCase(method)) {
+			if(args.length>=5) {
+				cts.captureImageAndSave(Integer.parseInt(args[1]), Integer.parseInt(args[2]), Integer.parseInt(args[3]), Integer.parseInt(args[4]));
+			}
+		}
 	}
 }
