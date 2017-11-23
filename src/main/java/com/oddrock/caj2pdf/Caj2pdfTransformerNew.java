@@ -95,10 +95,18 @@ public class Caj2pdfTransformerNew {
 	}
 	
 	/*
-	 * 打开空pdf
+	 * 打开ABBYY
 	 */
-	private CmdResult openPdf() {
-		return CmdExecutor.getSingleInstance().exeCmd(Prop.get("foxit.path"));
+	private CmdResult openABBYY() {
+		return CmdExecutor.getSingleInstance().exeCmd(Prop.get("abbyy.path"));
+	}
+	
+	/*
+	 * 关闭ABBYY
+	 */
+	private CmdResult closeABBYY() {
+		return CmdExecutor.getSingleInstance().exeCmd(
+				"taskkill /f /im \"" + Prop.get("abbyy.appname") + "\"");
 	}
 	
 	// 测试Caj是否打开
@@ -651,6 +659,14 @@ public class Caj2pdfTransformerNew {
 	}
 	
 	public static void main(String[] args) throws AWTException, NativeHookException, IOException, InterruptedException, MessagingException {		
+		/*if(1!=0) {
+			Caj2pdfTransformerNew cts = new Caj2pdfTransformerNew();
+			Thread.sleep(5000);
+			System.out.println(JudgerByCapturePics.isABBYYOpen(cts.robotMngr));
+			System.out.println(JudgerByCapturePics.isABBYYTasking(cts.robotMngr));
+			System.exit(0);
+		}*/
+		
 		String method = Prop.get("caj2pdf.start");
 		if(args.length>=1) {
 			method = args[0].trim(); 
