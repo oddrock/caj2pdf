@@ -17,8 +17,10 @@ import org.jnativehook.NativeHookException;
 
 import com.oddrock.common.DateUtils;
 import com.oddrock.common.awt.RobotManager;
+import com.oddrock.common.file.FileUtils;
 import com.oddrock.common.mail.MailSender;
 import com.oddrock.common.media.WavPlayer;
+import com.oddrock.common.pdf.PdfManager;
 import com.oddrock.common.pic.BufferedImageUtils;
 import com.oddrock.common.pic.PictureComparator;
 import com.oddrock.common.windows.ClipboardUtils;
@@ -55,8 +57,11 @@ public class Caj2pdfTransformerNew {
 	 * 关闭福昕PDF阅读器
 	 */
 	private CmdResult closeFoxit() {
-		return CmdExecutor.getSingleInstance().exeCmd(
-				"taskkill /f /im \"" + Prop.get("foxit.appname") + "\"");
+		CmdResult result  = null;
+		for(String appname : Prop.get("foxit.appname").split(",")) {
+			result = CmdExecutor.getSingleInstance().exeCmd("taskkill /f /im \"" + appname + "\"");
+		}
+		return result;
 	}
 	
 	/*
@@ -80,6 +85,20 @@ public class Caj2pdfTransformerNew {
 	 */
 	private CmdResult openCaj(){
 		return CmdExecutor.getSingleInstance().exeCmd(Prop.get("cajviewer.path"));
+	}
+	
+	/*
+	 * 用foxit打开pdf
+	 */
+	private CmdResult openPdf(String pdfFilePath) {
+		return CmdExecutor.getSingleInstance().exeCmd(Prop.get("foxit.path") + " \"" + pdfFilePath + "\"");
+	}
+	
+	/*
+	 * 打开空pdf
+	 */
+	private CmdResult openPdf() {
+		return CmdExecutor.getSingleInstance().exeCmd(Prop.get("foxit.path"));
 	}
 	
 	// 测试Caj是否打开
@@ -343,7 +362,7 @@ public class Caj2pdfTransformerNew {
 			logger.warn("等待输入文件名");
 			wait(Prop.getInt("interval.waitmillis"));
 		}
-		File dstFile = new File(srcFile.getParent(), srcFile.getName().replaceAll(".caj$", ""));
+		File dstFile = new File(srcFile.getParent(), srcFile.getName().replaceAll(".caj$", ".pdf"));
 		// 将生成的pdf文件名复制到文本框
 		ClipboardUtils.setSysClipboardText(dstFile.getCanonicalPath());
 		wait(Prop.getInt("interval.waitmillis"));
@@ -372,6 +391,29 @@ public class Caj2pdfTransformerNew {
 		logger.warn("完成打印，文件位置："+dstFile.getCanonicalPath());
 	}
 	
+	// 将所有文件从源文件夹移动到目标文件夹
+	private void mvAllFilesFromSrcToDst() throws IOException {
+		if(!Prop.getBool("needmovesrc2dst")){
+			return;
+		}
+		File srcDir = new File(Prop.get("srcdirpath"));
+		File dstDir = new File(Prop.get("dstdirpath"));
+		if(!dstDir.exists() || !dstDir.isDirectory()) {
+			dstDir.mkdirs();
+		}
+		for(File file: srcDir.listFiles()) {
+			FileUtils.moveFile(file.getCanonicalPath(), dstDir.getCanonicalPath());
+		}
+	}
+	
+	private void openFinishedWindows() {
+		if(!Prop.getBool("needmovesrc2dst")){
+			CmdExecutor.getSingleInstance().openDirWindows(Prop.get("srcdirpath"));
+		}else {
+			CmdExecutor.getSingleInstance().openDirWindows(Prop.get("dstdirpath"));
+		}
+		
+	}
 	
 	/**
 	 * 第二种caj2pdf方式，适用于ABBYY
@@ -379,16 +421,17 @@ public class Caj2pdfTransformerNew {
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	public void caj2pdf_abbyy(String srcCajFilePath) throws IOException, InterruptedException{
+	public File caj2pdf_abbyy(String srcCajFilePath) throws IOException, InterruptedException{
 		File srcFile = caj2pdf_abbyy_step1_opencaj(srcCajFilePath);
 		if(srcFile==null) {
-			return;
+			return null;
 		}
 		caj2pdf_abbyy_step2_openprinter();
 		caj2pdf_abbyy_step3_startprint();
 		caj2pdf_abbyy_step4_waitprintfinished();
 		File dstFile = caj2pdf_abbyy_step5_inputfilename(srcFile);
 		caj2pdf_abbyy_step6_end(dstFile);	
+		return dstFile;
 	}
 	
 	/**
@@ -412,6 +455,162 @@ public class Caj2pdfTransformerNew {
 		// 完成后短信通知
 		noticeMail();
 		closeFoxit();
+		wait(Prop.getInt("interval.waitmillis"));
+		// 将所有文件转移到目标文件夹
+		mvAllFilesFromSrcToDst();
+		// 打开完成窗口
+		openFinishedWindows();
+	}
+	
+	// 计算应该提取多少页
+	private int computeTestPageCount(int realPageCount) {
+		int testcount = Prop.getInt("test.pagecount");
+		int testcountmin = Prop.getInt("test.minpagecount");
+		if(realPageCount>=testcount*2) {
+			return testcount;
+		}else if(realPageCount>=testcountmin*2) {
+			return testcountmin;
+		}else if(realPageCount>=3) {
+			return 2;
+		}else {
+			return 1;
+		}
+	}
+	
+	// 是否处在提取页面的导出页面状态下
+	private boolean isExportPageOpenAtExtractPage() throws IOException{
+		boolean flag = false;
+		BufferedImage image = robotMngr.createScreenCapture(Prop.getInt("cajviewer.mark.extactpage.exportpage.x")
+				,Prop.getInt("cajviewer.mark.extactpage.exportpage.y")
+				,Prop.getInt("cajviewer.mark.extactpage.exportpage.width")
+				,Prop.getInt("cajviewer.mark.extactpage.exportpage.height"));
+		if(PictureComparator.compare(image, BufferedImageUtils.read(Prop.get("cajviewer.mark.extactpage.exportpage.picfilepath")))>=0.9){
+			flag = true;
+		}
+		return flag;
+	}
+	
+	// 是否处在提取页面的输入文件名状态下
+	private boolean isInputfilenameAtExtractPage() throws IOException{
+		boolean flag = false;
+		BufferedImage image = robotMngr.createScreenCapture(Prop.getInt("cajviewer.mark.extactpage.inputfilename.x")
+				,Prop.getInt("cajviewer.mark.extactpage.inputfilename.y")
+				,Prop.getInt("cajviewer.mark.extactpage.inputfilename.width")
+				,Prop.getInt("cajviewer.mark.extactpage.inputfilename.height"));
+		if(PictureComparator.compare(image, BufferedImageUtils.read(Prop.get("cajviewer.mark.extactpage.inputfilename.picfilepath")))>=0.9){
+			flag = true;
+		}
+		return flag;
+	}
+	
+	// pdf是否打开
+	private boolean isPdfOpen() throws IOException{
+		boolean flag = false;
+		BufferedImage image = robotMngr.createScreenCapture(Prop.getInt("cajviewer.mark.pdfopen.x")
+				,Prop.getInt("cajviewer.mark.pdfopen.y")
+				,Prop.getInt("cajviewer.mark.pdfopen.width")
+				,Prop.getInt("cajviewer.mark.pdfopen.height"));
+		if(PictureComparator.compare(image, BufferedImageUtils.read(Prop.get("cajviewer.mark.pdfopen.picfilepath")))>=0.9){
+			flag = true;
+		}
+		return flag;
+	}
+	
+	/**
+	 * 试转页面
+	 * @param srcDirPath
+	 * @throws IOException
+	 * @throws InterruptedException
+	 * @throws MessagingException
+	 */
+	public void caj2pdftest_abbyy(String srcDirPath) throws IOException, InterruptedException, MessagingException {
+		File srcDir = new File(srcDirPath);
+		if(!srcDir.exists() || !srcDir.isDirectory() || srcDir.listFiles().length==0){
+			return;
+		}
+		File srcFile = null;
+		for(File file : srcDir.listFiles()) {
+			if(file.getName().endsWith(".caj")) {
+				srcFile = file;
+				break;
+			}
+		}
+		if(srcFile==null) {
+			return;
+		}
+		File dstFile = caj2pdf_abbyy(srcFile.getCanonicalPath());
+		closeFoxit();
+		wait(Prop.getInt("interval.waitminmillis"));
+		while(isPdfOpen()) {
+			wait(Prop.getInt("interval.waitmillis"));
+			logger.warn("等待pdf关闭");
+		}
+		int pageCount = new PdfManager().pdfPageCount(dstFile.getCanonicalPath());
+		if(pageCount!=1) {
+			int testcount = computeTestPageCount(pageCount);
+			openPdf(dstFile.getCanonicalPath());
+			wait(Prop.getInt("interval.waitminmillis"));
+			while(!isPdfOpen()) {
+				wait(Prop.getInt("interval.waitmillis"));
+				logger.warn("等待pdf打开");
+			}
+			robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_O);
+			wait(Prop.getInt("interval.waitminmillis"));
+			robotMngr.pressKey(KeyEvent.VK_E);
+			wait(Prop.getInt("interval.waitminmillis"));
+			while(!isExportPageOpenAtExtractPage()) {
+				logger.warn("等待打开提取页面的导出页面");
+				wait(Prop.getInt("interval.waitminmillis"));
+			}
+			robotMngr.pressKey(KeyEvent.VK_TAB);
+			wait(Prop.getInt("interval.waitminmillis"));
+			robotMngr.pressKey(KeyEvent.VK_TAB);
+			wait(Prop.getInt("interval.waitminmillis"));
+			robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_A);
+			ClipboardUtils.setSysClipboardText(String.valueOf(testcount));
+			wait(Prop.getInt("interval.waitminmillis"));
+			robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_V);
+			wait(Prop.getInt("interval.waitminmillis"));
+			// 选中导出页面另存为其他文档
+			robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_S);
+			wait(Prop.getInt("interval.waitminmillis"));
+			robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_K);
+			wait(Prop.getInt("interval.waitminmillis"));
+			while(!isInputfilenameAtExtractPage()) {
+				logger.warn("等待打开输入文件名页面");
+				wait(Prop.getInt("interval.waitminmillis"));
+			}
+			/*ClipboardUtils.setSysClipboardText(dstFile.getCanonicalPath());
+			wait(Prop.getInt("interval.waitminmillis"));
+			robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_V);
+			wait(Prop.getInt("interval.waitminmillis"));*/
+			// 点击确定按钮
+			robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_S);
+			wait(Prop.getInt("interval.waitminmillis"));
+			robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_Y);
+			while(isInputfilename()) {
+				logger.warn("等待关闭输入文件名页面");
+				wait(Prop.getInt("interval.waitmillis"));
+			}
+			closeFoxit();
+			wait(Prop.getInt("interval.waitminmillis"));
+			while(isPdfOpen()) {
+				wait(Prop.getInt("interval.waitmillis"));
+				logger.warn("等待pdf关闭");
+			}
+		}
+		if(Prop.getBool("needmovesrc2dst")){
+			dstFile = new File(dstFile.getParentFile(), "提取页面 "+dstFile.getName());
+			System.out.println(dstFile.getCanonicalPath());
+			System.out.println(Prop.get("dstdirpath"));
+			FileUtils.moveFile(dstFile.getCanonicalPath(), Prop.get("dstdirpath"));
+		}
+		// 完成后声音通知
+		noticeSound();
+		// 完成后短信通知
+		noticeMail();
+		openFinishedWindows();
+		wait(Prop.getInt("interval.waitmillis"));
 	}
 	
 	/**
@@ -463,11 +662,15 @@ public class Caj2pdfTransformerNew {
 			logger.warn("开始abbyy方式打印");
 			String srcDirPath = Prop.get("srcdirpath");
 			cts.caj2pdfBatch_abbyy(srcDirPath);	
+		// 第一个启动参数为start_abbyy_testpdf，表示做基于abbyy的caj2pdf的一个文件的试转换，并提取前20页
+		}else if("start_abbyy_test".equalsIgnoreCase(method)) {
+			logger.warn("开始abbyy方式试转换");
+			String srcDirPath = Prop.get("srcdirpath");
+			cts.caj2pdftest_abbyy(srcDirPath);	
 		// 第一个启动参数为captureimage，表示进行截图
 		}else if("captureimage".equalsIgnoreCase(method)) {
 			if(args.length>=5) {
-				cts.openCaj();
-				Thread.sleep(Prop.getInt("captureimage.waitmillis"));
+				Thread.sleep(Prop.getInt("interval.waitlongmillis"));
 				cts.captureImageAndSave(Integer.parseInt(args[1]), Integer.parseInt(args[2]), Integer.parseInt(args[3]), Integer.parseInt(args[4]));
 			}
 		}
