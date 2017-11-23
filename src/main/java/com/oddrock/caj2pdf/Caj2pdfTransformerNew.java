@@ -524,6 +524,8 @@ public class Caj2pdfTransformerNew {
 	 * @throws MessagingException
 	 */
 	public void caj2pdftest_abbyy(String srcDirPath) throws IOException, InterruptedException, MessagingException {
+		// 鼠标挪开，避免挡事
+		robotMngr.moveMouseToRightDownCorner(Prop.getInt("xgap"),Prop.getInt("ygap"));
 		File srcDir = new File(srcDirPath);
 		if(!srcDir.exists() || !srcDir.isDirectory() || srcDir.listFiles().length==0){
 			return;
@@ -554,39 +556,43 @@ public class Caj2pdfTransformerNew {
 				wait(Prop.getInt("interval.waitmillis"));
 				logger.warn("等待pdf打开");
 			}
+			// 打开页面管理菜单
 			robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_O);
 			wait(Prop.getInt("interval.waitminmillis"));
+			// 打开提取页面菜单
 			robotMngr.pressKey(KeyEvent.VK_E);
 			wait(Prop.getInt("interval.waitminmillis"));
 			while(!isExportPageOpenAtExtractPage()) {
 				logger.warn("等待打开提取页面的导出页面");
 				wait(Prop.getInt("interval.waitminmillis"));
 			}
+			// 两次tab移动到输入数字文本框
 			robotMngr.pressKey(KeyEvent.VK_TAB);
 			wait(Prop.getInt("interval.waitminmillis"));
 			robotMngr.pressKey(KeyEvent.VK_TAB);
 			wait(Prop.getInt("interval.waitminmillis"));
+			// 全选输入数字文本框
 			robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_A);
+			// 将数字写入粘贴板
 			ClipboardUtils.setSysClipboardText(String.valueOf(testcount));
 			wait(Prop.getInt("interval.waitminmillis"));
+			// 将数字复制到输入数字文本框
 			robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_V);
 			wait(Prop.getInt("interval.waitminmillis"));
 			// 选中导出页面另存为其他文档
 			robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_S);
 			wait(Prop.getInt("interval.waitminmillis"));
+			// 点击确认按钮
 			robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_K);
 			wait(Prop.getInt("interval.waitminmillis"));
 			while(!isInputfilenameAtExtractPage()) {
 				logger.warn("等待打开输入文件名页面");
 				wait(Prop.getInt("interval.waitminmillis"));
 			}
-			/*ClipboardUtils.setSysClipboardText(dstFile.getCanonicalPath());
-			wait(Prop.getInt("interval.waitminmillis"));
-			robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_V);
-			wait(Prop.getInt("interval.waitminmillis"));*/
 			// 点击确定按钮
 			robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_S);
 			wait(Prop.getInt("interval.waitminmillis"));
+			// 确认覆盖（如果要覆盖的话）
 			robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_Y);
 			while(isInputfilename()) {
 				logger.warn("等待关闭输入文件名页面");
