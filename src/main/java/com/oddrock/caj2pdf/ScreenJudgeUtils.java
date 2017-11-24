@@ -19,27 +19,9 @@ public class ScreenJudgeUtils {
 	@SuppressWarnings("unused")
 	private static Logger logger = Logger.getLogger(ScreenJudgeUtils.class);
 	
-	/**
-	 * 判断ABBYY是否打开
-	 * @param robotMngr
-	 * @return
-	 * @throws IOException
-	 */
-	public static boolean isABBYYOpen(RobotManager robotMngr) throws IOException{
-		return comparePic(robotMngr, "abbyy.mark.open");
-	}
+
 	
-	/**
-	 * 判断ABBYY是否正在执行转换任务
-	 * @param robotMngr
-	 * @return
-	 * @throws IOException
-	 */
-	public static boolean isABBYYTasking(RobotManager robotMngr) throws IOException{
-		return comparePic(robotMngr, "abbyy.mark.tasking");
-	}
-	
-	private static boolean comparePic(RobotManager robotMngr, String prefix) throws IOException {
+	public static boolean comparePic(RobotManager robotMngr, String prefix) throws IOException {
 		boolean flag = false;
 		BufferedImage image = robotMngr.createScreenCapture(Prop.getInt(prefix+".x")
 				,Prop.getInt(prefix+".y")

@@ -10,7 +10,7 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 import com.oddrock.common.mail.MailSender;
 import com.oddrock.common.media.WavPlayer;
 
-public class NoticeUtils {
+public class CommonUtils {
 	// 邮件通知
 	public static void noticeMail(String content) throws UnsupportedEncodingException, MessagingException{
 		if(!Prop.getBool("notice.mail.flag")){

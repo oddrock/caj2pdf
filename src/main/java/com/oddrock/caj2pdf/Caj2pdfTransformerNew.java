@@ -33,9 +33,7 @@ public class Caj2pdfTransformerNew {
 		}
 	}
 
-	private void wait(int millis) throws InterruptedException{
-		Thread.sleep(millis);
-	}
+
 	
 	/**
 	 * 打印单个文件
@@ -122,9 +120,9 @@ public class Caj2pdfTransformerNew {
 		}
 		logger.warn("完成"+ srcDir.getCanonicalPath() +"目录下所有caj打印成pdf！");
 		// 完成后声音通知
-		NoticeUtils.noticeSound();
+		CommonUtils.noticeSound();
 		// 完成后短信通知
-		NoticeUtils.noticeMail("所有caj文件转换为PDF已完成！！！");
+		CommonUtils.noticeMail("所有caj文件转换为PDF已完成！！！");
 	}
 	
 	/*
@@ -147,11 +145,7 @@ public class Caj2pdfTransformerNew {
 		return srcFile;
 	}
 	
-	/**
-	 * 第二步，打开打印机
-	 * @throws IOException
-	 * @throws InterruptedException
-	 */
+	// 第二步，打开打印机
 	private void caj2pdf_abbyy_step2_openprinter() throws IOException, InterruptedException {
 		// 检查caj是否完全打开，没有就等待
 		while(!isCajOpen(robotMngr)){
@@ -162,9 +156,7 @@ public class Caj2pdfTransformerNew {
 		robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_P);
 	}
 	
-	/*
-	 * 第三步，开始打印
-	 */
+	// 第三步，开始打印
 	private void caj2pdf_abbyy_step3_startprint() throws IOException, InterruptedException {
 		// 检查打印机是否打开，没有就等待
 		while(!isPrintReady(robotMngr)){
@@ -283,9 +275,9 @@ public class Caj2pdfTransformerNew {
 		}
 		logger.warn("完成"+ srcDir.getCanonicalPath() +"目录下所有caj打印成pdf！");
 		// 完成后声音通知
-		NoticeUtils.noticeSound();
+		CommonUtils.noticeSound();
 		// 完成后短信通知
-		NoticeUtils.noticeMail("所有caj文件转换为PDF已完成！！！");
+		CommonUtils.noticeMail("所有caj文件转换为PDF已完成！！！");
 		closeFoxit();
 		wait(Prop.getInt("interval.waitmillis"));
 		// 将所有文件转移到目标文件夹
@@ -293,11 +285,6 @@ public class Caj2pdfTransformerNew {
 		// 打开完成窗口
 		openFinishedWindows();
 	}
-	
-
-	
-	
-	
 
 	
 	/**
@@ -396,9 +383,9 @@ public class Caj2pdfTransformerNew {
 			FileUtils.moveFile(dstFile.getCanonicalPath(), Prop.get("dstdirpath"));
 		}
 		// 完成后声音通知
-		NoticeUtils.noticeSound();
+		CommonUtils.noticeSound();
 		// 完成后短信通知
-		NoticeUtils.noticeMail("试转已经完成啦！！！");
+		CommonUtils.noticeMail("试转已经完成啦！！！");
 		openFinishedWindows();
 		wait(Prop.getInt("interval.waitmillis"));
 	}

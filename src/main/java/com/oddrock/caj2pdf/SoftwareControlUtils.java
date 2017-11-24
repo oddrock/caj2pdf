@@ -1,5 +1,6 @@
 package com.oddrock.caj2pdf;
 
+import org.apache.log4j.Logger;
 import com.oddrock.common.windows.CmdExecutor;
 import com.oddrock.common.windows.CmdResult;
 
@@ -9,23 +10,13 @@ import com.oddrock.common.windows.CmdResult;
  *
  */
 public class SoftwareControlUtils {
-	/**
-	 * 打开ABBYY
-	 * @return
-	 */
-	public static CmdResult openABBYY() {
-		return CmdExecutor.getSingleInstance().exeCmd(Prop.get("abbyy.path"));
-	}
+	@SuppressWarnings("unused")
+	private static Logger logger = Logger.getLogger(SoftwareControlUtils.class);
 	
-	/**
-	 * 关闭ABBYY
-	 * @return
-	 */
-	public static CmdResult closeABBYY() {
-		return CmdExecutor.getSingleInstance().exeCmd(
-				"taskkill /f /im \"" + Prop.get("abbyy.appname") + "\"");
+	public static void wait(int millis) throws InterruptedException{
+		Thread.sleep(millis);
 	}
-	
+
 	/*
 	 * 打开空的caj
 	 */
@@ -69,9 +60,7 @@ public class SoftwareControlUtils {
 		return CmdExecutor.getSingleInstance().exeCmd(
 				Prop.get("cajviewer.path") + " \"" + cajFilePath + "\"");
 	}
-	
 
-	
 	/*
 	 * 用foxit打开pdf
 	 */
@@ -90,7 +79,6 @@ public class SoftwareControlUtils {
 			CmdExecutor.getSingleInstance().openDirWindows(Prop.get("srcdirpath"));
 		}else {
 			CmdExecutor.getSingleInstance().openDirWindows(Prop.get("dstdirpath"));
-		}
-		
+		}	
 	}
 }
