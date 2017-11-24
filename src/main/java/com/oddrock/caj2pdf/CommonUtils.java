@@ -1,5 +1,6 @@
 package com.oddrock.caj2pdf;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
@@ -7,8 +8,13 @@ import javax.mail.MessagingException;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
+import com.oddrock.common.DateUtils;
+import com.oddrock.common.awt.RobotManager;
 import com.oddrock.common.mail.MailSender;
 import com.oddrock.common.media.WavPlayer;
+import com.oddrock.common.pic.BufferedImageUtils;
+import com.oddrock.common.pic.PictureComparator;
+import com.oddrock.common.windows.CmdExecutor;
 
 public class CommonUtils {
 	// 邮件通知
@@ -31,6 +37,18 @@ public class CommonUtils {
 		}
 	}
 	
+	/*
+	 * 截图并保存为文件，文件名为带毫秒数的时间字符串
+	 */
+	public static void captureImageAndSave(RobotManager robotMngr, int x, int y, int width, int height) throws IOException {
+		// 图片的保存目录从属性文件中取，如果没有定义，就放在当前目录
+		String dirpath = Prop.get("captureimage.savedirpath");
+		if(dirpath==null) {
+			dirpath = System.getProperty("user.dir");
+		}
+		BufferedImageUtils.captureImageAndSave(robotMngr, x, y, width, height, dirpath, DateUtils.timeStrWithMillisWithoutPunctuation());
+	}
+	
 	// 声音通知
 	public static void noticeSound(){
 		if(Prop.getBool("notice.sound.flag")){
@@ -44,5 +62,37 @@ public class CommonUtils {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	// 等待时间
+	public static void wait(int millis) throws InterruptedException{
+		Thread.sleep(millis);
+	}
+	
+	// 比较已保存的图片和截取的图片
+	public static boolean comparePic(RobotManager robotMngr, String prefix) throws IOException {
+		boolean flag = false;
+		BufferedImage image = robotMngr.createScreenCapture(Prop.getInt(prefix+".x")
+				,Prop.getInt(prefix+".y")
+				,Prop.getInt(prefix+".width")
+				,Prop.getInt(prefix+".height"));
+		if(PictureComparator.compare(image, BufferedImageUtils.read(Prop.get(prefix+".picfilepath")))>=0.9){
+			flag = true;
+		}
+		return flag;
+	}
+	
+	/**
+	 * 打开已完成文件所在目录的窗口
+	 */
+	public static void openFinishedWindows() {
+		if(!Prop.getBool("needopenfinishedwindows")){
+			return;
+		}
+		if(!Prop.getBool("needmovesrc2dst")){
+			CmdExecutor.getSingleInstance().openDirWindows(Prop.get("srcdirpath"));
+		}else {
+			CmdExecutor.getSingleInstance().openDirWindows(Prop.get("dstdirpath"));
+		}	
 	}
 }

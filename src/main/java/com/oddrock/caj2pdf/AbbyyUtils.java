@@ -15,7 +15,7 @@ public class AbbyyUtils {
 	 * @throws IOException
 	 */
 	public static boolean isHomePage(RobotManager robotMngr) throws IOException{
-		return ScreenJudgeUtils.comparePic(robotMngr, "abbyy.mark.homepage");
+		return CommonUtils.comparePic(robotMngr, "abbyy.mark.homepage");
 	}
 	
 	/**
@@ -25,7 +25,7 @@ public class AbbyyUtils {
 	 * @throws IOException
 	 */
 	public static boolean isWordPage(RobotManager robotMngr) throws IOException{
-		return ScreenJudgeUtils.comparePic(robotMngr, "abbyy.mark.wordpage");
+		return CommonUtils.comparePic(robotMngr, "abbyy.mark.wordpage");
 	}
 	
 	/**
@@ -48,7 +48,7 @@ public class AbbyyUtils {
 		}
 		while(isStarted()) {
 			logger.warn("等待ABBYY关闭......");
-			SoftwareControlUtils.wait(Prop.getInt("interval.waitmillis"));
+			CommonUtils.wait(Prop.getInt("interval.waitmillis"));
 		}
 		logger.warn("确认ABBYY已关闭");
 	}
@@ -62,7 +62,7 @@ public class AbbyyUtils {
 		CmdExecutor.getSingleInstance().exeCmd(Prop.get("abbyy.path"));
 		while(!isStarted()) {
 			logger.warn("等待ABBYY打开......");
-			SoftwareControlUtils.wait(Prop.getInt("interval.waitmillis"));
+			CommonUtils.wait(Prop.getInt("interval.waitmillis"));
 		}
 		logger.warn("确认ABBYY已打开");
 	}
