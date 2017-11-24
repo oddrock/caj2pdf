@@ -57,8 +57,7 @@ public class Caj2pdfTransformerNew {
 	 * @throws InterruptedException
 	 */
 	public void caj2pdf(String srcCajFilePath) throws IOException, InterruptedException{
-		// 鼠标挪开，避免挡事
-		robotMngr.moveMouseToRightDownCorner(Prop.getInt("xgap"),Prop.getInt("ygap"));
+		CommonUtils.moveMouseAvoidHandicap(robotMngr);
 		CajViewerUtils.closeCaj();
 		while(CajViewerUtils.isCajOpen(robotMngr)){
 			logger.warn("等待关闭caj");

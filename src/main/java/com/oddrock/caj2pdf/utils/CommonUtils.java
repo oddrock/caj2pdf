@@ -81,4 +81,9 @@ public class CommonUtils {
 		}
 		return flag;
 	}
+	
+	// 鼠标挪开，避免挡事
+	public static void moveMouseAvoidHandicap(RobotManager robotMngr) {
+		robotMngr.moveMouseToRightDownCorner(Prop.getInt("xgap"),Prop.getInt("ygap"));
+	}
 }
