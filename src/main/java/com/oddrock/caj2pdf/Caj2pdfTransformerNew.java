@@ -2,31 +2,19 @@ package com.oddrock.caj2pdf;
 
 import java.awt.AWTException;
 import java.awt.event.KeyEvent;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-
 import javax.mail.MessagingException;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
-
 import org.apache.log4j.Logger;
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
-
-import com.oddrock.common.DateUtils;
 import com.oddrock.common.awt.RobotManager;
 import com.oddrock.common.file.FileUtils;
-import com.oddrock.common.mail.MailSender;
-import com.oddrock.common.media.WavPlayer;
 import com.oddrock.common.pdf.PdfManager;
-import com.oddrock.common.pic.BufferedImageUtils;
-import com.oddrock.common.pic.PictureComparator;
 import com.oddrock.common.windows.ClipboardUtils;
-import com.oddrock.common.windows.CmdExecutor;
-import com.oddrock.common.windows.CmdResult;
 import com.oddrock.common.windows.GlobalKeyListener;
+import static com.oddrock.caj2pdf.SoftwareControlUtils.*;
+import static com.oddrock.caj2pdf.ScreenJudgeUtils.*;
 
 /**
  * 自动化从caj打印pdf
@@ -45,165 +33,8 @@ public class Caj2pdfTransformerNew {
 		}
 	}
 
-	/*
-	 * 关闭Notepad++
-	 */
-	/*private CmdResult closeNotepadpp() {
-		return CmdExecutor.getSingleInstance().exeCmd(
-				"taskkill /f /im \"" + Prop.get("notice.txt.notepadpp.appname") + "\"");
-	}*/
-	
-	/*
-	 * 关闭福昕PDF阅读器
-	 */
-	private CmdResult closeFoxit() {
-		CmdResult result  = null;
-		for(String appname : Prop.get("foxit.appname").split(",")) {
-			result = CmdExecutor.getSingleInstance().exeCmd("taskkill /f /im \"" + appname + "\"");
-		}
-		return result;
-	}
-	
-	/*
-	 * 关闭caj阅读器
-	 */
-	private CmdResult closeCaj(){
-		return CmdExecutor.getSingleInstance().exeCmd(
-				"taskkill /f /im \"" + Prop.get("cajviewer.appname") + "\"");
-	}
-
-	/*
-	 * 打开caj文件
-	 */
-	private CmdResult openCaj(String cajFilePath){
-		return CmdExecutor.getSingleInstance().exeCmd(
-				Prop.get("cajviewer.path") + " \"" + cajFilePath + "\"");
-	}
-	
-	/*
-	 * 打开空的caj
-	 */
-	private CmdResult openCaj(){
-		return CmdExecutor.getSingleInstance().exeCmd(Prop.get("cajviewer.path"));
-	}
-	
-	/*
-	 * 用foxit打开pdf
-	 */
-	private CmdResult openPdf(String pdfFilePath) {
-		return CmdExecutor.getSingleInstance().exeCmd(Prop.get("foxit.path") + " \"" + pdfFilePath + "\"");
-	}
-	
-	/*
-	 * 打开ABBYY
-	 */
-	private CmdResult openABBYY() {
-		return CmdExecutor.getSingleInstance().exeCmd(Prop.get("abbyy.path"));
-	}
-	
-	/*
-	 * 关闭ABBYY
-	 */
-	private CmdResult closeABBYY() {
-		return CmdExecutor.getSingleInstance().exeCmd(
-				"taskkill /f /im \"" + Prop.get("abbyy.appname") + "\"");
-	}
-	
-	// 测试Caj是否打开
-	private boolean isCajOpen() throws IOException{
-		boolean flag = false;
-		BufferedImage image = robotMngr.createScreenCapture(Prop.getInt("cajviewer.mark.leftupcorner.x")
-				,Prop.getInt("cajviewer.mark.leftupcorner.y")
-				,Prop.getInt("cajviewer.mark.leftupcorner.width")
-				,Prop.getInt("cajviewer.mark.leftupcorner.height"));
-		if(PictureComparator.compare(image, BufferedImageUtils.read(Prop.get("cajviewer.mark.leftupcorner.picfilepath")))>=0.9){
-			flag = true;
-		}
-		return flag;
-	}
-	
-	// 测试打印机是否打开
-	private boolean isPrintReady() throws IOException{
-		boolean flag = false;
-		BufferedImage image = robotMngr.createScreenCapture(Prop.getInt("cajviewer.mark.printready.x")
-				,Prop.getInt("cajviewer.mark.printready.y")
-				,Prop.getInt("cajviewer.mark.printready.width")
-				,Prop.getInt("cajviewer.mark.printready.height"));
-		if(PictureComparator.compare(image, 
-				BufferedImageUtils.read(Prop.get("cajviewer.mark.printready.picfilepath")))>=0.9){
-			flag = true;
-		}
-		return flag;
-	}
-	
-	// 检查是否到输入文件名的地方了
-	private boolean isInputfilename() throws IOException{
-		boolean flag = false;
-		BufferedImage image = robotMngr.createScreenCapture(Prop.getInt("cajviewer.mark.inputfilename.x")
-				,Prop.getInt("cajviewer.mark.inputfilename.y")
-				,Prop.getInt("cajviewer.mark.inputfilename.width")
-				,Prop.getInt("cajviewer.mark.inputfilename.height"));
-		if(PictureComparator.compare(image, BufferedImageUtils.read(Prop.get("cajviewer.mark.inputfilename.picfilepath")))>=0.9){
-			flag = true;
-		}
-		return flag;
-	}
-	
-	// 是否正在打印
-	private boolean isPrintnow() throws IOException{
-		boolean flag = false;
-		BufferedImage image = robotMngr.createScreenCapture(Prop.getInt("cajviewer.mark.printnow.x")
-				,Prop.getInt("cajviewer.mark.printnow.y")
-				,Prop.getInt("cajviewer.mark.printnow.width")
-				,Prop.getInt("cajviewer.mark.printnow.height"));
-		if(PictureComparator.compare(image, BufferedImageUtils.read(Prop.get("cajviewer.mark.printnow.picfilepath")))>=0.9){
-			flag = true;
-		}
-		//BufferedImageUtils.write(image, Prop.get("captureimage.savedirpath"));
-		/*captureImageAndSave(Prop.getInt("cajviewer.mark.printnow.x")
-				,Prop.getInt("cajviewer.mark.printnow.y")
-				,Prop.getInt("cajviewer.mark.printnow.width")
-				,Prop.getInt("cajviewer.mark.printnow.height"));*/
-		return flag;
-	}
-	
 	private void wait(int millis) throws InterruptedException{
 		Thread.sleep(millis);
-	}
-	
-	// 邮件通知
-	private void noticeMail() throws UnsupportedEncodingException, MessagingException{
-		if(!Prop.getBool("notice.mail.flag")){
-			return;
-		}
-		String content="所有caj文件转换为PDF已完成！！！";
-		String senderAccount = null;
-		String senderPasswd = null;
-		String recverAccounts = Prop.get("notice.mail.recver.accounts");
-		if(Prop.get("notice.mail.sender.type").equalsIgnoreCase("qq")){
-			senderAccount = Prop.get("notice.mail.sender.qq.account");
-			senderPasswd = Prop.get("notice.mail.sender.qq.passwd");
-			MailSender.sendEmailFastByAuth(senderAccount, senderPasswd, recverAccounts, content, Prop.get("notice.mail.sender.qq.smtpport"));
-		}else if(Prop.get("notice.mail.sender.type").equalsIgnoreCase("163")) {
-			senderAccount = Prop.get("notice.mail.sender.163.account");
-			senderPasswd = Prop.get("notice.mail.sender.163.passwd");
-			MailSender.sendEmailFast(senderAccount, senderPasswd, recverAccounts, content);
-		}
-	}
-	
-	// 声音通知
-	private void noticeSound(){
-		if(Prop.getBool("notice.sound.flag")){
-			try {
-				WavPlayer.play(Prop.get("notice.sound.wavpath"), Prop.getInt("notice.sound.playcount"));
-			} catch (UnsupportedAudioFileException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (LineUnavailableException e) {
-				e.printStackTrace();
-			}
-		}
 	}
 	
 	/**
@@ -216,7 +47,7 @@ public class Caj2pdfTransformerNew {
 		// 鼠标挪开，避免挡事
 		robotMngr.moveMouseToRightDownCorner(Prop.getInt("xgap"),Prop.getInt("ygap"));
 		closeCaj();
-		while(isCajOpen()){
+		while(isCajOpen(robotMngr)){
 			logger.warn("等待关闭caj");
 			wait(Prop.getInt("interval.waitmillis"));
 		}
@@ -227,20 +58,20 @@ public class Caj2pdfTransformerNew {
 		}
 		openCaj(srcFile.getCanonicalPath());
 		// 检查caj是否完全打开，没有就等待
-		while(!isCajOpen()){
+		while(!isCajOpen(robotMngr)){
 			logger.warn("等待打开caj");
 			wait(Prop.getInt("interval.waitmillis"));
 		}
 		// 打开打印机
 		robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_P);
 		// 检查打印机是否打开，没有就等待
-		while(!isPrintReady()){
+		while(!isPrintReady(robotMngr)){
 			logger.warn("等待打开打印机");
 			wait(Prop.getInt("interval.waitmillis"));
 		}
 		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_O);
 		// 检查是否要输入文件名了，没有就等待
-		while(!isInputfilename()){
+		while(!isInputfilename(robotMngr)){
 			logger.warn("等待输入文件名");
 			wait(Prop.getInt("interval.waitmillis"));
 		}
@@ -257,7 +88,7 @@ public class Caj2pdfTransformerNew {
 		boolean printnow = false;
 		robotMngr.pressKey(KeyEvent.VK_Y);
 		while(true){
-			if(isPrintnow()){
+			if(isPrintnow(robotMngr)){
 				printnow = true;
 			}else if(printnow){
 				break;
@@ -272,7 +103,7 @@ public class Caj2pdfTransformerNew {
 		}
 		wait(Prop.getInt("interval.waitmillis"));
 		closeCaj();
-		while(isCajOpen()){
+		while(isCajOpen(robotMngr)){
 			logger.warn("等待关闭caj");
 			wait(Prop.getInt("interval.waitmillis"));
 		}
@@ -291,9 +122,9 @@ public class Caj2pdfTransformerNew {
 		}
 		logger.warn("完成"+ srcDir.getCanonicalPath() +"目录下所有caj打印成pdf！");
 		// 完成后声音通知
-		noticeSound();
+		NoticeUtils.noticeSound();
 		// 完成后短信通知
-		noticeMail();
+		NoticeUtils.noticeMail("所有caj文件转换为PDF已完成！！！");
 	}
 	
 	/*
@@ -303,7 +134,7 @@ public class Caj2pdfTransformerNew {
 		// 鼠标挪开，避免挡事
 		robotMngr.moveMouseToRightDownCorner(Prop.getInt("xgap"),Prop.getInt("ygap"));
 		closeCaj();
-		while(isCajOpen()){
+		while(isCajOpen(robotMngr)){
 			logger.warn("等待关闭caj");
 			wait(Prop.getInt("interval.waitmillis"));
 		}
@@ -323,7 +154,7 @@ public class Caj2pdfTransformerNew {
 	 */
 	private void caj2pdf_abbyy_step2_openprinter() throws IOException, InterruptedException {
 		// 检查caj是否完全打开，没有就等待
-		while(!isCajOpen()){
+		while(!isCajOpen(robotMngr)){
 			logger.warn("等待打开caj");
 			wait(Prop.getInt("interval.waitmillis"));
 		}
@@ -336,7 +167,7 @@ public class Caj2pdfTransformerNew {
 	 */
 	private void caj2pdf_abbyy_step3_startprint() throws IOException, InterruptedException {
 		// 检查打印机是否打开，没有就等待
-		while(!isPrintReady()){
+		while(!isPrintReady(robotMngr)){
 			logger.warn("等待打开打印机");
 			wait(Prop.getInt("interval.waitmillis"));
 		}
@@ -349,7 +180,7 @@ public class Caj2pdfTransformerNew {
 	private void caj2pdf_abbyy_step4_waitprintfinished() throws IOException, InterruptedException {
 		boolean hasprinted = false;
 		while(true){
-			if(isPrintnow()){
+			if(isPrintnow(robotMngr)){
 				hasprinted = true;
 			}else if(hasprinted){
 				break;
@@ -366,7 +197,7 @@ public class Caj2pdfTransformerNew {
 	
 	private File caj2pdf_abbyy_step5_inputfilename(File srcFile) throws IOException, InterruptedException {
 		// 检查是否要输入文件名了，没有就等待
-		while(!isInputfilename()){
+		while(!isInputfilename(robotMngr)){
 			logger.warn("等待输入文件名");
 			wait(Prop.getInt("interval.waitmillis"));
 		}
@@ -391,7 +222,7 @@ public class Caj2pdfTransformerNew {
 	 */
 	private void caj2pdf_abbyy_step6_end(File dstFile) throws IOException, InterruptedException {
 		closeCaj();
-		while(isCajOpen()){
+		while(isCajOpen(robotMngr)){
 			logger.warn("等待关闭caj");
 			wait(Prop.getInt("interval.waitmillis"));
 		}
@@ -414,14 +245,7 @@ public class Caj2pdfTransformerNew {
 		}
 	}
 	
-	private void openFinishedWindows() {
-		if(!Prop.getBool("needmovesrc2dst")){
-			CmdExecutor.getSingleInstance().openDirWindows(Prop.get("srcdirpath"));
-		}else {
-			CmdExecutor.getSingleInstance().openDirWindows(Prop.get("dstdirpath"));
-		}
-		
-	}
+
 	
 	/**
 	 * 第二种caj2pdf方式，适用于ABBYY
@@ -459,9 +283,9 @@ public class Caj2pdfTransformerNew {
 		}
 		logger.warn("完成"+ srcDir.getCanonicalPath() +"目录下所有caj打印成pdf！");
 		// 完成后声音通知
-		noticeSound();
+		NoticeUtils.noticeSound();
 		// 完成后短信通知
-		noticeMail();
+		NoticeUtils.noticeMail("所有caj文件转换为PDF已完成！！！");
 		closeFoxit();
 		wait(Prop.getInt("interval.waitmillis"));
 		// 将所有文件转移到目标文件夹
@@ -470,59 +294,11 @@ public class Caj2pdfTransformerNew {
 		openFinishedWindows();
 	}
 	
-	// 计算应该提取多少页
-	private int computeTestPageCount(int realPageCount) {
-		int testcount = Prop.getInt("test.pagecount");
-		int testcountmin = Prop.getInt("test.minpagecount");
-		if(realPageCount>=testcount*2) {
-			return testcount;
-		}else if(realPageCount>=testcountmin*2) {
-			return testcountmin;
-		}else if(realPageCount>=3) {
-			return 2;
-		}else {
-			return 1;
-		}
-	}
+
 	
-	// 是否处在提取页面的导出页面状态下
-	private boolean isExportPageOpenAtExtractPage() throws IOException{
-		boolean flag = false;
-		BufferedImage image = robotMngr.createScreenCapture(Prop.getInt("cajviewer.mark.extactpage.exportpage.x")
-				,Prop.getInt("cajviewer.mark.extactpage.exportpage.y")
-				,Prop.getInt("cajviewer.mark.extactpage.exportpage.width")
-				,Prop.getInt("cajviewer.mark.extactpage.exportpage.height"));
-		if(PictureComparator.compare(image, BufferedImageUtils.read(Prop.get("cajviewer.mark.extactpage.exportpage.picfilepath")))>=0.9){
-			flag = true;
-		}
-		return flag;
-	}
 	
-	// 是否处在提取页面的输入文件名状态下
-	private boolean isInputfilenameAtExtractPage() throws IOException{
-		boolean flag = false;
-		BufferedImage image = robotMngr.createScreenCapture(Prop.getInt("cajviewer.mark.extactpage.inputfilename.x")
-				,Prop.getInt("cajviewer.mark.extactpage.inputfilename.y")
-				,Prop.getInt("cajviewer.mark.extactpage.inputfilename.width")
-				,Prop.getInt("cajviewer.mark.extactpage.inputfilename.height"));
-		if(PictureComparator.compare(image, BufferedImageUtils.read(Prop.get("cajviewer.mark.extactpage.inputfilename.picfilepath")))>=0.9){
-			flag = true;
-		}
-		return flag;
-	}
 	
-	// pdf是否打开
-	private boolean isPdfOpen() throws IOException{
-		boolean flag = false;
-		BufferedImage image = robotMngr.createScreenCapture(Prop.getInt("cajviewer.mark.pdfopen.x")
-				,Prop.getInt("cajviewer.mark.pdfopen.y")
-				,Prop.getInt("cajviewer.mark.pdfopen.width")
-				,Prop.getInt("cajviewer.mark.pdfopen.height"));
-		if(PictureComparator.compare(image, BufferedImageUtils.read(Prop.get("cajviewer.mark.pdfopen.picfilepath")))>=0.9){
-			flag = true;
-		}
-		return flag;
-	}
+
 	
 	/**
 	 * 试转页面
@@ -551,16 +327,16 @@ public class Caj2pdfTransformerNew {
 		File dstFile = caj2pdf_abbyy(srcFile.getCanonicalPath());
 		closeFoxit();
 		wait(Prop.getInt("interval.waitminmillis"));
-		while(isPdfOpen()) {
+		while(isPdfOpen(robotMngr)) {
 			wait(Prop.getInt("interval.waitmillis"));
 			logger.warn("等待pdf关闭");
 		}
 		int pageCount = new PdfManager().pdfPageCount(dstFile.getCanonicalPath());
 		if(pageCount!=1) {
-			int testcount = computeTestPageCount(pageCount);
+			int testcount = TransformRuleUtils.computeTestPageCount(pageCount);
 			openPdf(dstFile.getCanonicalPath());
 			wait(Prop.getInt("interval.waitminmillis"));
-			while(!isPdfOpen()) {
+			while(!isPdfOpen(robotMngr)) {
 				wait(Prop.getInt("interval.waitmillis"));
 				logger.warn("等待pdf打开");
 			}
@@ -570,7 +346,7 @@ public class Caj2pdfTransformerNew {
 			// 打开提取页面菜单
 			robotMngr.pressKey(KeyEvent.VK_E);
 			wait(Prop.getInt("interval.waitminmillis"));
-			while(!isExportPageOpenAtExtractPage()) {
+			while(!isExportPageOpenAtExtractPage(robotMngr)) {
 				logger.warn("等待打开提取页面的导出页面");
 				wait(Prop.getInt("interval.waitminmillis"));
 			}
@@ -593,7 +369,7 @@ public class Caj2pdfTransformerNew {
 			// 点击确认按钮
 			robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_K);
 			wait(Prop.getInt("interval.waitminmillis"));
-			while(!isInputfilenameAtExtractPage()) {
+			while(!isInputfilenameAtExtractPage(robotMngr)) {
 				logger.warn("等待打开输入文件名页面");
 				wait(Prop.getInt("interval.waitminmillis"));
 			}
@@ -602,13 +378,13 @@ public class Caj2pdfTransformerNew {
 			wait(Prop.getInt("interval.waitminmillis"));
 			// 确认覆盖（如果要覆盖的话）
 			robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_Y);
-			while(isInputfilename()) {
+			while(isInputfilename(robotMngr)) {
 				logger.warn("等待关闭输入文件名页面");
 				wait(Prop.getInt("interval.waitmillis"));
 			}
 			closeFoxit();
 			wait(Prop.getInt("interval.waitminmillis"));
-			while(isPdfOpen()) {
+			while(isPdfOpen(robotMngr)) {
 				wait(Prop.getInt("interval.waitmillis"));
 				logger.warn("等待pdf关闭");
 			}
@@ -620,43 +396,13 @@ public class Caj2pdfTransformerNew {
 			FileUtils.moveFile(dstFile.getCanonicalPath(), Prop.get("dstdirpath"));
 		}
 		// 完成后声音通知
-		noticeSound();
+		NoticeUtils.noticeSound();
 		// 完成后短信通知
-		noticeMail();
+		NoticeUtils.noticeMail("试转已经完成啦！！！");
 		openFinishedWindows();
 		wait(Prop.getInt("interval.waitmillis"));
 	}
 	
-	/**
-	 * 截图并保存为文件
-	 * @param x
-	 * @param y
-	 * @param width
-	 * @param height
-	 * @param parentDirPath
-	 * @throws IOException
-	 */
-	public void captureImageAndSave(int x, int y, int width, int height, String parentDirPath, String fileNameWithoutSuffix) throws IOException {
-		BufferedImage image = robotMngr.createScreenCapture(x, y ,width, height);
-		BufferedImageUtils.write(image, parentDirPath, fileNameWithoutSuffix);
-	}
-	
-	/**
-	 * 截图并保存为文件，文件名为带毫秒数的时间字符串
-	 * @param x
-	 * @param y
-	 * @param width
-	 * @param height
-	 * @throws IOException
-	 */
-	public void captureImageAndSave(int x, int y, int width, int height) throws IOException {
-		// 图片的保存目录从属性文件中取，如果没有定义，就放在当前目录
-		String dirpath = Prop.get("captureimage.savedirpath");
-		if(dirpath==null) {
-			dirpath = System.getProperty("user.dir");
-		}
-		captureImageAndSave(x, y, width, height, dirpath, DateUtils.timeStrWithMillisWithoutPunctuation());
-	}
 	
 	public static void main(String[] args) throws AWTException, NativeHookException, IOException, InterruptedException, MessagingException {		
 		/*if(1!=0) {
@@ -693,7 +439,7 @@ public class Caj2pdfTransformerNew {
 		}else if("captureimage".equalsIgnoreCase(method)) {
 			if(args.length>=5) {
 				Thread.sleep(Prop.getInt("interval.waitlongmillis"));
-				cts.captureImageAndSave(Integer.parseInt(args[1]), Integer.parseInt(args[2]), Integer.parseInt(args[3]), Integer.parseInt(args[4]));
+				ScreenJudgeUtils.captureImageAndSave(cts.robotMngr, Integer.parseInt(args[1]), Integer.parseInt(args[2]), Integer.parseInt(args[3]), Integer.parseInt(args[4]));
 			}
 		}
 	}
