@@ -30,8 +30,7 @@ public class Pdf2WordUtils {
 	}
 	
 	public static void main(String[] args) throws AWTException, IOException, InterruptedException {
-		RobotManager robotMngr = new RobotManager();
-		AbbyyUtils.open();
+		AbbyyUtils.openPdf("C:\\Users\\qzfeng\\Desktop\\cajwait\\ZX粮油食品有限公司人力资源管理研究_何微.pdf");
 		//AbbyyUtils.open();
 	}
 }

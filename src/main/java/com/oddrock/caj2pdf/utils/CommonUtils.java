@@ -15,7 +15,6 @@ import com.oddrock.common.mail.MailSender;
 import com.oddrock.common.media.WavPlayer;
 import com.oddrock.common.pic.BufferedImageUtils;
 import com.oddrock.common.pic.PictureComparator;
-import com.oddrock.common.windows.CmdExecutor;
 
 public class CommonUtils {
 	// 邮件通知
@@ -81,19 +80,5 @@ public class CommonUtils {
 			flag = true;
 		}
 		return flag;
-	}
-	
-	/**
-	 * 打开已完成文件所在目录的窗口
-	 */
-	public static void openFinishedWindows() {
-		if(!Prop.getBool("needopenfinishedwindows")){
-			return;
-		}
-		if(!Prop.getBool("needmovesrc2dst")){
-			CmdExecutor.getSingleInstance().openDirWindows(Prop.get("srcdirpath"));
-		}else {
-			CmdExecutor.getSingleInstance().openDirWindows(Prop.get("dstdirpath"));
-		}	
 	}
 }

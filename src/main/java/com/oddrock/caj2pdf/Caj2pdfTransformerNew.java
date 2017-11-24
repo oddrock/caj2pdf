@@ -4,6 +4,9 @@ import java.awt.AWTException;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.mail.MessagingException;
 import org.apache.log4j.Logger;
 import org.jnativehook.GlobalScreen;
@@ -13,10 +16,12 @@ import com.oddrock.caj2pdf.utils.CajViewerUtils;
 import com.oddrock.caj2pdf.utils.CommonUtils;
 import com.oddrock.caj2pdf.utils.FoxitUtils;
 import com.oddrock.caj2pdf.utils.TransformRuleUtils;
+import com.oddrock.common.DateUtils;
 import com.oddrock.common.awt.RobotManager;
 import com.oddrock.common.file.FileUtils;
 import com.oddrock.common.pdf.PdfManager;
 import com.oddrock.common.windows.ClipboardUtils;
+import com.oddrock.common.windows.CmdExecutor;
 import com.oddrock.common.windows.GlobalKeyListener;
 
 /**
@@ -27,9 +32,14 @@ import com.oddrock.common.windows.GlobalKeyListener;
 public class Caj2pdfTransformerNew {
 	private static Logger logger = Logger.getLogger(Caj2pdfTransformerNew.class);
 	private RobotManager robotMngr;
+	private List<File> srcFileList;		// 已转换好的源文件
+	private List<File> dstFileList;		// 已转换好的目标文件
+	private File dstDir;
 	public Caj2pdfTransformerNew() throws AWTException, NativeHookException {
 		super();
 		robotMngr = new RobotManager();
+		srcFileList = new ArrayList<File>();
+		dstFileList = new ArrayList<File>();
 		if(Boolean.parseBoolean(Prop.get("needesckey"))){
 			GlobalScreen.registerNativeHook();//初始化ESC钩子 
 	        GlobalScreen.addNativeKeyListener(new GlobalKeyListener());
@@ -211,7 +221,7 @@ public class Caj2pdfTransformerNew {
 	}
 	
 	/*
-	 * 结束并通知
+	 * 结束
 	 */
 	private void caj2pdf_abbyy_step6_end(File dstFile) throws IOException, InterruptedException {
 		CajViewerUtils.closeCaj();
@@ -223,22 +233,38 @@ public class Caj2pdfTransformerNew {
 		logger.warn("完成打印，文件位置："+dstFile.getCanonicalPath());
 	}
 	
-	// 将所有文件从源文件夹移动到目标文件夹
+	/**
+	 * 将所有文件从源文件夹移动到目标文件夹
+	 * @return
+	 * @throws IOException
+	 */
 	private void mvAllFilesFromSrcToDst() throws IOException {
-		if(!Prop.getBool("needmovesrc2dst")){
+		if(dstFileList.size()==0) {
 			return;
 		}
-		File srcDir = new File(Prop.get("srcdirpath"));
-		File dstDir = new File(Prop.get("dstdirpath"));
+		if(!Prop.getBool("needmovesrc2dst")){
+			dstDir = new File(Prop.get("srcdirpath"));
+			return;
+		}
+		dstDir = new File(Prop.get("dstdirpath")+File.separator+DateUtils.timeStrWithoutPunctuation());
 		if(!dstDir.exists() || !dstDir.isDirectory()) {
 			dstDir.mkdirs();
 		}
-		for(File file: srcDir.listFiles()) {
+		for(File file: srcFileList) {
+			FileUtils.moveFile(file.getCanonicalPath(), dstDir.getCanonicalPath());
+		}
+		for(File file: dstFileList) {
 			FileUtils.moveFile(file.getCanonicalPath(), dstDir.getCanonicalPath());
 		}
 	}
 	
-
+	// 打开已完成文件所在目录的窗口
+	private void openFinishedWindows() throws IOException {
+		if(!Prop.getBool("needopenfinishedwindows")){
+			return;
+		}
+		CmdExecutor.getSingleInstance().openDirWindows(dstDir.getCanonicalPath());	
+	}
 	
 	/**
 	 * 第二种caj2pdf方式，适用于ABBYY
@@ -255,7 +281,9 @@ public class Caj2pdfTransformerNew {
 		caj2pdf_abbyy_step3_startprint();
 		caj2pdf_abbyy_step4_waitprintfinished();
 		File dstFile = caj2pdf_abbyy_step5_inputfilename(srcFile);
-		caj2pdf_abbyy_step6_end(dstFile);	
+		caj2pdf_abbyy_step6_end(dstFile);
+		srcFileList.add(srcFile);
+		dstFileList.add(dstFile);
 		return dstFile;
 	}
 	
@@ -284,7 +312,7 @@ public class Caj2pdfTransformerNew {
 		// 将所有文件转移到目标文件夹
 		mvAllFilesFromSrcToDst();
 		// 打开完成窗口
-		CommonUtils.openFinishedWindows();
+		openFinishedWindows();
 	}
 
 	
@@ -361,6 +389,11 @@ public class Caj2pdfTransformerNew {
 				logger.warn("等待打开输入文件名页面");
 				CommonUtils.wait(Prop.getInt("interval.waitminmillis"));
 			}
+			dstFile = new File(dstFile.getParentFile(), "提取页面 "+dstFile.getName());
+			ClipboardUtils.setSysClipboardText(dstFile.getCanonicalPath());
+			CommonUtils.wait(Prop.getInt("interval.waitminmillis"));
+			robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_V);
+			CommonUtils.wait(Prop.getInt("interval.waitminmillis"));
 			// 点击确定按钮
 			robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_S);
 			CommonUtils.wait(Prop.getInt("interval.waitminmillis"));
@@ -377,17 +410,17 @@ public class Caj2pdfTransformerNew {
 				logger.warn("等待pdf关闭");
 			}
 		}
-		if(Prop.getBool("needmovesrc2dst")){
-			dstFile = new File(dstFile.getParentFile(), "提取页面 "+dstFile.getName());
-			System.out.println(dstFile.getCanonicalPath());
-			System.out.println(Prop.get("dstdirpath"));
-			FileUtils.moveFile(dstFile.getCanonicalPath(), Prop.get("dstdirpath"));
+		if(Prop.getBool("needmovesrc2dst")){	
+			dstDir = new File(Prop.get("dstdirpath")+File.separator+DateUtils.timeStrWithoutPunctuation());
+			FileUtils.moveFile(dstFile.getCanonicalPath(), dstDir.getCanonicalPath());
+		}else {
+			dstDir = dstFile.getParentFile();
 		}
 		// 完成后声音通知
 		CommonUtils.noticeSound();
 		// 完成后短信通知
 		CommonUtils.noticeMail("试转已经完成啦！！！");
-		CommonUtils.openFinishedWindows();
+		openFinishedWindows();
 		CommonUtils.wait(Prop.getInt("interval.waitmillis"));
 	}
 	

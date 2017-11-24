@@ -68,4 +68,20 @@ public class AbbyyUtils {
 		}
 		logger.warn("确认ABBYY已打开");
 	}
+	
+	/**
+	 * 用ABBYY打开一个pdf文件
+	 * @param pdfFilePath
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public static void openPdf(String pdfFilePath)throws IOException, InterruptedException {
+		CmdExecutor.getSingleInstance().exeCmd(Prop.get("abbyy.path") + " \"" + pdfFilePath + "\"");
+		while(!isStarted()) {
+			logger.warn("等待ABBYY打开......");
+			CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+		}
+		logger.warn("确认ABBYY已打开");
+	}
+	
 }
