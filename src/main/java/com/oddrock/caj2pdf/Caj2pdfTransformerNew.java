@@ -8,6 +8,11 @@ import javax.mail.MessagingException;
 import org.apache.log4j.Logger;
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
+
+import com.oddrock.caj2pdf.utils.CajViewerUtils;
+import com.oddrock.caj2pdf.utils.CommonUtils;
+import com.oddrock.caj2pdf.utils.FoxitUtils;
+import com.oddrock.caj2pdf.utils.TransformRuleUtils;
 import com.oddrock.common.awt.RobotManager;
 import com.oddrock.common.file.FileUtils;
 import com.oddrock.common.pdf.PdfManager;

@@ -1,4 +1,6 @@
-package com.oddrock.caj2pdf;
+package com.oddrock.caj2pdf.utils;
+
+import com.oddrock.caj2pdf.Prop;
 
 public class TransformRuleUtils {
 	/**

@@ -1,4 +1,4 @@
-package com.oddrock.caj2pdf;
+package com.oddrock.caj2pdf.utils;
 
 import java.awt.AWTException;
 import java.io.File;
