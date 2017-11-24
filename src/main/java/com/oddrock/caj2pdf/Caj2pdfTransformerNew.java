@@ -46,6 +46,10 @@ public class Caj2pdfTransformerNew {
 		}
 	}
 	
+	private void generateDstDir() {
+		dstDir = new File(Prop.get("dstdirpath")+File.separator+DateUtils.timeStrInChinese());
+	}
+	
 	/**
 	 * 打印单个文件
 	 * @param srcCajFilePath
@@ -246,7 +250,7 @@ public class Caj2pdfTransformerNew {
 			dstDir = new File(Prop.get("srcdirpath"));
 			return;
 		}
-		dstDir = new File(Prop.get("dstdirpath")+File.separator+DateUtils.timeStrWithoutPunctuation());
+		generateDstDir();
 		if(!dstDir.exists() || !dstDir.isDirectory()) {
 			dstDir.mkdirs();
 		}
@@ -411,7 +415,7 @@ public class Caj2pdfTransformerNew {
 			}
 		}
 		if(Prop.getBool("needmovesrc2dst")){	
-			dstDir = new File(Prop.get("dstdirpath")+File.separator+DateUtils.timeStrWithoutPunctuation());
+			generateDstDir();
 			FileUtils.moveFile(dstFile.getCanonicalPath(), dstDir.getCanonicalPath());
 		}else {
 			dstDir = dstFile.getParentFile();
