@@ -1,11 +1,14 @@
-package com.oddrock.caj2pdf.utils;
+package com.oddrock.caj2pdf;
 
 import java.awt.AWTException;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
-import com.oddrock.caj2pdf.Prop;
+
 import com.oddrock.caj2pdf.bean.TransformFileSet;
+import com.oddrock.caj2pdf.utils.AbbyyUtils;
+import com.oddrock.caj2pdf.utils.CommonUtils;
+import com.oddrock.caj2pdf.utils.MicrosoftWordUtils;
 import com.oddrock.common.awt.RobotManager;
 import com.oddrock.common.windows.ClipboardUtils;
 
