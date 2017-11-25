@@ -1,5 +1,6 @@
 package com.oddrock.caj2pdf.utils;
 
+import java.awt.AWTException;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
@@ -16,7 +17,7 @@ public class FoxitUtils {
 	private static Logger logger = Logger.getLogger(FoxitUtils.class);
 	
 	// pdf是否打开
-	public static boolean isPdfOpen(RobotManager robotMngr) throws IOException{
+	public static boolean isOpen(RobotManager robotMngr) throws IOException{
 		boolean flag = false;
 		BufferedImage image = robotMngr.createScreenCapture(Prop.getInt("cajviewer.mark.pdfopen.x")
 				,Prop.getInt("cajviewer.mark.pdfopen.y")
@@ -54,16 +55,14 @@ public class FoxitUtils {
 		return flag;
 	}
 	
-	/*
-	 * 用foxit打开pdf
-	 */
-	public static CmdResult openPdf(String pdfFilePath) {
+	// 用foxit打开pdf
+	@Deprecated
+	public static CmdResult openPdfOld(String pdfFilePath) {
 		return CmdExecutor.getSingleInstance().exeCmd(Prop.get("foxit.path") + " \"" + pdfFilePath + "\"");
 	}
 	
-	/*
-	 * 关闭福昕PDF阅读器
-	 */
+	// 关闭福昕PDF阅读器
+	@Deprecated
 	public static CmdResult closeFoxit() {
 		CmdResult result  = null;
 		for(String appname : Prop.get("foxit.appname").split(",")) {
@@ -72,6 +71,7 @@ public class FoxitUtils {
 		return result;
 	}
 	
+	// foxit进程是否启动
 	public static boolean isStart() throws IOException {
 		for(String appname : Prop.get("foxit.appname").split(",")) {
 			if(CmdExecutor.getSingleInstance().isAppAlive(appname)) {
@@ -81,6 +81,7 @@ public class FoxitUtils {
 		return false;
 	}
 	
+	// 关闭并等待完成关闭
 	public static void close() throws IOException, InterruptedException {
 		if(isStart()) {
 			for(String appname : Prop.get("foxit.appname").split(",")) {
@@ -92,5 +93,51 @@ public class FoxitUtils {
 			CommonUtils.wait(Prop.getInt("interval.waitmillis"));
 		}
 		logger.warn("确认foxit已关闭");
+	}
+	
+	// 用foxit打开一个pdf并等待打开完成
+	public static void openPdf(RobotManager robotMngr, String pdfFilePath) throws IOException, InterruptedException {
+		CmdExecutor.getSingleInstance().exeCmd(Prop.get("foxit.path") + " \"" + pdfFilePath + "\"");
+		while(!isStart()) {
+			logger.warn("等待foxit启动......");
+			CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+		}
+		logger.warn("确认foxit已启动");
+		while(!isOpen(robotMngr)) {
+			logger.warn("等待foxit打开");
+			CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+		}
+		logger.warn("确认foxit已打开");
+	}
+	
+	// 等待直到打开提取页面时的导出页面
+	public static void waitExportPageWhenExracting(RobotManager robotMngr) throws IOException, InterruptedException {
+		while(!isExportPageOpenAtExtractPage(robotMngr)) {
+			logger.warn("等待打开提取页面时的导出页面");
+			CommonUtils.wait(Prop.getInt("interval.waitminmillis"));
+		}
+		logger.warn("已完成打开提取页面时的导出页面");
+	}
+	
+	// 等待直到打开提取页面时的输入文件名页面
+	public static void waitInputfilenameOpenWhenExracting(RobotManager robotMngr) throws IOException, InterruptedException{
+		while(!isInputfilenameAtExtractPage(robotMngr)) {
+			logger.warn("等待打开提取页面时的输入文件名页面");
+			CommonUtils.wait(Prop.getInt("interval.waitminmillis"));
+		}
+		logger.warn("已完成打开提取页面时的输入文件名页面");
+	}
+	
+	// 等待直到关闭提取页面时的输入文件名页面
+	public static void waitInputfilenameCloseWhenExracting(RobotManager robotMngr) throws IOException, InterruptedException{
+		while(isInputfilenameAtExtractPage(robotMngr)) {
+			logger.warn("等待关闭提取页面时的输入文件名页面");
+			CommonUtils.wait(Prop.getInt("interval.waitminmillis"));
+		}
+		logger.warn("已完成关闭提取页面时的输入文件名页面");
+	}
+	
+	public static void main(String[] args) throws IOException, InterruptedException, AWTException {
+		openPdf(new RobotManager(), "C:\\Users\\qzfeng\\Desktop\\cajwait\\ZX粮油食品有限公司人力资源管理研究_何微.pdf");
 	}
 }

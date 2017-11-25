@@ -56,6 +56,7 @@ public class Caj2pdfTransformerNew {
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
+	@SuppressWarnings("deprecation")
 	public void caj2pdf(String srcCajFilePath) throws IOException, InterruptedException{
 		CommonUtils.moveMouseAvoidHandicap(robotMngr);
 		CajViewerUtils.closeCaj();
@@ -142,6 +143,7 @@ public class Caj2pdfTransformerNew {
 	/*
 	 * 第一步，打开caj
 	 */
+	@SuppressWarnings("deprecation")
 	private File caj2pdf_abbyy_step1_opencaj(String srcCajFilePath) throws IOException, InterruptedException {
 		// 鼠标挪开，避免挡事
 		robotMngr.moveMouseToRightDownCorner(Prop.getInt("xgap"),Prop.getInt("ygap"));
@@ -297,6 +299,7 @@ public class Caj2pdfTransformerNew {
 	 * @throws InterruptedException
 	 * @throws MessagingException
 	 */
+	@SuppressWarnings("deprecation")
 	public void caj2pdfBatch_abbyy(String srcDirPath) throws IOException, InterruptedException, MessagingException{
 		File srcDir = new File(srcDirPath);
 		if(!srcDir.exists() || !srcDir.isDirectory()){
@@ -326,6 +329,7 @@ public class Caj2pdfTransformerNew {
 	 * @throws InterruptedException
 	 * @throws MessagingException
 	 */
+	@SuppressWarnings("deprecation")
 	public void caj2pdftest_abbyy(String srcDirPath) throws IOException, InterruptedException, MessagingException {
 		// 鼠标挪开，避免挡事
 		robotMngr.moveMouseToRightDownCorner(Prop.getInt("xgap"),Prop.getInt("ygap"));
@@ -346,16 +350,16 @@ public class Caj2pdfTransformerNew {
 		File dstFile = caj2pdf_abbyy(srcFile.getCanonicalPath());
 		FoxitUtils.closeFoxit();
 		CommonUtils.wait(Prop.getInt("interval.waitminmillis"));
-		while(FoxitUtils.isPdfOpen(robotMngr)) {
+		while(FoxitUtils.isOpen(robotMngr)) {
 			CommonUtils.wait(Prop.getInt("interval.waitmillis"));
 			logger.warn("等待pdf关闭");
 		}
 		int pageCount = new PdfManager().pdfPageCount(dstFile.getCanonicalPath());
 		if(pageCount!=1) {
 			int testcount = TransformRuleUtils.computeTestPageCount(pageCount);
-			FoxitUtils.openPdf(dstFile.getCanonicalPath());
+			FoxitUtils.openPdfOld(dstFile.getCanonicalPath());
 			CommonUtils.wait(Prop.getInt("interval.waitminmillis"));
-			while(!FoxitUtils.isPdfOpen(robotMngr)) {
+			while(!FoxitUtils.isOpen(robotMngr)) {
 				CommonUtils.wait(Prop.getInt("interval.waitmillis"));
 				logger.warn("等待pdf打开");
 			}
@@ -408,7 +412,7 @@ public class Caj2pdfTransformerNew {
 			}
 			FoxitUtils.closeFoxit();
 			CommonUtils.wait(Prop.getInt("interval.waitminmillis"));
-			while(FoxitUtils.isPdfOpen(robotMngr)) {
+			while(FoxitUtils.isOpen(robotMngr)) {
 				CommonUtils.wait(Prop.getInt("interval.waitmillis"));
 				logger.warn("等待pdf关闭");
 			}

@@ -19,7 +19,7 @@ public class TransformFileSet {
 	public File getDstFIle() {
 		return dstFIle;
 	}
-	public void setDstFIle(File dstFIle) {
-		this.dstFIle = dstFIle;
+	public void setDstFIle(File dstFile) {
+		this.dstFIle = dstFile;
 	}
 }
