@@ -240,6 +240,11 @@ public class DocFormatConverter {
 			pdf2word();
 		}else if("pdf2word_test".equalsIgnoreCase(method)) {
 			pdf2word_test();
+		}else if("captureimage".equalsIgnoreCase(method)) {
+			if(args.length>=6) {
+				Thread.sleep(Integer.parseInt(args[1])*1000);
+				CommonUtils.captureImageAndSave(robotMngr, Integer.parseInt(args[2]), Integer.parseInt(args[3]), Integer.parseInt(args[4]), Integer.parseInt(args[5]));
+			}
 		}
 	}
 	
