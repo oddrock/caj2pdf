@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
-
 import javax.mail.MessagingException;
 import org.apache.log4j.Logger;
 import com.oddrock.caj2pdf.bean.TransformFileSet;
@@ -26,12 +25,20 @@ public class DocFormatConverter {
 		robotMngr = new RobotManager();
 	}
 	
-	/**
-	 * 批量caj转换pdf
-	 * @throws InterruptedException 
-	 * @throws IOException 
-	 * @throws MessagingException 
-	 */
+	// 转换后的动作
+	private void doAfterTransform(File srcDir, File dstDir, Set<File> needMoveFilesSet, String noticeContent) throws IOException, MessagingException {
+		// 将需要移动的文件移动到目标文件夹
+		dstDir = CommonUtils.mvAllFilesFromSrcToDst(needMoveFilesSet, dstDir);
+		// 完成后声音通知
+		CommonUtils.noticeSound();
+		// 完成后短信通知
+		CommonUtils.noticeMail(noticeContent);
+		// 打开完成后的文件夹窗口
+		CommonUtils.openFinishedWindows(dstDir);
+		logger.warn(noticeContent+ ":" + srcDir.getCanonicalPath());
+	}
+	
+	// 批量caj转pdf
 	public void caj2pdf(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
 		if(!srcDir.exists() || !srcDir.isDirectory()){
 			return;
@@ -47,35 +54,12 @@ public class DocFormatConverter {
 		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "caj转pdf已完成");
 	}
 	
-	/**
-	 * 批量caj转pdf，用默认的源文件夹和目标文件夹
-	 * @throws IOException
-	 * @throws InterruptedException
-	 * @throws MessagingException
-	 */
+	// 批量caj转pdf，用默认的源文件夹和目标文件夹
 	public void caj2pdf() throws IOException, InterruptedException, MessagingException {
 		caj2pdf(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
-	// 转换后的动作
-	private void doAfterTransform(File srcDir, File dstDir, Set<File> needMoveFilesSet, String noticeContent) throws IOException, MessagingException {
-		// 将需要移动的文件移动到目标文件夹
-		dstDir = CommonUtils.mvAllFilesFromSrcToDst(needMoveFilesSet, dstDir);
-		// 完成后声音通知
-		CommonUtils.noticeSound();
-		// 完成后短信通知
-		CommonUtils.noticeMail(noticeContent);
-		// 打开完成后的文件夹窗口
-		CommonUtils.openFinishedWindows(dstDir);
-		logger.warn(noticeContent+ ":" + srcDir.getCanonicalPath());
-	}
-	
-	/**
-	 * 批量caj转word
-	 * @throws InterruptedException 
-	 * @throws IOException 
-	 * @throws MessagingException 
-	 */
+	// 批量caj转word
 	public void caj2word(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
 		if(!srcDir.exists() || !srcDir.isDirectory()){
 			return;
@@ -100,6 +84,11 @@ public class DocFormatConverter {
 			needMoveFilesSet.add(fileSet.getSrcFile());
 		}
 		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "caj转word已完成");
+	}
+	
+	// 批量caj转word
+	public void caj2word() throws IOException, InterruptedException, MessagingException {
+		caj2word(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
 	// caj试转pdf
@@ -162,16 +151,77 @@ public class DocFormatConverter {
 		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "caj试转word已完成");
 	}
 	
+	// caj试转word
 	public void caj2word_test() throws IOException, InterruptedException, MessagingException{
 		caj2word_test(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
-	public void caj2word() throws IOException, InterruptedException, MessagingException {
-		caj2word(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
+	// pdf批量转word
+	public void pdf2word(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		if(!srcDir.exists() || !srcDir.isDirectory()){
+			return;
+		}
+		// 存放每次单次转换后的源文件和目标文件
+		TransformFileSet fileSet;
+		// 存放需要移动的文件
+		Set<File> needMoveFilesSet = new HashSet<File>();
+		for(File file : srcDir.listFiles()){
+			if(file==null) continue;
+			// 将单个pdf文件转换为word
+			fileSet = Pdf2WordUtils.pdf2word(robotMngr, file.getCanonicalPath());
+			needMoveFilesSet.add(fileSet.getDstFile());
+			needMoveFilesSet.add(fileSet.getSrcFile());
+		}
+		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "pdf转word已完成");
+	}
+	
+	// pdf批量转word
+	public void pdf2word() throws IOException, InterruptedException, MessagingException {
+		pdf2word(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
+	}
+	
+	public void pdf2word_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		if(!srcDir.exists() || !srcDir.isDirectory()){
+			return;
+		}
+		// 存放每次单次转换后的源文件和目标文件
+		TransformFileSet fileSet = null;
+		// 存放需要移动的文件
+		Set<File> needMoveFilesSet = new HashSet<File>();
+		File pdfFile = null;
+		PdfManager pm = new PdfManager();
+		// 找到目录下页数最多那个pdf
+		for(File file : srcDir.listFiles()){
+			if(file!=null && file.exists() && file.isFile() && file.getCanonicalPath().endsWith(".pdf")) {
+				if(pdfFile==null) {
+					pdfFile = file;
+				}else {
+					if(pm.pdfPageCount(file.getCanonicalPath())>pm.pdfPageCount(pdfFile.getCanonicalPath())) {
+						pdfFile = file;
+					}
+				}
+			}
+		}
+		if(pdfFile==null) return;
+		// 获得转换得到的pdf的实际页数
+		int realPageCount = pm.pdfPageCount(pdfFile.getCanonicalPath());
+		// 计算出应该提取的页数
+		int tiquPageCount = TransformRuleUtils.computeTestPageCount(realPageCount);
+		// 从已转换的pdf中提取相应页数，另存为新的pdf，新的pdf名为在已有PDF名称前加上“提取页面 ”
+		fileSet = PdfUtils.extractPage(robotMngr, pdfFile.getCanonicalPath(), tiquPageCount);
+		// 将提取后的页面转为word
+		fileSet = Pdf2WordUtils.pdf2word(robotMngr, fileSet.getDstFile().getCanonicalPath());
+		needMoveFilesSet.add(fileSet.getDstFile());
+		needMoveFilesSet.add(fileSet.getSrcFile());
+		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "pdf试转word已完成");
+	}
+	
+	public void pdf2word_test() throws IOException, InterruptedException, MessagingException {
+		pdf2word_test(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
 	public static void main(String[] args) throws AWTException, IOException, InterruptedException, MessagingException {
 		DocFormatConverter dfc = new DocFormatConverter();
-		dfc.caj2word_test();
+		dfc.pdf2word_test();
 	}
 }
