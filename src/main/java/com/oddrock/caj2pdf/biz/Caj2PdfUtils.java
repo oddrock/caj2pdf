@@ -1,4 +1,4 @@
-package com.oddrock.caj2pdf;
+package com.oddrock.caj2pdf.biz;
 
 import java.awt.AWTException;
 import java.awt.event.KeyEvent;
@@ -9,6 +9,7 @@ import com.oddrock.caj2pdf.bean.TransformFileSet;
 import com.oddrock.caj2pdf.utils.CajViewerUtils;
 import com.oddrock.caj2pdf.utils.CommonUtils;
 import com.oddrock.caj2pdf.utils.FoxitUtils;
+import com.oddrock.caj2pdf.utils.Prop;
 import com.oddrock.common.awt.RobotManager;
 import com.oddrock.common.windows.ClipboardUtils;
 

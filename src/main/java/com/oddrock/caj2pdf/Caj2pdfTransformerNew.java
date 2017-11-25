@@ -15,6 +15,7 @@ import org.jnativehook.NativeHookException;
 import com.oddrock.caj2pdf.utils.CajViewerUtils;
 import com.oddrock.caj2pdf.utils.CommonUtils;
 import com.oddrock.caj2pdf.utils.FoxitUtils;
+import com.oddrock.caj2pdf.utils.Prop;
 import com.oddrock.caj2pdf.utils.TransformRuleUtils;
 import com.oddrock.common.DateUtils;
 import com.oddrock.common.awt.RobotManager;

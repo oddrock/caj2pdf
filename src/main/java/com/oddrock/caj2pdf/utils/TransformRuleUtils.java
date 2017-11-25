@@ -1,7 +1,5 @@
 package com.oddrock.caj2pdf.utils;
 
-import com.oddrock.caj2pdf.Prop;
-
 public class TransformRuleUtils {
 	/**
 	 * 计算试转应该提取多少页

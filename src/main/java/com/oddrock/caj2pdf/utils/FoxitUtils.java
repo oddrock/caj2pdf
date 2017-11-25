@@ -6,7 +6,6 @@ import java.io.IOException;
 
 import org.apache.log4j.Logger;
 
-import com.oddrock.caj2pdf.Prop;
 import com.oddrock.common.awt.RobotManager;
 import com.oddrock.common.pic.BufferedImageUtils;
 import com.oddrock.common.pic.PictureComparator;
