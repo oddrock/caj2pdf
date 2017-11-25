@@ -66,7 +66,7 @@ public class PdfUtils {
 		CommonUtils.wait(Prop.getInt("interval.waitminmillis"));
 		// 在源文件名前加上“提取页面 ”字样，其他原封不动，成为新的提取后的文件名
 		File dstFile = new File(pdfFile.getParentFile(), "提取页面 "+pdfFile.getName());
-		result.setDstFIle(dstFile);
+		result.setDstFile(dstFile);
 		// 将提取后文件名复制到剪贴板
 		ClipboardUtils.setSysClipboardText(dstFile.getCanonicalPath());
 		CommonUtils.wait(Prop.getInt("interval.waitminmillis"));

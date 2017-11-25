@@ -58,7 +58,7 @@ public class Pdf2WordUtils {
 		AbbyyUtils.waitToInputfilename(robotMngr);
 		// 将文件名的pdf替换为docx，保存到剪贴板，word文件就保存在原地
 		File wordFile = new File(pdfFile.getCanonicalPath().replaceAll(".pdf$", ".docx"));
-		result.setDstFIle(wordFile);
+		result.setDstFile(wordFile);
 		ClipboardUtils.setSysClipboardText(wordFile.getCanonicalPath());
 		CommonUtils.wait(Prop.getInt("interval.waitminmillis"));
 		// 将剪贴板的文件名复制到输入框

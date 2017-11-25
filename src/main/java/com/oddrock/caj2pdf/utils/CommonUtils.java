@@ -1,8 +1,10 @@
 package com.oddrock.caj2pdf.utils;
 
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Set;
 
 import javax.mail.MessagingException;
 import javax.sound.sampled.LineUnavailableException;
@@ -10,10 +12,12 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 
 import com.oddrock.common.DateUtils;
 import com.oddrock.common.awt.RobotManager;
+import com.oddrock.common.file.FileUtils;
 import com.oddrock.common.mail.MailSender;
 import com.oddrock.common.media.WavPlayer;
 import com.oddrock.common.pic.BufferedImageUtils;
 import com.oddrock.common.pic.PictureComparator;
+import com.oddrock.common.windows.CmdExecutor;
 
 public class CommonUtils {
 	// 邮件通知
@@ -85,4 +89,49 @@ public class CommonUtils {
 	public static void moveMouseAvoidHandicap(RobotManager robotMngr) {
 		robotMngr.moveMouseToRightDownCorner(Prop.getInt("xgap"),Prop.getInt("ygap"));
 	}
+	
+	// 根据规则生成目标文件夹
+	public static File generateDstDir() {
+		return new File(Prop.get("dstdirpath")+File.separator+DateUtils.timeStrInChinese());
+	}
+	
+	public static File generateDstDir(File dstDir) throws IOException {
+		return new File(dstDir.getCanonicalPath()+File.separator+DateUtils.timeStrInChinese());
+	}
+	
+	
+	// 将需要移动的文件移动到目标文件夹
+	public static File mvAllFilesFromSrcToDst(Set<File> needMoveFilesSet, File dstDir) throws IOException {
+		// 如果需要移动的文件数为0，则返回null
+		if(needMoveFilesSet.size()==0){
+			return null;
+		}	
+		// 如果不需要移动，则返回源文件文件夹
+		if(!Prop.getBool("needmovesrc2dst")){
+			for(File file: needMoveFilesSet) {
+				if(file!=null && dstDir!=null) {
+					return file.getParentFile();
+				}
+			}
+		}
+		dstDir = generateDstDir(dstDir);
+		if(!dstDir.exists() || !dstDir.isDirectory()) {
+			dstDir.mkdirs();
+		}
+		for(File file: needMoveFilesSet) {
+			if(file!=null && dstDir!=null) {
+				FileUtils.moveFile(file.getCanonicalPath(), dstDir.getCanonicalPath());
+			}
+		}
+		return dstDir;
+	}
+	
+	// 打开已完成窗口
+	public static void openFinishedWindows(File dstDir) throws IOException {
+		if(!Prop.getBool("needopenfinishedwindows")){
+			return;
+		}
+		CmdExecutor.getSingleInstance().openDirWindows(dstDir.getCanonicalPath());	
+	}
+	
 }

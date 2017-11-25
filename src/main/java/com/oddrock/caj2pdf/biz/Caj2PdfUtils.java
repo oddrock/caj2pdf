@@ -46,7 +46,7 @@ public class Caj2PdfUtils {
 		CajViewerUtils.waitInputfilename(robotMngr);
 		// pdf文件生成在原地，只修改后缀
 		File pdfFile = new File(cajFile.getParent(), cajFile.getName().replaceAll(".caj$", ".pdf"));
-		result.setDstFIle(pdfFile);
+		result.setDstFile(pdfFile);
 		// 将生成的pdf文件名复制到文本框
 		ClipboardUtils.setSysClipboardText(pdfFile.getCanonicalPath());
 		CommonUtils.wait(Prop.getInt("interval.waitminmillis"));
