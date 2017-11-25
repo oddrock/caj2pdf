@@ -220,8 +220,31 @@ public class DocFormatConverter {
 		pdf2word_test(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
+	public void execTransform(String[] args) throws IOException, InterruptedException, MessagingException {
+		String method = Prop.get("caj2pdf.start");
+		if(method==null) {
+			method = "caj2word";
+		}
+		if(args.length>=1) {
+			method = args[0].trim(); 
+		}
+		if("caj2word".equalsIgnoreCase(method)) {
+			caj2word();
+		}else if("caj2word_test".equalsIgnoreCase(method)) {
+			caj2word_test();
+		}else if("caj2pdf".equalsIgnoreCase(method)) {
+			caj2pdf();
+		}else if("caj2pdf_test".equalsIgnoreCase(method)) {
+			caj2pdf_test();
+		}else if("pdf2word".equalsIgnoreCase(method)) {
+			pdf2word();
+		}else if("pdf2word_test".equalsIgnoreCase(method)) {
+			pdf2word_test();
+		}
+	}
+	
 	public static void main(String[] args) throws AWTException, IOException, InterruptedException, MessagingException {
 		DocFormatConverter dfc = new DocFormatConverter();
-		dfc.pdf2word_test();
+		dfc.execTransform(args);
 	}
 }
