@@ -59,7 +59,7 @@ public class Caj2pdfTransformerNew {
 	public void caj2pdf(String srcCajFilePath) throws IOException, InterruptedException{
 		CommonUtils.moveMouseAvoidHandicap(robotMngr);
 		CajViewerUtils.closeCaj();
-		while(CajViewerUtils.isCajOpen(robotMngr)){
+		while(CajViewerUtils.isOpen(robotMngr)){
 			logger.warn("等待关闭caj");
 			CommonUtils.wait(Prop.getInt("interval.waitmillis"));
 		}
@@ -68,9 +68,9 @@ public class Caj2pdfTransformerNew {
 		if(!srcFile.exists() || !srcFile.isFile() || !srcFile.getName().endsWith(".caj")){
 			return;
 		}
-		CajViewerUtils.openCaj(srcFile.getCanonicalPath());
+		CajViewerUtils.openCajOld(srcFile.getCanonicalPath());
 		// 检查caj是否完全打开，没有就等待
-		while(!CajViewerUtils.isCajOpen(robotMngr)){
+		while(!CajViewerUtils.isOpen(robotMngr)){
 			logger.warn("等待打开caj");
 			CommonUtils.wait(Prop.getInt("interval.waitmillis"));
 		}
@@ -115,7 +115,7 @@ public class Caj2pdfTransformerNew {
 		}
 		CommonUtils.wait(Prop.getInt("interval.waitmillis"));
 		CajViewerUtils.closeCaj();
-		while(CajViewerUtils.isCajOpen(robotMngr)){
+		while(CajViewerUtils.isOpen(robotMngr)){
 			logger.warn("等待关闭caj");
 			CommonUtils.wait(Prop.getInt("interval.waitmillis"));
 		}
@@ -146,7 +146,7 @@ public class Caj2pdfTransformerNew {
 		// 鼠标挪开，避免挡事
 		robotMngr.moveMouseToRightDownCorner(Prop.getInt("xgap"),Prop.getInt("ygap"));
 		CajViewerUtils.closeCaj();
-		while(CajViewerUtils.isCajOpen(robotMngr)){
+		while(CajViewerUtils.isOpen(robotMngr)){
 			logger.warn("等待关闭caj");
 			CommonUtils.wait(Prop.getInt("interval.waitmillis"));
 		}
@@ -155,14 +155,14 @@ public class Caj2pdfTransformerNew {
 		if(!srcFile.exists() || !srcFile.isFile() || !srcFile.getName().endsWith(".caj")){
 			return null;
 		}
-		CajViewerUtils.openCaj(srcFile.getCanonicalPath());
+		CajViewerUtils.openCajOld(srcFile.getCanonicalPath());
 		return srcFile;
 	}
 	
 	// 第二步，打开打印机
 	private void caj2pdf_abbyy_step2_openprinter() throws IOException, InterruptedException {
 		// 检查caj是否完全打开，没有就等待
-		while(!CajViewerUtils.isCajOpen(robotMngr)){
+		while(!CajViewerUtils.isOpen(robotMngr)){
 			logger.warn("等待打开caj");
 			CommonUtils.wait(Prop.getInt("interval.waitmillis"));
 		}
@@ -228,7 +228,7 @@ public class Caj2pdfTransformerNew {
 	 */
 	private void caj2pdf_abbyy_step6_end(File dstFile) throws IOException, InterruptedException {
 		CajViewerUtils.closeCaj();
-		while(CajViewerUtils.isCajOpen(robotMngr)){
+		while(CajViewerUtils.isOpen(robotMngr)){
 			logger.warn("等待关闭caj");
 			CommonUtils.wait(Prop.getInt("interval.waitmillis"));
 		}

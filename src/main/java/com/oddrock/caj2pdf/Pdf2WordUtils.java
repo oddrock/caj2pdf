@@ -30,11 +30,11 @@ public class Pdf2WordUtils {
 		// 移开鼠标避免挡事
 		CommonUtils.moveMouseAvoidHandicap(robotMngr);
 		TransformFileSet result = new TransformFileSet();
-		File wordFile = new File(pdfFilePath);
-		result.setSrcFile(wordFile);
-		if(!wordFile.exists() || !wordFile.isFile() || !wordFile.getCanonicalPath().endsWith(".pdf")) {
-			return null;
+		File pdfFile = new File(pdfFilePath);
+		if(!pdfFile.exists() || !pdfFile.isFile() || !pdfFile.getCanonicalPath().endsWith(".pdf")) {
+			return result;
 		}
+		result.setSrcFile(pdfFile);
 		// 关闭word
 		MicrosoftWordUtils.close();
 		// 关闭ABBYY
@@ -55,10 +55,10 @@ public class Pdf2WordUtils {
 		CommonUtils.wait(Prop.getInt("interval.waitminmillis"));
 		// 等待出现文件名输入框
 		AbbyyUtils.waitToInputfilename(robotMngr);
-		// 将文件名的pdf替换为docx，保存到剪贴板
-		File dstFile = new File(wordFile.getCanonicalPath().replaceAll(".pdf$", ".docx"));
-		result.setDstFIle(dstFile);
-		ClipboardUtils.setSysClipboardText(dstFile.getCanonicalPath());
+		// 将文件名的pdf替换为docx，保存到剪贴板，word文件就保存在原地
+		File wordFile = new File(pdfFile.getCanonicalPath().replaceAll(".pdf$", ".docx"));
+		result.setDstFIle(wordFile);
+		ClipboardUtils.setSysClipboardText(wordFile.getCanonicalPath());
 		CommonUtils.wait(Prop.getInt("interval.waitminmillis"));
 		// 将剪贴板的文件名复制到输入框
 		robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_V);

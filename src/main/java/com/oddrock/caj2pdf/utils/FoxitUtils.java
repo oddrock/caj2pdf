@@ -3,6 +3,8 @@ package com.oddrock.caj2pdf.utils;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
+import org.apache.log4j.Logger;
+
 import com.oddrock.caj2pdf.Prop;
 import com.oddrock.common.awt.RobotManager;
 import com.oddrock.common.pic.BufferedImageUtils;
@@ -11,6 +13,8 @@ import com.oddrock.common.windows.CmdExecutor;
 import com.oddrock.common.windows.CmdResult;
 
 public class FoxitUtils {
+	private static Logger logger = Logger.getLogger(FoxitUtils.class);
+	
 	// pdf是否打开
 	public static boolean isPdfOpen(RobotManager robotMngr) throws IOException{
 		boolean flag = false;
@@ -66,5 +70,27 @@ public class FoxitUtils {
 			result = CmdExecutor.getSingleInstance().exeCmd("taskkill /f /im \"" + appname + "\"");
 		}
 		return result;
+	}
+	
+	public static boolean isStart() throws IOException {
+		for(String appname : Prop.get("foxit.appname").split(",")) {
+			if(CmdExecutor.getSingleInstance().isAppAlive(appname)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public static void close() throws IOException, InterruptedException {
+		if(isStart()) {
+			for(String appname : Prop.get("foxit.appname").split(",")) {
+				CmdExecutor.getSingleInstance().exeCmd("taskkill /f /im \"" + appname + "\"");
+			}
+		}
+		while(isStart()) {
+			logger.warn("等待foxit关闭......");
+			CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+		}
+		logger.warn("确认foxit已关闭");
 	}
 }
