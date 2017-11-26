@@ -131,7 +131,16 @@ public class CommonUtils {
 		if(!Prop.getBool("needopenfinishedwindows")){
 			return;
 		}
-		CmdExecutor.getSingleInstance().openDirWindows(dstDir.getCanonicalPath());	
+		CmdExecutor.getSingleInstance().openDirWindows(dstDir.getCanonicalPath());
+	}
+	// 在桌面生成一个已完成文件夹的bat文件，可以一运行立刻打开文件夹
+	public static void createBatDirectToFinishedWindows(File dstDir) throws IOException{
+		if(!Prop.getBool("bat.directtofinishedwindows.need")){
+			return;
+		}
+		String parentPath = Prop.get("bat.directtofinishedwindows.parentpath");
+		File file = new File(parentPath, "刚转完的.bat");
+		FileUtils.writeToFile(file.getCanonicalPath(), "start /max explorer \""+dstDir.getCanonicalPath()+"\"", false, "GBK");
 	}
 	
 }

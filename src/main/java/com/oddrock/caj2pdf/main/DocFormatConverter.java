@@ -16,6 +16,7 @@ import com.oddrock.caj2pdf.utils.Prop;
 import com.oddrock.caj2pdf.utils.TransformRuleUtils;
 import com.oddrock.common.awt.RobotManager;
 import com.oddrock.common.pdf.PdfManager;
+import com.oddrock.common.windows.CmdExecutor;
 
 public class DocFormatConverter {
 	private static Logger logger = Logger.getLogger(DocFormatConverter.class);
@@ -35,6 +36,8 @@ public class DocFormatConverter {
 		CommonUtils.noticeMail(noticeContent);
 		// 打开完成后的文件夹窗口
 		CommonUtils.openFinishedWindows(dstDir);
+		// 在桌面生成一个已完成文件夹的bat文件，可以一运行立刻打开文件夹
+		CommonUtils.createBatDirectToFinishedWindows(dstDir);
 		logger.warn(noticeContent+ ":" + srcDir.getCanonicalPath());
 	}
 	
@@ -245,11 +248,23 @@ public class DocFormatConverter {
 				Thread.sleep(Integer.parseInt(args[1])*1000);
 				CommonUtils.captureImageAndSave(robotMngr, Integer.parseInt(args[2]), Integer.parseInt(args[3]), Integer.parseInt(args[4]), Integer.parseInt(args[5]));
 			}
+		}else if("tasklist".equalsIgnoreCase(method)) {
+			String dstDir = Prop.get("tasklist.savedirpath");
+			String filename = Prop.get("tasklist.filename");
+			if(args.length>=2) {
+				dstDir = args[1].trim();
+			}
+			if(args.length>=3) {
+				filename = args[2].trim();
+			}
+			CmdExecutor.getSingleInstance().exportTasklistToFile(new File(dstDir, filename));
 		}
 	}
 	
 	public static void main(String[] args) throws AWTException, IOException, InterruptedException, MessagingException {
 		DocFormatConverter dfc = new DocFormatConverter();
-		dfc.execTransform(args);
+		dfc.caj2pdf();
+		//dfc.execTransform(args);
+		//CmdExecutor.getSingleInstance().exportTasklistToFile(new File(Prop.get("tasklist.savedirpath"), Prop.get("tasklist.filename")));
 	}
 }
