@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Date;
 import java.util.Set;
 
 import javax.mail.MessagingException;
@@ -22,7 +23,7 @@ import com.oddrock.common.windows.CmdExecutor;
 public class CommonUtils {
 	// 邮件通知
 	public static void noticeMail(String content) throws UnsupportedEncodingException, MessagingException{
-		if(!Prop.getBool("notice.mail.flag")){
+		if(!Prop.getBool("notice.mail.flag") || isInNoticeMailExcludetime()){
 			return;
 		}
 		//String content="所有caj文件转换为PDF已完成！！！";
@@ -54,7 +55,7 @@ public class CommonUtils {
 	
 	// 声音通知
 	public static void noticeSound(){
-		if(Prop.getBool("notice.sound.flag")){
+		if(Prop.getBool("notice.sound.flag") && !isInNoticeSoundExcludetime()){
 			try {
 				WavPlayer.play(Prop.get("notice.sound.wavpath"), Prop.getInt("notice.sound.playcount"));
 			} catch (UnsupportedAudioFileException e) {
@@ -97,6 +98,14 @@ public class CommonUtils {
 	
 	public static File generateDstDir(File dstDir) throws IOException {
 		return new File(dstDir.getCanonicalPath()+File.separator+DateUtils.timeStrInChinese());
+	}
+	
+	public static File generateDstDir(File dstDir, boolean needMkdir) throws IOException {
+		File result = new File(dstDir.getCanonicalPath()+File.separator+DateUtils.timeStrInChinese());
+		if(needMkdir) {
+			result.mkdirs();
+		}
+		return result;
 	}
 	
 	
@@ -143,4 +152,39 @@ public class CommonUtils {
 		FileUtils.writeToFile(file.getCanonicalPath(), "start /max explorer \""+dstDir.getCanonicalPath()+"\"", false, "GBK");
 	}
 	
+	// 当前是否处于邮件通知的排除时段
+	public static boolean isInNoticeMailExcludetime() {
+		if(!Prop.getBool("notice.mail.excludetime.need")) return false;
+		int start = Prop.getInt("notice.mail.excludetime.start");
+		int end = Prop.getInt("notice.mail.excludetime.end");
+		if(start<0 || end<0 || start>=24 || end>=24) {
+			return false;
+		}
+		@SuppressWarnings("deprecation")
+		int hour = new Date().getHours();
+		if((hour>=start && hour<=23) || (hour>=0 && hour<=end) ) {
+			return true;
+		}
+		return false;
+	}
+	
+	// 是否在排除时间段
+	public static boolean isInNoticeSoundExcludetime() {
+		if(!Prop.getBool("notice.sound.excludetime.need")) return false;
+		int start = Prop.getInt("notice.sound.excludetime.start");
+		int end = Prop.getInt("notice.sound.excludetime.end");
+		if(start<0 || end<0 || start>=24 || end>=24) {
+			return false;
+		}
+		@SuppressWarnings("deprecation")
+		int hour = new Date().getHours();
+		if((hour>=start && hour<=23) || (hour>=0 && hour<=end) ) {
+			return true;
+		}
+		return false;
+	}
+	
+	public static void main(String[] args) throws UnsupportedEncodingException, MessagingException {
+		noticeMail("test");
+	}
 }
