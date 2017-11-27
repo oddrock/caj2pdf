@@ -15,13 +15,13 @@ public class MicrosoftWordUtils {
 	}
 	
 	public static boolean isOpen(RobotManager robotMngr) throws IOException {
-		return CommonUtils.comparePic(robotMngr, "microsoftword.mark.open");
+		return Common.comparePic(robotMngr, "microsoftword.mark.open");
 	}
 	
 	public static void waitToOpen(RobotManager robotMngr) throws IOException, InterruptedException{
 		while(!isOpen(robotMngr)) {
 			logger.warn("等待Word打开");
-			CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+			Common.wait(Prop.getInt("interval.waitmillis"));
 		}
 		logger.warn("确认Word已打开");
 	}
@@ -32,7 +32,7 @@ public class MicrosoftWordUtils {
 		}
 		while(isStart()) {
 			logger.warn("等待MicrosoftWord关闭......");
-			CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+			Common.wait(Prop.getInt("interval.waitmillis"));
 		}
 		logger.warn("确认MicrosoftWord已关闭");
 	}

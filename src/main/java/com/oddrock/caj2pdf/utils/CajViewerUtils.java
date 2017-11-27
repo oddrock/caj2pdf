@@ -104,7 +104,7 @@ public class CajViewerUtils {
 		}
 		while(isStart()) {
 			logger.warn("等待cajviewer关闭......");
-			CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+			Common.wait(Prop.getInt("interval.waitmillis"));
 		}
 		logger.warn("确认cajviewer已关闭");
 	}
@@ -113,12 +113,12 @@ public class CajViewerUtils {
 		CmdExecutor.getSingleInstance().exeCmd(Prop.get("cajviewer.path") + " \"" + cajFilePath + "\"");
 		while(!isStart()) {
 			logger.warn("等待cajviewer启动......");
-			CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+			Common.wait(Prop.getInt("interval.waitmillis"));
 		}
 		logger.warn("确认cajviewer已启动");
 		while(!isOpen(robotMngr)) {
 			logger.warn("等待cajviewer打开");
-			CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+			Common.wait(Prop.getInt("interval.waitmillis"));
 		}
 		logger.warn("确认cajviewer已打开");
 	}
@@ -127,7 +127,7 @@ public class CajViewerUtils {
 	public static void waitPrinterOpen(RobotManager robotMngr) throws IOException, InterruptedException {
 		while(!isPrintReady(robotMngr)) {
 			logger.warn("等待打印机打开");
-			CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+			Common.wait(Prop.getInt("interval.waitmillis"));
 		}
 		logger.warn("确认打印机已打开");
 	}
@@ -146,14 +146,14 @@ public class CajViewerUtils {
 			}else{
 				logger.warn("等待开始打印");
 			}
-			CommonUtils.wait(Prop.getInt("interval.waitminmillis"));
+			Common.wait(Prop.getInt("interval.waitminmillis"));
 		}
 	}
 	// 检查是否要输入文件名了，没有就等待
 	public static void waitInputfilename(RobotManager robotMngr) throws IOException, InterruptedException {
 		while(!isInputfilename(robotMngr)){
 			logger.warn("等待输入文件名");
-			CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+			Common.wait(Prop.getInt("interval.waitmillis"));
 		}
 	}
 }

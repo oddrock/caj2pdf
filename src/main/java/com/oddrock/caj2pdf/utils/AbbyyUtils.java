@@ -16,17 +16,17 @@ public class AbbyyUtils {
 	 * @throws IOException
 	 */
 	public static boolean isOpen(RobotManager robotMngr) throws IOException{
-		return CommonUtils.comparePic(robotMngr, "abbyy.mark.open");
+		return Common.comparePic(robotMngr, "abbyy.mark.open");
 	}
 	
 	// 判断ABBYY是否处在需要输入文件名
 	public static boolean isInputfilename(RobotManager robotMngr) throws IOException {
-		return CommonUtils.comparePic(robotMngr, "abbyy.mark.inputfilename");
+		return Common.comparePic(robotMngr, "abbyy.mark.inputfilename");
 	}
 	
 	// 是否正在从pdf转为word
 	public static boolean isPdf2wordTransforming(RobotManager robotMngr) throws IOException {
-		return CommonUtils.comparePic(robotMngr, "abbyy.mark.pdf2wordtransforming");
+		return Common.comparePic(robotMngr, "abbyy.mark.pdf2wordtransforming");
 	}
 	
 	// 等待pdf2word完成转换
@@ -34,12 +34,12 @@ public class AbbyyUtils {
 		// 等待开始转换
 		while(!isPdf2wordTransforming(robotMngr)) {
 			logger.warn("等待pdf2word开始转换......");
-			CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+			Common.wait(Prop.getInt("interval.waitmillis"));
 		}
 		// 等待完成转换
 		while(isPdf2wordTransforming(robotMngr)) {
 			logger.warn("pdf2word开始转换中......");
-			CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+			Common.wait(Prop.getInt("interval.waitmillis"));
 		}
 		logger.warn("已完成pdf2word转换");
 	}
@@ -48,7 +48,7 @@ public class AbbyyUtils {
 	public static void waitToInputfilename(RobotManager robotMngr) throws IOException, InterruptedException {
 		while(!isInputfilename(robotMngr)) {
 			logger.warn("等待出现文件名输入框......");
-			CommonUtils.wait(Prop.getInt("interval.waitminmillis"));
+			Common.wait(Prop.getInt("interval.waitminmillis"));
 		}
 		logger.warn("已出现文件名输入框......");
 	}
@@ -74,7 +74,7 @@ public class AbbyyUtils {
 		}
 		while(isStart()) {
 			logger.warn("等待ABBYY关闭......");
-			CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+			Common.wait(Prop.getInt("interval.waitmillis"));
 		}
 		logger.warn("确认ABBYY已关闭");
 	}
@@ -89,12 +89,12 @@ public class AbbyyUtils {
 		CmdExecutor.getSingleInstance().exeCmd(Prop.get("abbyy.path") + " \"" + pdfFilePath + "\"");
 		while(!isStart()) {
 			logger.warn("等待ABBYY启动......");
-			CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+			Common.wait(Prop.getInt("interval.waitmillis"));
 		}
 		logger.warn("确认ABBYY已启动");
 		while(!isOpen(robotMngr)) {
 			logger.warn("等待ABBYY打开");
-			CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+			Common.wait(Prop.getInt("interval.waitmillis"));
 		}
 		logger.warn("确认ABBYY已打开");
 	}

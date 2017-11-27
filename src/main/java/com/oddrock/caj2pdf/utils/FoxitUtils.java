@@ -89,7 +89,7 @@ public class FoxitUtils {
 		}
 		while(isStart()) {
 			logger.warn("等待foxit关闭......");
-			CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+			Common.wait(Prop.getInt("interval.waitmillis"));
 		}
 		logger.warn("确认foxit已关闭");
 	}
@@ -99,12 +99,12 @@ public class FoxitUtils {
 		CmdExecutor.getSingleInstance().exeCmd(Prop.get("foxit.path") + " \"" + pdfFilePath + "\"");
 		while(!isStart()) {
 			logger.warn("等待foxit启动......");
-			CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+			Common.wait(Prop.getInt("interval.waitmillis"));
 		}
 		logger.warn("确认foxit已启动");
 		while(!isOpen(robotMngr)) {
 			logger.warn("等待foxit打开");
-			CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+			Common.wait(Prop.getInt("interval.waitmillis"));
 		}
 		logger.warn("确认foxit已打开");
 	}
@@ -113,7 +113,7 @@ public class FoxitUtils {
 	public static void waitExportPageWhenExracting(RobotManager robotMngr) throws IOException, InterruptedException {
 		while(!isExportPageOpenAtExtractPage(robotMngr)) {
 			logger.warn("等待打开提取页面时的导出页面");
-			CommonUtils.wait(Prop.getInt("interval.waitminmillis"));
+			Common.wait(Prop.getInt("interval.waitminmillis"));
 		}
 		logger.warn("已完成打开提取页面时的导出页面");
 	}
@@ -122,7 +122,7 @@ public class FoxitUtils {
 	public static void waitInputfilenameOpenWhenExracting(RobotManager robotMngr) throws IOException, InterruptedException{
 		while(!isInputfilenameAtExtractPage(robotMngr)) {
 			logger.warn("等待打开提取页面时的输入文件名页面");
-			CommonUtils.wait(Prop.getInt("interval.waitminmillis"));
+			Common.wait(Prop.getInt("interval.waitminmillis"));
 		}
 		logger.warn("已完成打开提取页面时的输入文件名页面");
 	}
@@ -131,7 +131,7 @@ public class FoxitUtils {
 	public static void waitInputfilenameCloseWhenExracting(RobotManager robotMngr) throws IOException, InterruptedException{
 		while(isInputfilenameAtExtractPage(robotMngr)) {
 			logger.warn("等待关闭提取页面时的输入文件名页面");
-			CommonUtils.wait(Prop.getInt("interval.waitminmillis"));
+			Common.wait(Prop.getInt("interval.waitminmillis"));
 		}
 		logger.warn("已完成关闭提取页面时的输入文件名页面");
 	}

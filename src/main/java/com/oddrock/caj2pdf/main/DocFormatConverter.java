@@ -11,7 +11,7 @@ import com.oddrock.caj2pdf.bean.TransformFileSet;
 import com.oddrock.caj2pdf.biz.Caj2PdfUtils;
 import com.oddrock.caj2pdf.biz.Pdf2WordUtils;
 import com.oddrock.caj2pdf.biz.PdfUtils;
-import com.oddrock.caj2pdf.utils.CommonUtils;
+import com.oddrock.caj2pdf.utils.Common;
 import com.oddrock.caj2pdf.utils.Prop;
 import com.oddrock.caj2pdf.utils.TransformRuleUtils;
 import com.oddrock.common.awt.RobotManager;
@@ -29,15 +29,15 @@ public class DocFormatConverter {
 	// 转换后的动作
 	private void doAfterTransform(File srcDir, File dstDir, Set<File> needMoveFilesSet, String noticeContent) throws IOException, MessagingException {
 		// 将需要移动的文件移动到目标文件夹
-		dstDir = CommonUtils.mvAllFilesFromSrcToDst(needMoveFilesSet, dstDir);
+		dstDir = Common.mvAllFilesFromSrcToDst(needMoveFilesSet, dstDir);
 		// 完成后声音通知
-		CommonUtils.noticeSound();
+		Common.noticeSound();
 		// 完成后短信通知
-		CommonUtils.noticeMail(noticeContent);
+		Common.noticeMail(noticeContent);
 		// 打开完成后的文件夹窗口
-		CommonUtils.openFinishedWindows(dstDir);
+		Common.openFinishedWindows(dstDir);
 		// 在桌面生成一个已完成文件夹的bat文件，可以一运行立刻打开文件夹
-		CommonUtils.createBatDirectToFinishedWindows(dstDir);
+		Common.createBatDirectToFinishedWindows(dstDir);
 		logger.warn(noticeContent+ ":" + srcDir.getCanonicalPath());
 	}
 	
@@ -246,7 +246,7 @@ public class DocFormatConverter {
 		}else if("captureimage".equalsIgnoreCase(method)) {
 			if(args.length>=6) {
 				Thread.sleep(Integer.parseInt(args[1])*1000);
-				CommonUtils.captureImageAndSave(robotMngr, Integer.parseInt(args[2]), Integer.parseInt(args[3]), Integer.parseInt(args[4]), Integer.parseInt(args[5]));
+				Common.captureImageAndSave(robotMngr, Integer.parseInt(args[2]), Integer.parseInt(args[3]), Integer.parseInt(args[4]), Integer.parseInt(args[5]));
 			}
 		}else if("tasklist".equalsIgnoreCase(method)) {
 			String dstDir = Prop.get("tasklist.savedirpath");

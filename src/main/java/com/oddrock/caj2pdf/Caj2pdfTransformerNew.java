@@ -13,7 +13,7 @@ import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
 
 import com.oddrock.caj2pdf.utils.CajViewerUtils;
-import com.oddrock.caj2pdf.utils.CommonUtils;
+import com.oddrock.caj2pdf.utils.Common;
 import com.oddrock.caj2pdf.utils.FoxitUtils;
 import com.oddrock.caj2pdf.utils.Prop;
 import com.oddrock.caj2pdf.utils.TransformRuleUtils;
@@ -59,13 +59,13 @@ public class Caj2pdfTransformerNew {
 	 */
 	@SuppressWarnings("deprecation")
 	public void caj2pdf(String srcCajFilePath) throws IOException, InterruptedException{
-		CommonUtils.moveMouseAvoidHandicap(robotMngr);
+		Common.moveMouseAvoidHandicap(robotMngr);
 		CajViewerUtils.closeCaj();
 		while(CajViewerUtils.isOpen(robotMngr)){
 			logger.warn("等待关闭caj");
-			CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+			Common.wait(Prop.getInt("interval.waitmillis"));
 		}
-		CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+		Common.wait(Prop.getInt("interval.waitmillis"));
 		File srcFile = new File(srcCajFilePath);
 		if(!srcFile.exists() || !srcFile.isFile() || !srcFile.getName().endsWith(".caj")){
 			return;
@@ -74,29 +74,29 @@ public class Caj2pdfTransformerNew {
 		// 检查caj是否完全打开，没有就等待
 		while(!CajViewerUtils.isOpen(robotMngr)){
 			logger.warn("等待打开caj");
-			CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+			Common.wait(Prop.getInt("interval.waitmillis"));
 		}
 		// 打开打印机
 		robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_P);
 		// 检查打印机是否打开，没有就等待
 		while(!CajViewerUtils.isPrintReady(robotMngr)){
 			logger.warn("等待打开打印机");
-			CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+			Common.wait(Prop.getInt("interval.waitmillis"));
 		}
 		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_O);
 		// 检查是否要输入文件名了，没有就等待
 		while(!CajViewerUtils.isInputfilename(robotMngr)){
 			logger.warn("等待输入文件名");
-			CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+			Common.wait(Prop.getInt("interval.waitmillis"));
 		}
 		File dstFile = new File(srcFile.getParent(), srcFile.getName().replaceAll(".caj$", ""));
 		// 将生成的pdf文件名复制到文本框
 		ClipboardUtils.setSysClipboardText(dstFile.getCanonicalPath());
-		CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+		Common.wait(Prop.getInt("interval.waitmillis"));
 		robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_A);
-		CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+		Common.wait(Prop.getInt("interval.waitmillis"));
 		robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_V);
-		CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+		Common.wait(Prop.getInt("interval.waitmillis"));
 		// 点击确定按钮
 		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_S);
 		boolean printnow = false;
@@ -113,16 +113,16 @@ public class Caj2pdfTransformerNew {
 				logger.warn("等待开始打印");
 			}
 			
-			CommonUtils.wait(Prop.getInt("interval.waitminmillis"));
+			Common.wait(Prop.getInt("interval.waitminmillis"));
 		}
-		CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+		Common.wait(Prop.getInt("interval.waitmillis"));
 		CajViewerUtils.closeCaj();
 		while(CajViewerUtils.isOpen(robotMngr)){
 			logger.warn("等待关闭caj");
-			CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+			Common.wait(Prop.getInt("interval.waitmillis"));
 		}
 		FoxitUtils.closeFoxit();
-		CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+		Common.wait(Prop.getInt("interval.waitmillis"));
 		logger.warn("完成打印，文件位置："+dstFile.getCanonicalPath());
 	}
 	
@@ -136,9 +136,9 @@ public class Caj2pdfTransformerNew {
 		}
 		logger.warn("完成"+ srcDir.getCanonicalPath() +"目录下所有caj打印成pdf！");
 		// 完成后声音通知
-		CommonUtils.noticeSound();
+		Common.noticeSound();
 		// 完成后短信通知
-		CommonUtils.noticeMail("所有caj文件转换为PDF已完成！！！");
+		Common.noticeMail("所有caj文件转换为PDF已完成！！！");
 	}
 	
 	/*
@@ -151,9 +151,9 @@ public class Caj2pdfTransformerNew {
 		CajViewerUtils.closeCaj();
 		while(CajViewerUtils.isOpen(robotMngr)){
 			logger.warn("等待关闭caj");
-			CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+			Common.wait(Prop.getInt("interval.waitmillis"));
 		}
-		CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+		Common.wait(Prop.getInt("interval.waitmillis"));
 		File srcFile = new File(srcCajFilePath);
 		if(!srcFile.exists() || !srcFile.isFile() || !srcFile.getName().endsWith(".caj")){
 			return null;
@@ -167,7 +167,7 @@ public class Caj2pdfTransformerNew {
 		// 检查caj是否完全打开，没有就等待
 		while(!CajViewerUtils.isOpen(robotMngr)){
 			logger.warn("等待打开caj");
-			CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+			Common.wait(Prop.getInt("interval.waitmillis"));
 		}
 		// 打开打印机
 		robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_P);
@@ -178,7 +178,7 @@ public class Caj2pdfTransformerNew {
 		// 检查打印机是否打开，没有就等待
 		while(!CajViewerUtils.isPrintReady(robotMngr)){
 			logger.warn("等待打开打印机");
-			CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+			Common.wait(Prop.getInt("interval.waitmillis"));
 		}
 		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_O);
 	}
@@ -199,30 +199,30 @@ public class Caj2pdfTransformerNew {
 			}else{
 				logger.warn("等待开始打印");
 			}
-			CommonUtils.wait(Prop.getInt("interval.waitminmillis"));
+			Common.wait(Prop.getInt("interval.waitminmillis"));
 		}
-		CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+		Common.wait(Prop.getInt("interval.waitmillis"));
 	}
 	
 	private File caj2pdf_abbyy_step5_inputfilename(File srcFile) throws IOException, InterruptedException {
 		// 检查是否要输入文件名了，没有就等待
 		while(!CajViewerUtils.isInputfilename(robotMngr)){
 			logger.warn("等待输入文件名");
-			CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+			Common.wait(Prop.getInt("interval.waitmillis"));
 		}
 		File dstFile = new File(srcFile.getParent(), srcFile.getName().replaceAll(".caj$", ".pdf"));
 		// 将生成的pdf文件名复制到文本框
 		ClipboardUtils.setSysClipboardText(dstFile.getCanonicalPath());
-		CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+		Common.wait(Prop.getInt("interval.waitmillis"));
 		robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_A);
-		CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+		Common.wait(Prop.getInt("interval.waitmillis"));
 		robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_V);
-		CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+		Common.wait(Prop.getInt("interval.waitmillis"));
 		// 点击确定按钮
 		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_S);
 		// 点击确定覆盖按钮
 		robotMngr.pressKey(KeyEvent.VK_ENTER);
-		CommonUtils.wait(Prop.getInt("interval.waitlongmillis"));
+		Common.wait(Prop.getInt("interval.waitlongmillis"));
 		return dstFile;
 	}
 	
@@ -233,9 +233,9 @@ public class Caj2pdfTransformerNew {
 		CajViewerUtils.closeCaj();
 		while(CajViewerUtils.isOpen(robotMngr)){
 			logger.warn("等待关闭caj");
-			CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+			Common.wait(Prop.getInt("interval.waitmillis"));
 		}
-		CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+		Common.wait(Prop.getInt("interval.waitmillis"));
 		logger.warn("完成打印，文件位置："+dstFile.getCanonicalPath());
 	}
 	
@@ -311,11 +311,11 @@ public class Caj2pdfTransformerNew {
 		}
 		logger.warn("完成"+ srcDir.getCanonicalPath() +"目录下所有caj打印成pdf！");
 		// 完成后声音通知
-		CommonUtils.noticeSound();
+		Common.noticeSound();
 		// 完成后短信通知
-		CommonUtils.noticeMail("所有caj文件转换为PDF已完成！！！");
+		Common.noticeMail("所有caj文件转换为PDF已完成！！！");
 		FoxitUtils.closeFoxit();
-		CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+		Common.wait(Prop.getInt("interval.waitmillis"));
 		// 将所有文件转移到目标文件夹
 		mvAllFilesFromSrcToDst();
 		// 打开完成窗口
@@ -350,71 +350,71 @@ public class Caj2pdfTransformerNew {
 		}
 		File dstFile = caj2pdf_abbyy(srcFile.getCanonicalPath());
 		FoxitUtils.closeFoxit();
-		CommonUtils.wait(Prop.getInt("interval.waitminmillis"));
+		Common.wait(Prop.getInt("interval.waitminmillis"));
 		while(FoxitUtils.isOpen(robotMngr)) {
-			CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+			Common.wait(Prop.getInt("interval.waitmillis"));
 			logger.warn("等待pdf关闭");
 		}
 		int pageCount = new PdfManager().pdfPageCount(dstFile.getCanonicalPath());
 		if(pageCount!=1) {
 			int testcount = TransformRuleUtils.computeTestPageCount(pageCount);
 			FoxitUtils.openPdfOld(dstFile.getCanonicalPath());
-			CommonUtils.wait(Prop.getInt("interval.waitminmillis"));
+			Common.wait(Prop.getInt("interval.waitminmillis"));
 			while(!FoxitUtils.isOpen(robotMngr)) {
-				CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+				Common.wait(Prop.getInt("interval.waitmillis"));
 				logger.warn("等待pdf打开");
 			}
 			// 打开页面管理菜单
 			robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_O);
-			CommonUtils.wait(Prop.getInt("interval.waitminmillis"));
+			Common.wait(Prop.getInt("interval.waitminmillis"));
 			// 打开提取页面菜单
 			robotMngr.pressKey(KeyEvent.VK_E);
-			CommonUtils.wait(Prop.getInt("interval.waitminmillis"));
+			Common.wait(Prop.getInt("interval.waitminmillis"));
 			while(!FoxitUtils.isExportPageOpenAtExtractPage(robotMngr)) {
 				logger.warn("等待打开提取页面的导出页面");
-				CommonUtils.wait(Prop.getInt("interval.waitminmillis"));
+				Common.wait(Prop.getInt("interval.waitminmillis"));
 			}
 			// 两次tab移动到输入数字文本框
 			robotMngr.pressKey(KeyEvent.VK_TAB);
-			CommonUtils.wait(Prop.getInt("interval.waitminmillis"));
+			Common.wait(Prop.getInt("interval.waitminmillis"));
 			robotMngr.pressKey(KeyEvent.VK_TAB);
-			CommonUtils.wait(Prop.getInt("interval.waitminmillis"));
+			Common.wait(Prop.getInt("interval.waitminmillis"));
 			// 全选输入数字文本框
 			robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_A);
 			// 将数字写入粘贴板
 			ClipboardUtils.setSysClipboardText(String.valueOf(testcount));
-			CommonUtils.wait(Prop.getInt("interval.waitminmillis"));
+			Common.wait(Prop.getInt("interval.waitminmillis"));
 			// 将数字复制到输入数字文本框
 			robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_V);
-			CommonUtils.wait(Prop.getInt("interval.waitminmillis"));
+			Common.wait(Prop.getInt("interval.waitminmillis"));
 			// 选中导出页面另存为其他文档
 			robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_S);
-			CommonUtils.wait(Prop.getInt("interval.waitminmillis"));
+			Common.wait(Prop.getInt("interval.waitminmillis"));
 			// 点击确认按钮
 			robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_K);
-			CommonUtils.wait(Prop.getInt("interval.waitminmillis"));
+			Common.wait(Prop.getInt("interval.waitminmillis"));
 			while(!FoxitUtils.isInputfilenameAtExtractPage(robotMngr)) {
 				logger.warn("等待打开输入文件名页面");
-				CommonUtils.wait(Prop.getInt("interval.waitminmillis"));
+				Common.wait(Prop.getInt("interval.waitminmillis"));
 			}
 			dstFile = new File(dstFile.getParentFile(), "提取页面 "+dstFile.getName());
 			ClipboardUtils.setSysClipboardText(dstFile.getCanonicalPath());
-			CommonUtils.wait(Prop.getInt("interval.waitminmillis"));
+			Common.wait(Prop.getInt("interval.waitminmillis"));
 			robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_V);
-			CommonUtils.wait(Prop.getInt("interval.waitminmillis"));
+			Common.wait(Prop.getInt("interval.waitminmillis"));
 			// 点击确定按钮
 			robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_S);
-			CommonUtils.wait(Prop.getInt("interval.waitminmillis"));
+			Common.wait(Prop.getInt("interval.waitminmillis"));
 			// 确认覆盖（如果要覆盖的话）
 			robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_Y);
 			while(CajViewerUtils.isInputfilename(robotMngr)) {
 				logger.warn("等待关闭输入文件名页面");
-				CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+				Common.wait(Prop.getInt("interval.waitmillis"));
 			}
 			FoxitUtils.closeFoxit();
-			CommonUtils.wait(Prop.getInt("interval.waitminmillis"));
+			Common.wait(Prop.getInt("interval.waitminmillis"));
 			while(FoxitUtils.isOpen(robotMngr)) {
-				CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+				Common.wait(Prop.getInt("interval.waitmillis"));
 				logger.warn("等待pdf关闭");
 			}
 		}
@@ -425,11 +425,11 @@ public class Caj2pdfTransformerNew {
 			dstDir = dstFile.getParentFile();
 		}
 		// 完成后声音通知
-		CommonUtils.noticeSound();
+		Common.noticeSound();
 		// 完成后短信通知
-		CommonUtils.noticeMail("试转已经完成啦！！！");
+		Common.noticeMail("试转已经完成啦！！！");
 		openFinishedWindows();
-		CommonUtils.wait(Prop.getInt("interval.waitmillis"));
+		Common.wait(Prop.getInt("interval.waitmillis"));
 	}
 	
 	
@@ -468,7 +468,7 @@ public class Caj2pdfTransformerNew {
 		}else if("captureimage".equalsIgnoreCase(method)) {
 			if(args.length>=5) {
 				Thread.sleep(Prop.getInt("interval.waitlongmillis"));
-				CommonUtils.captureImageAndSave(cts.robotMngr, Integer.parseInt(args[1]), Integer.parseInt(args[2]), Integer.parseInt(args[3]), Integer.parseInt(args[4]));
+				Common.captureImageAndSave(cts.robotMngr, Integer.parseInt(args[1]), Integer.parseInt(args[2]), Integer.parseInt(args[3]), Integer.parseInt(args[4]));
 			}
 		}
 	}

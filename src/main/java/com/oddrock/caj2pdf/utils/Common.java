@@ -20,7 +20,7 @@ import com.oddrock.common.pic.BufferedImageUtils;
 import com.oddrock.common.pic.PictureComparator;
 import com.oddrock.common.windows.CmdExecutor;
 
-public class CommonUtils {
+public class Common {
 	// 邮件通知
 	public static void noticeMail(String content) throws UnsupportedEncodingException, MessagingException{
 		if(!Prop.getBool("notice.mail.flag") || isInNoticeMailExcludetime()){
@@ -71,6 +71,21 @@ public class CommonUtils {
 	// 等待时间
 	public static void wait(int millis) throws InterruptedException{
 		Thread.sleep(millis);
+	}
+	
+	// 短时间等待
+	public static void waitShort() throws InterruptedException {
+		Common.wait(Prop.getInt("interval.waitminmillis"));
+	}
+	
+	// 中等时间等待
+	public static void waitM() throws InterruptedException {
+		Common.wait(Prop.getInt("interval.waitmillis"));
+	}
+	
+	// 长等时间等待
+	public static void waitLong() throws InterruptedException {
+		Common.wait(Prop.getInt("interval.waitlongmillis"));
 	}
 	
 	// 比较已保存的图片和截取的图片
@@ -182,6 +197,23 @@ public class CommonUtils {
 			return true;
 		}
 		return false;
+	}
+	
+	// 判断文件是否存在，并且可以判断是否符合某种后缀（后缀名不区分大小写）
+	public static boolean isFileExists(File file, String suffix) throws IOException {
+		if(!file.exists() || !file.isFile()) {
+			return false;
+		}
+		if(suffix!=null && suffix.trim().length()>0) {
+			suffix = suffix.trim();
+			if(file.getCanonicalPath().toLowerCase().equalsIgnoreCase(suffix)) {
+				return true;
+			}else {
+				return false;
+			}
+		}else {
+			return true;
+		}
 	}
 	
 	public static void main(String[] args) throws UnsupportedEncodingException, MessagingException {
