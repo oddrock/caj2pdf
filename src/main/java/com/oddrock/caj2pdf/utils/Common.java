@@ -206,7 +206,7 @@ public class Common {
 		}
 		if(suffix!=null && suffix.trim().length()>0) {
 			suffix = suffix.trim();
-			if(file.getCanonicalPath().toLowerCase().equalsIgnoreCase(suffix)) {
+			if(file.getCanonicalPath().toLowerCase().endsWith(suffix)) {
 				return true;
 			}else {
 				return false;

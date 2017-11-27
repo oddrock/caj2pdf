@@ -23,8 +23,8 @@ public class Pdf2MobiUtils {
 		Common.moveMouseAvoidHandicap(robotMngr);
 		TransformFileSet result = new TransformFileSet();
 		File srcFile = new File(pdfFilePath);
-		if(Common.isFileExists(srcFile, "\\.pdf")) {
-			logger.warn("文件不存在："+pdfFilePath);
+		if(!Common.isFileExists(srcFile, "pdf")) {
+			logger.warn("文件不存在或后缀名不对："+pdfFilePath);
 			return result;
 		}
 		result.setSrcFile(srcFile);
@@ -72,6 +72,8 @@ public class Pdf2MobiUtils {
 		// 等待直到转换任务完成
 		CalibreUtils.waitTransformTaskEnd(robotMngr);
 		Common.waitM();
+		CalibreUtils.closeAndWaitTransformTaskPage(robotMngr);
+		Common.waitM();
 		// 鼠标移动到第一本书上
 		robotMngr.moveMouseTo(Prop.getInt("calibre.coordinate.firstbook.x"), 
 				Prop.getInt("calibre.coordinate.firstbook.y"));
@@ -109,21 +111,24 @@ public class Pdf2MobiUtils {
 		Common.waitM();
 		// 等待直到“选择目标目录”页面被关闭
 		CalibreUtils.waitSelectTargetDirClose(robotMngr);
+		Common.waitLong();
 		File dstFile = null;
 		// 遍历目标文件夹，删除mobi以外文件，并将mobi文件改名(因为默认的是拼音名字)
 		for(File file : dstDir.listFiles()) {
+			System.out.println(file.getCanonicalPath());
 			if(!file.getCanonicalPath().toLowerCase().endsWith(".mobi")) {
 				file.delete();
 			}else {
-				dstFile = new File(file.getParentFile().getCanonicalPath() + 
-						srcFile.getCanonicalPath().replaceAll(".pdf$", "")+".mobi");
+				dstFile = new File(srcFile.getCanonicalPath().replaceAll(".pdf$", "")+".mobi");
+				// 删除同名文件
+				dstFile.delete();
+				// 将得到的mobi改名，并移动到源文件所在目录
 				file.renameTo(dstFile);
-			}
-			
+			}	
 		}
 		result.setDstFile(dstFile);
 		// 关闭calibre
-		//close();
+		CalibreUtils.close();
 		return result;
 	}
 

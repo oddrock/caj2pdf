@@ -9,6 +9,7 @@ import javax.mail.MessagingException;
 import org.apache.log4j.Logger;
 import com.oddrock.caj2pdf.bean.TransformFileSet;
 import com.oddrock.caj2pdf.biz.Caj2PdfUtils;
+import com.oddrock.caj2pdf.biz.Pdf2MobiUtils;
 import com.oddrock.caj2pdf.biz.Pdf2WordUtils;
 import com.oddrock.caj2pdf.biz.PdfUtils;
 import com.oddrock.caj2pdf.utils.Common;
@@ -183,6 +184,7 @@ public class DocFormatConverter {
 		pdf2word(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
+	// pdf试转word
 	public void pdf2word_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
 		if(!srcDir.exists() || !srcDir.isDirectory()){
 			return;
@@ -223,6 +225,71 @@ public class DocFormatConverter {
 		pdf2word_test(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
+	
+	
+	// 批量pdf转mobi，用calibre
+	public void pdf2mobiByCalibre(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		if(!srcDir.exists() || !srcDir.isDirectory()){
+			return;
+		}
+		TransformFileSet fileSet;
+		Set<File> needMoveFilesSet = new HashSet<File>();
+		for(File file : srcDir.listFiles()){
+			if(file==null) continue;
+			fileSet = Pdf2MobiUtils.pdf2mobiByCalibre(robotMngr, file.getCanonicalPath());
+			needMoveFilesSet.add(fileSet.getSrcFile());
+			needMoveFilesSet.add(fileSet.getDstFile());
+		}
+		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "pdf转mobi已完成");
+	}
+	
+	// 批量pdf转mobi，用calibre
+	public void pdf2mobiByCalibre() throws IOException, InterruptedException, MessagingException {
+		pdf2mobiByCalibre(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
+	}
+	
+	// 试转pdf转mobi
+	public void pdf2mobiByCalibre_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		if(!srcDir.exists() || !srcDir.isDirectory()){
+			return;
+		}
+		// 存放每次单次转换后的源文件和目标文件
+		TransformFileSet fileSet = null;
+		// 存放需要移动的文件
+		Set<File> needMoveFilesSet = new HashSet<File>();
+		File pdfFile = null;
+		PdfManager pm = new PdfManager();
+		// 找到目录下页数最多那个pdf
+		for(File file : srcDir.listFiles()){
+			if(file!=null && file.exists() && file.isFile() && file.getCanonicalPath().endsWith(".pdf")) {
+				if(pdfFile==null) {
+					pdfFile = file;
+				}else {
+					if(pm.pdfPageCount(file.getCanonicalPath())>pm.pdfPageCount(pdfFile.getCanonicalPath())) {
+						pdfFile = file;
+					}
+				}
+			}
+		}
+		if(pdfFile==null) return;
+		// 获得转换得到的pdf的实际页数
+		int realPageCount = pm.pdfPageCount(pdfFile.getCanonicalPath());
+		// 计算出应该提取的页数
+		int tiquPageCount = TransformRuleUtils.computeTestPageCount(realPageCount);
+		// 从已转换的pdf中提取相应页数，另存为新的pdf，新的pdf名为在已有PDF名称前加上“提取页面 ”
+		fileSet = PdfUtils.extractPage(robotMngr, pdfFile.getCanonicalPath(), tiquPageCount);
+		// 将提取后的页面转为word
+		fileSet = Pdf2MobiUtils.pdf2mobiByCalibre(robotMngr, fileSet.getDstFile().getCanonicalPath());
+		needMoveFilesSet.add(fileSet.getDstFile());
+		needMoveFilesSet.add(fileSet.getSrcFile());
+		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "pdf试转mobi已完成");
+	}
+	
+	// 试转pdf转mobi
+	public void pdf2mobiByCalibre_test() throws IOException, InterruptedException, MessagingException {
+		pdf2mobiByCalibre_test(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
+	}
+	
 	public void execTransform(String[] args) throws IOException, InterruptedException, MessagingException {
 		String method = Prop.get("caj2pdf.start");
 		if(method==null) {
@@ -243,6 +310,10 @@ public class DocFormatConverter {
 			pdf2word();
 		}else if("pdf2word_test".equalsIgnoreCase(method)) {
 			pdf2word_test();
+		}else if("pdf2mobi_bycalibre".equalsIgnoreCase(method)) {
+			pdf2mobiByCalibre();
+		}else if("pdf2mobi_bycalibre_est".equalsIgnoreCase(method)) {
+			pdf2mobiByCalibre_test();
 		}else if("captureimage".equalsIgnoreCase(method)) {
 			if(args.length>=6) {
 				Thread.sleep(Integer.parseInt(args[1])*1000);
@@ -263,8 +334,7 @@ public class DocFormatConverter {
 	
 	public static void main(String[] args) throws AWTException, IOException, InterruptedException, MessagingException {
 		DocFormatConverter dfc = new DocFormatConverter();
-		dfc.caj2pdf();
-		//dfc.execTransform(args);
-		//CmdExecutor.getSingleInstance().exportTasklistToFile(new File(Prop.get("tasklist.savedirpath"), Prop.get("tasklist.filename")));
+		//dfc.pdf2mobiByCalibre_test();
+		dfc.execTransform(args);
 	}
 }
