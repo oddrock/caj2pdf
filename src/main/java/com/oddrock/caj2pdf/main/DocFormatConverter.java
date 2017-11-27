@@ -312,7 +312,7 @@ public class DocFormatConverter {
 			pdf2word_test();
 		}else if("pdf2mobi_bycalibre".equalsIgnoreCase(method)) {
 			pdf2mobiByCalibre();
-		}else if("pdf2mobi_bycalibre_est".equalsIgnoreCase(method)) {
+		}else if("pdf2mobi_bycalibre_test".equalsIgnoreCase(method)) {
 			pdf2mobiByCalibre_test();
 		}else if("captureimage".equalsIgnoreCase(method)) {
 			if(args.length>=6) {
