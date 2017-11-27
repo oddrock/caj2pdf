@@ -19,4 +19,23 @@ public class TransformRuleUtils {
 			return 1;
 		}
 	}
+	
+	/**
+	 * 计算试转应该提取多少Byte文字
+	 * @param txtFileSize 	单位Byte
+	 * @return  			单位Byte
+	 */
+	public static long computeTestTxtSize(long txtFileSize) {
+		long testfilesize = Prop.getLong("test.filesize");
+		long testfilesizemin = Prop.getLong("test.minfilesize");
+		if(txtFileSize>=testfilesize*1024*2) {
+			return testfilesize;
+		}else if(txtFileSize>=testfilesizemin*1024*2) {
+			return testfilesizemin;
+		}else if(txtFileSize>=3*1024) {
+			return 2*1024;
+		}else {
+			return 1*1024;
+		}
+	}
 }

@@ -12,9 +12,11 @@ import com.oddrock.caj2pdf.biz.Caj2PdfUtils;
 import com.oddrock.caj2pdf.biz.Pdf2MobiUtils;
 import com.oddrock.caj2pdf.biz.Pdf2WordUtils;
 import com.oddrock.caj2pdf.biz.PdfUtils;
+import com.oddrock.caj2pdf.biz.Txt2MobiUtils;
 import com.oddrock.caj2pdf.utils.Common;
 import com.oddrock.caj2pdf.utils.Prop;
 import com.oddrock.caj2pdf.utils.TransformRuleUtils;
+import com.oddrock.caj2pdf.utils.TxtUtils;
 import com.oddrock.common.awt.RobotManager;
 import com.oddrock.common.pdf.PdfManager;
 import com.oddrock.common.windows.CmdExecutor;
@@ -290,6 +292,48 @@ public class DocFormatConverter {
 		pdf2mobiByCalibre_test(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
+	// 批量txt转mobi，用calibre
+	public void txt2mobi(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		if(!srcDir.exists() || !srcDir.isDirectory()){
+			return;
+		}
+		// 将srcDir目录下的txt文件全部切割为不超过500KB大小，并且删除超过500KB大小的源文件。
+		TxtUtils.splitTxtFiles(srcDir);
+		TransformFileSet fileSet;
+		Set<File> needMoveFilesSet = new HashSet<File>();
+		for(File file : srcDir.listFiles()){
+			if(file==null) continue;
+			fileSet = Txt2MobiUtils.txt2mobi(robotMngr, file.getCanonicalPath());
+			needMoveFilesSet.add(fileSet.getSrcFile());
+			needMoveFilesSet.add(fileSet.getDstFile());
+		}
+		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "txt转mobi已完成");
+	}
+	
+	public void txt2mobi() throws IOException, InterruptedException, MessagingException {
+		txt2mobi(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
+	}
+	
+	// 试转txt转mobi
+	public void txt2mobi_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		File srcFile = TxtUtils.extractFrontPart();
+		if(srcFile==null) {
+			logger.warn("没有txt文件可以试转");
+			return;
+		}
+		TransformFileSet fileSet = Txt2MobiUtils.txt2mobi(robotMngr, srcFile.getCanonicalPath());
+		Set<File> needMoveFilesSet = new HashSet<File>();
+		needMoveFilesSet.add(fileSet.getSrcFile());
+		needMoveFilesSet.add(fileSet.getDstFile());
+		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "txt试转mobi已完成");
+	}
+	
+	public void txt2mobi_test() throws IOException, InterruptedException, MessagingException {
+		txt2mobi_test(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
+	}
+	
+	
+	
 	public void execTransform(String[] args) throws IOException, InterruptedException, MessagingException {
 		String method = Prop.get("caj2pdf.start");
 		if(method==null) {
@@ -314,6 +358,10 @@ public class DocFormatConverter {
 			pdf2mobiByCalibre();
 		}else if("pdf2mobi_bycalibre_test".equalsIgnoreCase(method)) {
 			pdf2mobiByCalibre_test();
+		}else if("txt2mobi".equalsIgnoreCase(method)) {
+			txt2mobi();
+		}else if("txt2mobi_test".equalsIgnoreCase(method)) {
+			txt2mobi_test();
 		}else if("captureimage".equalsIgnoreCase(method)) {
 			if(args.length>=6) {
 				Thread.sleep(Integer.parseInt(args[1])*1000);
@@ -334,7 +382,7 @@ public class DocFormatConverter {
 	
 	public static void main(String[] args) throws AWTException, IOException, InterruptedException, MessagingException {
 		DocFormatConverter dfc = new DocFormatConverter();
-		//dfc.pdf2mobiByCalibre_test();
+		//dfc.txt2mobi_test();
 		dfc.execTransform(args);
 	}
 }

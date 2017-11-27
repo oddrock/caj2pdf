@@ -23,6 +23,10 @@ public class Prop {
 		return PR.getIntValue(key);
 	}
 	
+	public static long getLong(String key){
+		return PR.getLongValue(key);
+	}
+	
 	public static boolean getBool(String key){
 		return PR.getBooleanValue(key);
 	}

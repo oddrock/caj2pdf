@@ -219,6 +219,6 @@ public class CalibreUtils{
 		}
 		// 等待书籍添加完毕
 		waitAddingBookEnd(robotMngr);
-		Common.waitM();
+		Common.waitLong();
 	}
 }
