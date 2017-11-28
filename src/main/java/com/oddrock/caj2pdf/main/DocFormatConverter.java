@@ -9,6 +9,7 @@ import javax.mail.MessagingException;
 import org.apache.log4j.Logger;
 import com.oddrock.caj2pdf.bean.TransformFileSet;
 import com.oddrock.caj2pdf.biz.Caj2PdfUtils;
+import com.oddrock.caj2pdf.biz.Img2PdfUtils;
 import com.oddrock.caj2pdf.biz.Pdf2MobiUtils;
 import com.oddrock.caj2pdf.biz.Pdf2WordUtils;
 import com.oddrock.caj2pdf.biz.PdfUtils;
@@ -332,6 +333,36 @@ public class DocFormatConverter {
 		txt2mobi_test(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
+	// 批量img转word
+	public void img2word(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		if(!srcDir.exists() || !srcDir.isDirectory()){
+			return;
+		}
+		TransformFileSet fileSet;
+		// 存放待转换的pdf文件
+		Set<File> imgFileSet = new HashSet<File>();
+		Set<File> needMoveFilesSet = new HashSet<File>();
+		// 先全部caj转pdf
+		for(File file : srcDir.listFiles()){
+			if(file==null) continue;
+			fileSet = Img2PdfUtils.img2pdf(file.getCanonicalPath());
+			needMoveFilesSet.add(fileSet.getDstFile());
+			needMoveFilesSet.add(fileSet.getSrcFile());
+			imgFileSet.add(fileSet.getDstFile());
+		}
+		// 再全部pdf转word
+		for(File file : imgFileSet){
+			if(file==null) continue;
+			fileSet = Pdf2WordUtils.pdf2word(robotMngr, file.getCanonicalPath());
+			needMoveFilesSet.add(fileSet.getDstFile());
+			needMoveFilesSet.add(fileSet.getSrcFile());
+		}
+		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "图片转word已完成");
+	}
+	
+	public void img2word() throws IOException, InterruptedException, MessagingException {
+		img2word(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
+	}
 	
 	
 	public void execTransform(String[] args) throws IOException, InterruptedException, MessagingException {
@@ -362,6 +393,8 @@ public class DocFormatConverter {
 			txt2mobi();
 		}else if("txt2mobi_test".equalsIgnoreCase(method)) {
 			txt2mobi_test();
+		}else if("img2word".equalsIgnoreCase(method)) {
+			img2word();
 		}else if("captureimage".equalsIgnoreCase(method)) {
 			if(args.length>=6) {
 				Thread.sleep(Integer.parseInt(args[1])*1000);
@@ -382,7 +415,7 @@ public class DocFormatConverter {
 	
 	public static void main(String[] args) throws AWTException, IOException, InterruptedException, MessagingException {
 		DocFormatConverter dfc = new DocFormatConverter();
-		//dfc.txt2mobi_test();
-		dfc.execTransform(args);
+		dfc.img2word();
+		//dfc.execTransform(args);
 	}
 }

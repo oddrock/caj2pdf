@@ -216,6 +216,19 @@ public class Common {
 		}
 	}
 	
+	// 判断文件是否是图片文件
+	public static boolean isImgFile(File file) throws IOException {
+		if(!file.exists() || !file.isFile()) {
+			return false;
+		}
+		for(String suffix : Prop.get("img.filenamesuffix").split(",")) {
+			if(file.getCanonicalPath().toLowerCase().endsWith(suffix.toLowerCase())) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	public static void main(String[] args) throws UnsupportedEncodingException, MessagingException {
 		noticeMail("test");
 	}
