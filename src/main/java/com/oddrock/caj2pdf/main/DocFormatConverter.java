@@ -9,7 +9,9 @@ import javax.mail.MessagingException;
 import org.apache.log4j.Logger;
 import com.oddrock.caj2pdf.bean.TransformFileSet;
 import com.oddrock.caj2pdf.biz.Caj2PdfUtils;
+import com.oddrock.caj2pdf.biz.Epub2MobiUtils;
 import com.oddrock.caj2pdf.biz.Img2PdfUtils;
+import com.oddrock.caj2pdf.biz.Pdf2EpubUtils;
 import com.oddrock.caj2pdf.biz.Pdf2MobiUtils;
 import com.oddrock.caj2pdf.biz.Pdf2WordUtils;
 import com.oddrock.caj2pdf.biz.PdfUtils;
@@ -364,6 +366,172 @@ public class DocFormatConverter {
 		img2word(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
+	// 试转img转word
+	public void img2word_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		if(!srcDir.exists() || !srcDir.isDirectory()){
+			return;
+		}
+		TransformFileSet fileSet;
+		// 存放待转换的pdf文件
+		Set<File> imgFileSet = new HashSet<File>();
+		Set<File> needMoveFilesSet = new HashSet<File>();
+		// 先全部caj转pdf
+		for(File file : srcDir.listFiles()){
+			if(file==null) continue;
+			if(Common.isImgFile(file)) {
+				fileSet = Img2PdfUtils.img2pdf(file.getCanonicalPath());
+				needMoveFilesSet.add(fileSet.getDstFile());
+				imgFileSet.add(fileSet.getDstFile());
+				break;
+			}
+		}
+		// 再全部pdf转word
+		for(File file : imgFileSet){
+			if(file==null) continue;
+			fileSet = Pdf2WordUtils.pdf2word(robotMngr, file.getCanonicalPath());
+			needMoveFilesSet.add(fileSet.getDstFile());
+			needMoveFilesSet.add(fileSet.getSrcFile());
+		}
+		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "图片试转word已完成");
+	}
+	
+	public void img2word_test() throws IOException, InterruptedException, MessagingException {
+		img2word_test(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
+	}
+	
+	// pdf批量转epub
+	public void pdf2epub(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		if(!srcDir.exists() || !srcDir.isDirectory()){
+			return;
+		}
+		TransformFileSet fileSet;
+		Set<File> needMoveFilesSet = new HashSet<File>();
+		for(File file : srcDir.listFiles()){
+			if(file==null) continue;
+			fileSet = Pdf2EpubUtils.pdf2epub(robotMngr, file.getCanonicalPath());
+			needMoveFilesSet.add(fileSet.getSrcFile());
+			needMoveFilesSet.add(fileSet.getDstFile());
+		}
+		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "pdf转epub已完成");
+	}
+	
+	public void pdf2epub() throws IOException, InterruptedException, MessagingException {
+		pdf2epub(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
+	}
+	
+	// 试转pdf转epub
+	public void pdf2epub_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		if(!srcDir.exists() || !srcDir.isDirectory()){
+			return;
+		}
+		// 存放每次单次转换后的源文件和目标文件
+		TransformFileSet fileSet = null;
+		// 存放需要移动的文件
+		Set<File> needMoveFilesSet = new HashSet<File>();
+		File pdfFile = null;
+		PdfManager pm = new PdfManager();
+		// 找到目录下页数最多那个pdf
+		for(File file : srcDir.listFiles()){
+			if(file!=null && file.exists() && file.isFile() && file.getCanonicalPath().endsWith(".pdf")) {
+				if(pdfFile==null) {
+					pdfFile = file;
+				}else {
+					if(pm.pdfPageCount(file.getCanonicalPath())>pm.pdfPageCount(pdfFile.getCanonicalPath())) {
+						pdfFile = file;
+					}
+				}
+			}
+		}
+		if(pdfFile==null) return;
+		// 获得转换得到的pdf的实际页数
+		int realPageCount = pm.pdfPageCount(pdfFile.getCanonicalPath());
+		// 计算出应该提取的页数
+		int tiquPageCount = TransformRuleUtils.computeTestPageCount(realPageCount);
+		// 从已转换的pdf中提取相应页数，另存为新的pdf，新的pdf名为在已有PDF名称前加上“提取页面 ”
+		fileSet = PdfUtils.extractPage(robotMngr, pdfFile.getCanonicalPath(), tiquPageCount);
+		// 将提取后的页面转为epub
+		fileSet = Pdf2EpubUtils.pdf2epub(robotMngr, fileSet.getDstFile().getCanonicalPath());
+		needMoveFilesSet.add(fileSet.getDstFile());
+		needMoveFilesSet.add(fileSet.getSrcFile());
+		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "pdf试转epub已完成");
+	}
+	
+	public void pdf2epub_test() throws IOException, InterruptedException, MessagingException {
+		pdf2epub_test(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
+	}
+	
+	// 用abbyy进行pdf转mobi
+	public void pdf2mobiByAbbyy(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		if(!srcDir.exists() || !srcDir.isDirectory()){
+			return;
+		}
+		TransformFileSet fileSet;
+		// 存放待转换的pdf文件
+		Set<File> imgFileSet = new HashSet<File>();
+		Set<File> needMoveFilesSet = new HashSet<File>();
+		// 先全部pdf转epub
+		for(File file : srcDir.listFiles()){
+			if(file==null) continue;
+			fileSet = Pdf2EpubUtils.pdf2epub(robotMngr, file.getCanonicalPath());
+			needMoveFilesSet.add(fileSet.getDstFile());
+			needMoveFilesSet.add(fileSet.getSrcFile());
+			imgFileSet.add(fileSet.getDstFile());
+		}
+		// 再全部epub转mobi
+		for(File file : imgFileSet){
+			if(file==null) continue;
+			fileSet = Epub2MobiUtils.epub2mobiByCalibre(robotMngr, file.getCanonicalPath());
+			needMoveFilesSet.add(fileSet.getDstFile());
+			needMoveFilesSet.add(fileSet.getSrcFile());
+		}
+		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "pdf转mobi已完成");
+	}
+	
+	public void pdf2mobiByAbbyy() throws IOException, InterruptedException, MessagingException {
+		pdf2mobiByAbbyy(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
+	}
+	
+	public void pdf2mobiByAbbyy_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		if(!srcDir.exists() || !srcDir.isDirectory()){
+			return;
+		}
+		// 存放每次单次转换后的源文件和目标文件
+		TransformFileSet fileSet = null;
+		// 存放需要移动的文件
+		Set<File> needMoveFilesSet = new HashSet<File>();
+		File pdfFile = null;
+		PdfManager pm = new PdfManager();
+		// 找到目录下页数最多那个pdf
+		for(File file : srcDir.listFiles()){
+			if(file!=null && file.exists() && file.isFile() && file.getCanonicalPath().endsWith(".pdf")) {
+				if(pdfFile==null) {
+					pdfFile = file;
+				}else {
+					if(pm.pdfPageCount(file.getCanonicalPath())>pm.pdfPageCount(pdfFile.getCanonicalPath())) {
+						pdfFile = file;
+					}
+				}
+			}
+		}
+		if(pdfFile==null) return;
+		// 获得转换得到的pdf的实际页数
+		int realPageCount = pm.pdfPageCount(pdfFile.getCanonicalPath());
+		// 计算出应该提取的页数
+		int tiquPageCount = TransformRuleUtils.computeTestPageCount(realPageCount);
+		// 从已转换的pdf中提取相应页数，另存为新的pdf，新的pdf名为在已有PDF名称前加上“提取页面 ”
+		fileSet = PdfUtils.extractPage(robotMngr, pdfFile.getCanonicalPath(), tiquPageCount);
+		// 将提取后的页面转为epub
+		fileSet = Pdf2EpubUtils.pdf2epub(robotMngr, fileSet.getDstFile().getCanonicalPath());
+		needMoveFilesSet.add(fileSet.getDstFile());
+		fileSet = Epub2MobiUtils.epub2mobiByCalibre(robotMngr, fileSet.getDstFile().getCanonicalPath());
+		needMoveFilesSet.add(fileSet.getDstFile());
+		needMoveFilesSet.add(fileSet.getSrcFile());
+		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "pdf试转mobi已完成");	
+	}
+	
+	public void pdf2mobiByAbbyy_test() throws IOException, InterruptedException, MessagingException {
+		pdf2mobiByAbbyy_test(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
+	}
 	
 	public void execTransform(String[] args) throws IOException, InterruptedException, MessagingException {
 		String method = Prop.get("caj2pdf.start");
@@ -395,6 +563,16 @@ public class DocFormatConverter {
 			txt2mobi_test();
 		}else if("img2word".equalsIgnoreCase(method)) {
 			img2word();
+		}else if("img2word_test".equalsIgnoreCase(method)) {
+			img2word_test();
+		}else if("pdf2epub".equalsIgnoreCase(method)) {
+			pdf2epub();
+		}else if("pdf2epub_test".equalsIgnoreCase(method)) {
+			pdf2epub_test();
+		}else if("pdf2mobi_byabbyy".equalsIgnoreCase(method)) {
+			pdf2mobiByAbbyy();
+		}else if("pdf2mobi_byabbyy_test".equalsIgnoreCase(method)) {
+			pdf2mobiByAbbyy_test();
 		}else if("captureimage".equalsIgnoreCase(method)) {
 			if(args.length>=6) {
 				Thread.sleep(Integer.parseInt(args[1])*1000);
@@ -415,7 +593,12 @@ public class DocFormatConverter {
 	
 	public static void main(String[] args) throws AWTException, IOException, InterruptedException, MessagingException {
 		DocFormatConverter dfc = new DocFormatConverter();
-		dfc.img2word();
-		//dfc.execTransform(args);
+		if(Prop.getBool("debug")) {		// 调试模式
+			//dfc.img2word();
+			//AbbyyUtils.openPdf(new RobotManager(), "C:\\Users\\qzfeng\\Desktop\\cajwait\\装配式建筑施工安全评价体系研究_杨爽.pdf");
+			dfc.pdf2mobiByAbbyy_test();
+		}else {
+			dfc.execTransform(args);
+		}
 	}
 }

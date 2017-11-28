@@ -44,6 +44,26 @@ public class AbbyyUtils {
 		logger.warn("已完成pdf2word转换");
 	}
 	
+	// 是否pdf转epub
+	public static boolean isPdf2epubTransforming(RobotManager robotMngr) throws IOException {
+		return Common.comparePic(robotMngr, "abbyy.mark.pdf2epubtransforming");
+	}
+	
+	// 等待pdf2epub完成转换
+	public static void waitPdf2epubTransformingFinised(RobotManager robotMngr) throws IOException, InterruptedException {
+		// 等待开始转换
+		while(!isPdf2epubTransforming(robotMngr)) {
+			logger.warn("等待pdf2epub开始转换......");
+			Common.wait(Prop.getInt("interval.waitmillis"));
+		}
+		// 等待完成转换
+		while(isPdf2epubTransforming(robotMngr)) {
+			logger.warn("pdf2epub开始转换中......");
+			Common.wait(Prop.getInt("interval.waitmillis"));
+		}
+		logger.warn("已完成pdf2epub转换");
+	}
+	
 	// 阻塞等待出现文件名输入款
 	public static void waitToInputfilename(RobotManager robotMngr) throws IOException, InterruptedException {
 		while(!isInputfilename(robotMngr)) {

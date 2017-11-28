@@ -41,6 +41,14 @@ public class CalibreUtils{
 		return Common.comparePic(robotMngr, softwareName+".mark.open");
 	}
 	
+	public static void waitToOpen(RobotManager robotMngr) throws IOException, InterruptedException{
+		while(!isOpen(robotMngr)) {
+			logger.warn("等待calibre打开");
+			Common.wait(Prop.getInt("interval.waitmillis"));
+		}
+		logger.warn("确认calibre已打开");
+	}
+	
 	// 用软件打开一个文件，并等待直到打开成功
 	public static void open(RobotManager robotMngr,File file) throws IOException, InterruptedException {
 		if(file!=null && file.exists()) {
