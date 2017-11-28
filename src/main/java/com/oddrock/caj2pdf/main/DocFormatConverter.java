@@ -302,7 +302,7 @@ public class DocFormatConverter {
 		TransformFileSet fileSet;
 		Set<File> needMoveFilesSet = new HashSet<File>();
 		for(File file : srcDir.listFiles()){
-			if(file==null) continue;
+			if(file==null || !Common.isFileExists(file, "txt")) continue;
 			fileSet = Txt2MobiUtils.txt2mobi(robotMngr, file.getCanonicalPath());
 			needMoveFilesSet.add(fileSet.getSrcFile());
 			needMoveFilesSet.add(fileSet.getDstFile());

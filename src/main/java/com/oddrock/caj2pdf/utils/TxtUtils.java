@@ -36,11 +36,6 @@ public class TxtUtils {
 		}
 		
 		if(srcFile.length()<=maxSize*1024) {
-			/*// 即使文件大小并不需要切割，也将其改名加个01，便于后续操作
-			File tmpFile = null;
-			tmpFile = new File(srcFile.getParentFile(), srcFile.getName().replaceAll("\\.txt", "")+"01.txt");
-			tmpFile.delete();
-			srcFile.renameTo(tmpFile);*/
 			return result;
 		}
 		
@@ -53,7 +48,7 @@ public class TxtUtils {
 			writeEncoding = Prop.get("txtfile.write.encoding");
 		}
 		try {
-			reader = new BufferedReader(new InputStreamReader(new FileInputStream(srcFile), encoding));
+			reader = new BufferedReader(new InputStreamReader(new FileInputStream(srcFile),encoding));
 			String tempString = null;
 			int i = 1;
 			File splittedFile = new File(srcFile.getParentFile(), srcFile.getName().replaceAll("\\.txt", "")+StringUtils.leftPad(String.valueOf(i), 2, "0")+".txt");
@@ -61,7 +56,6 @@ public class TxtUtils {
 			while ((tempString = reader.readLine()) != null) {
 				sb.append(tempString + "\n");
 				if(sb.length() >= maxSize*1024) {	
-					//System.out.println(sb.toString());
 					FileUtils.writeToFile(splittedFile.getCanonicalPath(), sb.toString(), false, writeEncoding);
 					result.add(splittedFile);
 					i++;
@@ -73,6 +67,7 @@ public class TxtUtils {
 				FileUtils.writeToFile(splittedFile.getCanonicalPath(), sb.toString(), false, writeEncoding);
 				result.add(splittedFile);
 			}
+			reader.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
@@ -89,8 +84,9 @@ public class TxtUtils {
 	 * 将srcDir目录下的txt文件全部切割为不超过500KB大小，并且删除超过500KB大小的源文件。
 	 * @param srcDir
 	 * @throws IOException 
+	 * @throws InterruptedException 
 	 */
-	public static void splitTxtFiles(File srcDir) throws IOException {
+	public static void splitTxtFiles(File srcDir) throws IOException, InterruptedException {
 		splitTxtFiles(srcDir, true);
 	}
 	
@@ -99,13 +95,16 @@ public class TxtUtils {
 	 * @param srcDir
 	 * @param del			是否删除源文件
 	 * @throws IOException
+	 * @throws InterruptedException 
 	 */
-	public static void splitTxtFiles(File srcDir, boolean del) throws IOException {
+	public static void splitTxtFiles(File srcDir, boolean del) throws IOException, InterruptedException {
 		if(!srcDir.exists() || !srcDir.isDirectory()) return;
 		for(File file : srcDir.listFiles()) {
 			if(!Common.isFileExists(file, "txt")) continue;
 			Set<File> result = TxtUtils.split(file);
-			if(del && result.size()>0) file.delete();
+			if(del && result.size()>0) {
+				FileUtils.deleteAndConfirm(file);
+			}
 		}
 	}
 	
@@ -152,6 +151,7 @@ public class TxtUtils {
 				FileUtils.writeToFile(extractedFile.getCanonicalPath(), sb.toString(), false, writeEncoding);
 				result = extractedFile;
 			}
+			reader.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
@@ -187,8 +187,10 @@ public class TxtUtils {
 		}
 	}
 	
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException, InterruptedException {
 		TxtUtils.extractFrontPart();
-		//TxtUtils.splitTxtFiles(new File(Prop.get("srcdirpath")), false);
+		//TxtUtils.splitTxtFiles(new File(Prop.get("srcdirpath")));
+		/*File file = new File("C:\\Users\\qzfeng\\Desktop\\cajwait\\知否？知否？应是绿肥红瘦.txt");
+		file.delete();*/
 	}
 }
