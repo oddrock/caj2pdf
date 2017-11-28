@@ -383,7 +383,6 @@ public class DocFormatConverter {
 	public static void main(String[] args) throws AWTException, IOException, InterruptedException, MessagingException {
 		DocFormatConverter dfc = new DocFormatConverter();
 		//dfc.txt2mobi_test();
-		//dfc.execTransform(args);
-		TxtUtils.extractFrontPart();
+		dfc.execTransform(args);
 	}
 }
