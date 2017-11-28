@@ -29,9 +29,9 @@ public class TransformRuleUtils {
 		long testfilesize = Prop.getLong("test.filesize");
 		long testfilesizemin = Prop.getLong("test.minfilesize");
 		if(txtFileSize>=testfilesize*1024*2) {
-			return testfilesize;
+			return testfilesize*1024;
 		}else if(txtFileSize>=testfilesizemin*1024*2) {
-			return testfilesizemin;
+			return testfilesizemin*1024;
 		}else if(txtFileSize>=3*1024) {
 			return 2*1024;
 		}else {

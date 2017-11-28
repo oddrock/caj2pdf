@@ -25,11 +25,10 @@ public class TxtUtils {
 	 * 将txt文件切割为最大不超过maxsizeKB大小的txt文件
 	 * @param srcFile	
 	 * @param maxSize	单位为KB
-	 * @param encoding	文件编码
 	 * @return
 	 * @throws IOException
 	 */
-	public static Set<File> split(File srcFile, long maxSize, String encoding) throws IOException{
+	public static Set<File> split(File srcFile, long maxSize) throws IOException{
 		Set<File> result = new HashSet<File>();
 		if(!Common.isFileExists(srcFile, "txt")) {
 			logger.warn("文件不存在或后缀名不对："+srcFile.getCanonicalPath());
@@ -47,6 +46,7 @@ public class TxtUtils {
 		
 		BufferedReader reader = null;
 		StringBuffer sb = new StringBuffer();
+		String encoding = FileUtils.getEncoding(srcFile);
 		try {
 			reader = new BufferedReader(new InputStreamReader(new FileInputStream(srcFile), encoding));
 			String tempString = null;
@@ -56,6 +56,7 @@ public class TxtUtils {
 			while ((tempString = reader.readLine()) != null) {
 				sb.append(tempString + "\n");
 				if(sb.length() >= maxSize*1024) {	
+					//System.out.println(sb.toString());
 					FileUtils.writeToFile(splittedFile.getCanonicalPath(), sb.toString(), false, encoding);
 					result.add(splittedFile);
 					i++;
@@ -67,7 +68,6 @@ public class TxtUtils {
 				FileUtils.writeToFile(splittedFile.getCanonicalPath(), sb.toString(), false, encoding);
 				result.add(splittedFile);
 			}
-			reader.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
@@ -76,16 +76,8 @@ public class TxtUtils {
 		return result;
 	}
 	
-	public static Set<File> split(String srcFilePath, long maxSize, String encoding) throws IOException{
-		return split(new File(srcFilePath), maxSize, encoding);
-	}
-	
-	public static Set<File> split(String srcFilePath) throws IOException{
-		return split(new File(srcFilePath));
-	}
-	
 	public static Set<File> split(File srcFile) throws IOException{
-		return split(srcFile, Prop.getLong("txtfile.maxsize"), Prop.get("txtfile.encoding"));
+		return split(srcFile, Prop.getLong("txtfile.maxsize"));
 	}
 	
 	/**
@@ -94,11 +86,21 @@ public class TxtUtils {
 	 * @throws IOException 
 	 */
 	public static void splitTxtFiles(File srcDir) throws IOException {
+		splitTxtFiles(srcDir, true);
+	}
+	
+	/**
+	 * 将srcDir目录下的txt文件全部切割为不超过500KB大小，并且删除超过500KB大小的源文件。
+	 * @param srcDir
+	 * @param del			是否删除源文件
+	 * @throws IOException
+	 */
+	public static void splitTxtFiles(File srcDir, boolean del) throws IOException {
 		if(!srcDir.exists() || !srcDir.isDirectory()) return;
 		for(File file : srcDir.listFiles()) {
 			if(!Common.isFileExists(file, "txt")) continue;
 			Set<File> result = TxtUtils.split(file);
-			if(result.size()>0) file.delete();
+			if(del && result.size()>0) file.delete();
 		}
 	}
 	
@@ -109,7 +111,7 @@ public class TxtUtils {
 	 * @return
 	 * @throws IOException
 	 */
-	public static File extractFrontPart(File srcTxtFile, long size, String encoding) throws IOException {
+	public static File extractFrontPart(File srcTxtFile, long size) throws IOException {
 		File result = null;
 		if(!Common.isFileExists(srcTxtFile, "txt")) {
 			logger.warn("文件不存在或后缀名不对："+srcTxtFile.getCanonicalPath());
@@ -120,6 +122,7 @@ public class TxtUtils {
 		}
 		BufferedReader reader = null;
 		StringBuffer sb = new StringBuffer();
+		String encoding = FileUtils.getEncoding(srcTxtFile);
 		try {
 			reader = new BufferedReader(new InputStreamReader(new FileInputStream(srcTxtFile), encoding));
 			String tempString = null;
@@ -139,7 +142,6 @@ public class TxtUtils {
 				FileUtils.writeToFile(extractedFile.getCanonicalPath(), sb.toString(), false, encoding);
 				result = extractedFile;
 			}
-			reader.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
@@ -150,8 +152,7 @@ public class TxtUtils {
 	
 	public static File extractFrontPart(File srcTxtFile) throws IOException {
 		long size = TransformRuleUtils.computeTestTxtSize(srcTxtFile.length())/1024;
-		String encoding = Prop.get("txtfile.encoding");
-		return extractFrontPart(srcTxtFile, size, encoding);
+		return extractFrontPart(srcTxtFile, size);
 	}
 	
 	/**
@@ -174,5 +175,10 @@ public class TxtUtils {
 		}else {
 			return null;
 		}
+	}
+	
+	public static void main(String[] args) throws IOException {
+		//TxtUtils.extractFrontPart();
+		TxtUtils.splitTxtFiles(new File(Prop.get("srcdirpath")), false);
 	}
 }
