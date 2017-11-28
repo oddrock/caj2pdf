@@ -47,6 +47,11 @@ public class TxtUtils {
 		BufferedReader reader = null;
 		StringBuffer sb = new StringBuffer();
 		String encoding = FileUtils.getEncoding(srcFile);
+		String writeEncoding = encoding;
+		// 检查是否需要强制使用系统指定的编码
+		if(Prop.getBool("txtfile.write.usesystemencoding")) {
+			writeEncoding = Prop.get("txtfile.write.encoding");
+		}
 		try {
 			reader = new BufferedReader(new InputStreamReader(new FileInputStream(srcFile), encoding));
 			String tempString = null;
@@ -57,7 +62,7 @@ public class TxtUtils {
 				sb.append(tempString + "\n");
 				if(sb.length() >= maxSize*1024) {	
 					//System.out.println(sb.toString());
-					FileUtils.writeToFile(splittedFile.getCanonicalPath(), sb.toString(), false, encoding);
+					FileUtils.writeToFile(splittedFile.getCanonicalPath(), sb.toString(), false, writeEncoding);
 					result.add(splittedFile);
 					i++;
 					splittedFile = new File(srcFile.getParentFile(), srcFile.getName().replaceAll("\\.txt", "")+StringUtils.leftPad(String.valueOf(i), 2, "0")+".txt");	
@@ -65,7 +70,7 @@ public class TxtUtils {
 				}
 			}
 			if(sb.length()>0) {
-				FileUtils.writeToFile(splittedFile.getCanonicalPath(), sb.toString(), false, encoding);
+				FileUtils.writeToFile(splittedFile.getCanonicalPath(), sb.toString(), false, writeEncoding);
 				result.add(splittedFile);
 			}
 		} catch (IOException e) {
@@ -123,6 +128,11 @@ public class TxtUtils {
 		BufferedReader reader = null;
 		StringBuffer sb = new StringBuffer();
 		String encoding = FileUtils.getEncoding(srcTxtFile);
+		String writeEncoding = encoding;
+		// 检查是否需要强制使用系统指定的编码
+		if(Prop.getBool("txtfile.write.usesystemencoding")) {
+			writeEncoding = Prop.get("txtfile.write.encoding");
+		}
 		try {
 			reader = new BufferedReader(new InputStreamReader(new FileInputStream(srcTxtFile), encoding));
 			String tempString = null;
@@ -132,14 +142,14 @@ public class TxtUtils {
 			while ((tempString = reader.readLine()) != null) {
 				sb.append(tempString + "\n");
 				if(sb.length() >= size*1024) {	
-					FileUtils.writeToFile(extractedFile.getCanonicalPath(), sb.toString(), false, encoding);
+					FileUtils.writeToFile(extractedFile.getCanonicalPath(), sb.toString(), false, writeEncoding);
 					result = extractedFile;
 					hasWrite = true;
 					break;
 				}
 			}
 			if(!hasWrite && sb.length()>0) {
-				FileUtils.writeToFile(extractedFile.getCanonicalPath(), sb.toString(), false, encoding);
+				FileUtils.writeToFile(extractedFile.getCanonicalPath(), sb.toString(), false, writeEncoding);
 				result = extractedFile;
 			}
 		} catch (IOException e) {
@@ -178,7 +188,7 @@ public class TxtUtils {
 	}
 	
 	public static void main(String[] args) throws IOException {
-		//TxtUtils.extractFrontPart();
-		TxtUtils.splitTxtFiles(new File(Prop.get("srcdirpath")), false);
+		TxtUtils.extractFrontPart();
+		//TxtUtils.splitTxtFiles(new File(Prop.get("srcdirpath")), false);
 	}
 }
