@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+
 import javax.mail.MessagingException;
 import org.apache.log4j.Logger;
 import com.oddrock.caj2pdf.bean.TransformFileSet;
@@ -33,6 +34,19 @@ public class DocFormatConverter {
 		robotMngr = new RobotManager();
 	}
 	
+	private void doBeforeTransform(File srcDir) {
+		for(File file : srcDir.listFiles()) {
+			if(file.isHidden() || file.isDirectory()) continue;
+			String fileName = file.getName();
+			// 看文件名中是否有多个连续的空格，如果有，则替换为1个空格。
+			// 因为名字里有两个空格的文件，无法用CmdExecutor打开
+			if(fileName.matches(".*\\s{2,}.*")) {
+				fileName = fileName.replaceAll("\\s{2,}", " ");
+				file.renameTo(new File(srcDir, fileName));
+			}
+		}
+	}
+	
 	// 转换后的动作
 	private void doAfterTransform(File srcDir, File dstDir, Set<File> needMoveFilesSet, String noticeContent) throws IOException, MessagingException {
 		// 将需要移动的文件移动到目标文件夹
@@ -50,6 +64,7 @@ public class DocFormatConverter {
 	
 	// 批量caj转pdf
 	public void caj2pdf(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("caj2pdf");
 		if(!srcDir.exists() || !srcDir.isDirectory()){
 			return;
@@ -81,6 +96,7 @@ public class DocFormatConverter {
 	
 	// 批量caj转word
 	public void caj2word(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("caj2word");
 		if(!srcDir.exists() || !srcDir.isDirectory()){
 			return;
@@ -125,6 +141,7 @@ public class DocFormatConverter {
 	
 	// caj试转pdf
 	public void caj2pdf_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("caj2pdf_test");
 		if(!srcDir.exists() || !srcDir.isDirectory()) return;
 		TransformFileSet fileSet = null;
@@ -165,6 +182,7 @@ public class DocFormatConverter {
 	
 	// caj试转word
 	public void caj2word_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("caj2word_test");
 		if(!srcDir.exists() || !srcDir.isDirectory()) return;
 		TransformFileSet fileSet = null;
@@ -203,6 +221,7 @@ public class DocFormatConverter {
 	
 	// pdf批量转word
 	public void pdf2word(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("pdf2word");
 		if(!srcDir.exists() || !srcDir.isDirectory()){
 			return;
@@ -231,6 +250,7 @@ public class DocFormatConverter {
 	
 	// pdf试转word
 	public void pdf2word_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("pdf2word_test");
 		if(!srcDir.exists() || !srcDir.isDirectory()){
 			return;
@@ -278,6 +298,7 @@ public class DocFormatConverter {
 	
 	// 批量pdf转mobi，用calibre
 	public void pdf2mobiByCalibre(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("pdf2mobiByCalibre");
 		if(!srcDir.exists() || !srcDir.isDirectory()){
 			return;
@@ -303,6 +324,7 @@ public class DocFormatConverter {
 	
 	// 试转pdf转mobi
 	public void pdf2mobiByCalibre_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("pdf2mobiByCalibre_test");
 		if(!srcDir.exists() || !srcDir.isDirectory()){
 			return;
@@ -349,6 +371,7 @@ public class DocFormatConverter {
 	
 	// 批量txt转mobi，用calibre
 	public void txt2mobi(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("txt2mobi");
 		if(!srcDir.exists() || !srcDir.isDirectory()){
 			return;
@@ -375,6 +398,7 @@ public class DocFormatConverter {
 	
 	// 试转txt转mobi
 	public void txt2mobi_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("txt2mobi_test");
 		File srcFile = TxtUtils.extractFrontPart();
 		if(srcFile==null) {
@@ -397,6 +421,7 @@ public class DocFormatConverter {
 	
 	// 批量img转word
 	public void img2word(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("img2word");
 		if(!srcDir.exists() || !srcDir.isDirectory()){
 			return;
@@ -432,6 +457,7 @@ public class DocFormatConverter {
 	
 	// 试转img转word
 	public void img2word_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("img2word_test");
 		if(!srcDir.exists() || !srcDir.isDirectory()){
 			return;
@@ -469,6 +495,7 @@ public class DocFormatConverter {
 	
 	// pdf批量转epub
 	public void pdf2epub(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("pdf2epub");
 		if(!srcDir.exists() || !srcDir.isDirectory()){
 			return;
@@ -493,6 +520,7 @@ public class DocFormatConverter {
 	
 	// 试转pdf转epub
 	public void pdf2epub_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("pdf2epub_test");
 		if(!srcDir.exists() || !srcDir.isDirectory()){
 			return;
@@ -538,6 +566,7 @@ public class DocFormatConverter {
 	
 	// 用abbyy进行pdf转mobi
 	public void pdf2mobiByAbbyy(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("pdf2mobiByAbbyy");
 		if(!srcDir.exists() || !srcDir.isDirectory()){
 			return;
@@ -572,6 +601,7 @@ public class DocFormatConverter {
 	}
 	
 	public void pdf2mobiByAbbyy_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("pdf2mobiByAbbyy_test");
 		if(!srcDir.exists() || !srcDir.isDirectory()){
 			return;
@@ -680,7 +710,7 @@ public class DocFormatConverter {
 		if(Prop.getBool("debug")) {		// 调试模式
 			//dfc.img2word();
 			//AbbyyUtils.openPdf(new RobotManager(), "C:\\Users\\qzfeng\\Desktop\\cajwait\\装配式建筑施工安全评价体系研究_杨爽.pdf");
-			dfc.pdf2mobiByAbbyy_test();
+			dfc.pdf2mobiByCalibre_test();
 		}else {
 			dfc.execTransform(args);
 		}

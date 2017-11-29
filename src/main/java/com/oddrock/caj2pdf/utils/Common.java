@@ -11,6 +11,8 @@ import javax.mail.MessagingException;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
+import org.apache.log4j.Logger;
+
 import com.oddrock.common.DateUtils;
 import com.oddrock.common.awt.RobotManager;
 import com.oddrock.common.file.FileUtils;
@@ -21,15 +23,24 @@ import com.oddrock.common.pic.PictureComparator;
 import com.oddrock.common.windows.CmdExecutor;
 
 public class Common {
+	private static Logger logger = Logger.getLogger(Common.class);
+	
 	// 邮件通知
 	public static void noticeMail(String content) throws UnsupportedEncodingException, MessagingException{
-		if(Prop.getBool("debug") || !Prop.getBool("notice.mail.flag") || isInNoticeMailExcludetime()){
+		if(!Prop.getBool("notice.mail.flag")) return;
+		if((Prop.getBool("debug") || isInNoticeMailExcludetime()) 
+				&& !Prop.getBool("notice.mail.excludetime.takeplace")){
 			return;
 		}
 		//String content="所有caj文件转换为PDF已完成！！！";
 		String senderAccount = null;
 		String senderPasswd = null;
 		String recverAccounts = Prop.get("notice.mail.recver.accounts");
+		if((Prop.getBool("debug") || isInNoticeMailExcludetime()) 
+				&& Prop.getBool("notice.mail.excludetime.takeplace")){
+			// 发送给替代的收信人
+			recverAccounts = Prop.get("notice.mail.excludetime.takeplace.recver.accounts");
+		}
 		if(Prop.get("notice.mail.sender.type").equalsIgnoreCase("qq")){
 			senderAccount = Prop.get("notice.mail.sender.qq.account");
 			senderPasswd = Prop.get("notice.mail.sender.qq.passwd");
@@ -39,6 +50,7 @@ public class Common {
 			senderPasswd = Prop.get("notice.mail.sender.163.passwd");
 			MailSender.sendEmailFast(senderAccount, senderPasswd, recverAccounts, content);
 		}
+		logger.warn(senderAccount + "已发送邮件通知给：" + recverAccounts);
 	}
 	
 	/*
@@ -58,6 +70,7 @@ public class Common {
 		if(!Prop.getBool("debug") && Prop.getBool("notice.sound.flag") && !isInNoticeSoundExcludetime()){
 			try {
 				WavPlayer.play(Prop.get("notice.sound.wavpath"), Prop.getInt("notice.sound.playcount"));
+				logger.warn("已进行声音通知");
 			} catch (UnsupportedAudioFileException e) {
 				e.printStackTrace();
 			} catch (IOException e) {

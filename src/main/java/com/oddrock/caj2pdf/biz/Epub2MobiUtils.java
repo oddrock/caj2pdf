@@ -108,7 +108,14 @@ private static Logger logger = Logger.getLogger(Pdf2MobiUtils.class);
 		robotMngr.pressKey(KeyEvent.VK_ENTER);
 		Common.waitShort();
 		// 确认保存
-		robotMngr.pressKey(KeyEvent.VK_ENTER);
+		//robotMngr.pressKey(KeyEvent.VK_ENTER);
+		robotMngr.moveMouseTo(Prop.getInt("calibre.coordinate.selecttargetdir.selectdirbutton.x"), 
+				Prop.getInt("calibre.coordinate.selecttargetdir.selectdirbutton.y"));
+		Common.waitM();
+		robotMngr.clickMouseLeft();
+		Common.waitShort();
+		// 移开鼠标避免挡事
+		Common.moveMouseAvoidHandicap(robotMngr);
 		Common.waitM();
 		// 等待直到“选择目标目录”页面被关闭
 		CalibreUtils.waitSelectTargetDirClose(robotMngr);

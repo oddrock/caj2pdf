@@ -96,6 +96,7 @@ public class FoxitUtils {
 	
 	// 用foxit打开一个pdf并等待打开完成
 	public static void openPdf(RobotManager robotMngr, String pdfFilePath) throws IOException, InterruptedException {
+		logger.warn("开始用foxit打开文件："+pdfFilePath);
 		CmdExecutor.getSingleInstance().exeCmd(Prop.get("foxit.path") + " \"" + pdfFilePath + "\"");
 		while(!isStart()) {
 			logger.warn("等待foxit启动......");
@@ -106,7 +107,7 @@ public class FoxitUtils {
 			logger.warn("等待foxit打开");
 			Common.wait(Prop.getInt("interval.waitmillis"));
 		}
-		logger.warn("确认foxit已打开");
+		logger.warn("确认foxit已打开文件："+pdfFilePath);
 	}
 	
 	// 等待直到打开提取页面时的导出页面
