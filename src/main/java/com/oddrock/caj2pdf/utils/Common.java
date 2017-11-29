@@ -23,7 +23,7 @@ import com.oddrock.common.windows.CmdExecutor;
 public class Common {
 	// 邮件通知
 	public static void noticeMail(String content) throws UnsupportedEncodingException, MessagingException{
-		if(!Prop.getBool("notice.mail.flag") || isInNoticeMailExcludetime()){
+		if(Prop.getBool("debug") || !Prop.getBool("notice.mail.flag") || isInNoticeMailExcludetime()){
 			return;
 		}
 		//String content="所有caj文件转换为PDF已完成！！！";
@@ -55,7 +55,7 @@ public class Common {
 	
 	// 声音通知
 	public static void noticeSound(){
-		if(Prop.getBool("notice.sound.flag") && !isInNoticeSoundExcludetime()){
+		if(!Prop.getBool("debug") && Prop.getBool("notice.sound.flag") && !isInNoticeSoundExcludetime()){
 			try {
 				WavPlayer.play(Prop.get("notice.sound.wavpath"), Prop.getInt("notice.sound.playcount"));
 			} catch (UnsupportedAudioFileException e) {
