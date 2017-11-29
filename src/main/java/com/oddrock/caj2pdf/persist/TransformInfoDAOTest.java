@@ -19,8 +19,8 @@ public class TransformInfoDAOTest {
         	TransformInfoDAO dao = session.getMapper(TransformInfoDAO.class);
         	TransformInfo info = new TransformInfo();
         	info.setStart_time(new Date());
-        	info.setTransform_type("caj2pdf11");
-        	info.setSrc_file_size(11000000000000L);
+        	info.setTransform_type("11caj2pdf11");
+        	info.setSrc_file_size(12200000L);
         	dao.addTransformInfo(info);
         } finally {
             session.close();
