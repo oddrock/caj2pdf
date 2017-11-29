@@ -8,10 +8,8 @@ public class TransformInfo {
 	private String transform_type;
 	private Date start_time;
 	private Date end_time;
-	private int src_file_count;
-	private int src_page_count;
-	private int dst_file_count;
-	private int dst_page_count;
+	private long src_file_count;
+	private long dst_file_count;
 	private String transform_status;
 	private Date record_time;
 	private String src_dirpath;
@@ -19,6 +17,8 @@ public class TransformInfo {
 	private String dst_dirpath;
 	private String dst_file_names;
 	private String remark;
+	private long src_file_size;
+	private long dst_file_size;
 	public String getSrc_file_type() {
 		return src_file_type;
 	}
@@ -49,29 +49,17 @@ public class TransformInfo {
 	public void setEnd_time(Date end_time) {
 		this.end_time = end_time;
 	}
-	public int getSrc_file_count() {
+	public long getSrc_file_count() {
 		return src_file_count;
 	}
-	public void setSrc_file_count(int src_file_count) {
+	public void setSrc_file_count(long src_file_count) {
 		this.src_file_count = src_file_count;
 	}
-	public int getSrc_page_count() {
-		return src_page_count;
-	}
-	public void setSrc_page_count(int src_page_count) {
-		this.src_page_count = src_page_count;
-	}
-	public int getDst_file_count() {
+	public long getDst_file_count() {
 		return dst_file_count;
 	}
-	public void setDst_file_count(int dst_file_count) {
+	public void setDst_file_count(long dst_file_count) {
 		this.dst_file_count = dst_file_count;
-	}
-	public int getDst_page_count() {
-		return dst_page_count;
-	}
-	public void setDst_page_count(int dst_page_count) {
-		this.dst_page_count = dst_page_count;
 	}
 	public String getTransform_status() {
 		return transform_status;
@@ -114,5 +102,17 @@ public class TransformInfo {
 	}
 	public void setRemark(String remark) {
 		this.remark = remark;
+	}
+	public long getSrc_file_size() {
+		return src_file_size;
+	}
+	public void setSrc_file_size(long src_file_size) {
+		this.src_file_size = src_file_size;
+	}
+	public long getDst_file_size() {
+		return dst_file_size;
+	}
+	public void setDst_file_size(long dst_file_size) {
+		this.dst_file_size = dst_file_size;
 	}
 }
