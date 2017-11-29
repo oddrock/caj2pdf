@@ -7,7 +7,7 @@ import com.oddrock.caj2pdf.bean.TransformFileInfo;
 import com.oddrock.caj2pdf.bean.TransformInfo;
 import com.oddrock.common.file.FileUtils;
 
-public class TransformInfoStatisticsUtils {
+public class TransformInfoPersistUtils {
 	// 统计源文件信息
 	public static void statisticsSrcFileInfo(TransformInfo info, Set<File> srcFileSet) throws IOException{
 		for(File file : srcFileSet){
