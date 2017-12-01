@@ -96,7 +96,8 @@ public class Pdf2MobiUtils {
 		Common.waitShort();
 		// 等待直到“选择目标目录”页面被打开
 		CalibreUtils.waitSelectTargetDirOpen(robotMngr);
-		File dstDir = Common.generateDstDir(new File(Prop.get("dstdirpath")), true);
+		File dstDir = new File(Prop.get("calibre.tmpoutputdir"));
+		dstDir.mkdirs();
 		// 将生成的目标文件夹地址复制到剪贴板
 		ClipboardUtils.setSysClipboardText(dstDir.getCanonicalPath());
 		Common.waitShort();
