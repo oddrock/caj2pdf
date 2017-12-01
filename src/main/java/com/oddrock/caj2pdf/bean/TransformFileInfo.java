@@ -22,4 +22,9 @@ public class TransformFileInfo {
 	public void setFile_size(long file_size) {
 		this.file_size = file_size;
 	}
+	@Override
+	public String toString() {
+		return "TransformFileInfo [file_type=" + file_type + ", file_name="
+				+ file_name + ", file_size=" + file_size + "]";
+	}
 }

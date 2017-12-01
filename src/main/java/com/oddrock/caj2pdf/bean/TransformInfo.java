@@ -115,4 +115,18 @@ public class TransformInfo {
 	public void setDst_file_size(long dst_file_size) {
 		this.dst_file_size = dst_file_size;
 	}
+	@Override
+	public String toString() {
+		return "TransformInfo [src_file_type=" + src_file_type
+				+ ", dst_file_type=" + dst_file_type + ", transform_type="
+				+ transform_type + ", start_time=" + start_time + ", end_time="
+				+ end_time + ", src_file_count=" + src_file_count
+				+ ", dst_file_count=" + dst_file_count + ", transform_status="
+				+ transform_status + ", record_time=" + record_time
+				+ ", src_dirpath=" + src_dirpath + ", src_file_names="
+				+ src_file_names + ", dst_dirpath=" + dst_dirpath
+				+ ", dst_file_names=" + dst_file_names + ", remark=" + remark
+				+ ", src_file_size=" + src_file_size + ", dst_file_size="
+				+ dst_file_size + "]";
+	}
 }

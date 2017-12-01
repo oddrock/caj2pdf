@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import com.oddrock.caj2pdf.utils.Prop;
 import com.oddrock.common.file.FileUtils;
 
@@ -16,6 +18,8 @@ import com.oddrock.common.file.FileUtils;
  *
  */
 public class SelftestFilesPool {
+	private static Logger logger = Logger.getLogger(SelftestFilesPool.class);
+	
 	// 生成指定文件类型的单个测试文件
 	public static File getSingleRandomTestFileByFileType(String fileType){
 		File testTypeFileDir = new File(Prop.get("selftest.pool.basedirpath"), fileType);
@@ -33,9 +37,10 @@ public class SelftestFilesPool {
 	}
 	
 	// 生成指定数量指定文件类型的测试文件
-	public static Set<File> getRandomTestFilesByFileType(String fileType, int count){
-		Set<File> fileSet = new HashSet<File>();
+	public static Set<File> getRandomTestFilesByFileType(String fileType, int count) throws IOException{	
 		File testTypeFileDir = new File(Prop.get("selftest.pool.basedirpath"), fileType);
+		logger.warn("开始从本目录生成测试文件："+testTypeFileDir.getCanonicalPath());
+		Set<File> fileSet = new HashSet<File>();
 		// 如果要获得的文件数量大于池中文件总数，则将池中文件全部返回
 		if(testTypeFileDir.listFiles().length<=count) {		
 			fileSet.addAll(Arrays.asList(testTypeFileDir.listFiles()));
@@ -48,15 +53,18 @@ public class SelftestFilesPool {
 				}
 			}
 		}
+		logger.warn("完成从本目录生成测试文件："+testTypeFileDir.getCanonicalPath());
 		return fileSet;
 	}
 	
 	// 生成指定数量指定文件类型的测试文件，拷贝到指定目录下
 	public static void generateTestFilesByFileType(String type, int count, File dstDir) throws IOException {
+		logger.warn("开始从生成测试文件并拷贝到："+dstDir.getCanonicalPath());
 		Set<File> fileSet = getRandomTestFilesByFileType(type, count);
 		for(File file : fileSet) {
 			FileUtils.copyFile(file.getCanonicalPath(), new File(dstDir, file.getName()).getCanonicalPath());
 		}
+		logger.warn("完成从生成测试文件并拷贝到："+dstDir.getCanonicalPath());
 	}
 	
 	// 在srcdirpath目录下生成指定数量指定文件类型的测试文件

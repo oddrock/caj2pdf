@@ -1,6 +1,7 @@
 package com.oddrock.caj2pdf.bean;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  * 存放转换文件的集合
@@ -21,5 +22,16 @@ public class TransformFileSet {
 	}
 	public void setDstFile(File dstFile) {
 		this.dstFile = dstFile;
+	}
+	@Override
+	public String toString() {
+		String result = null;
+		try {
+			result = "TransformFileSet [srcFile=" + srcFile.getCanonicalPath() + ", dstFile=" + dstFile.getCanonicalPath()+ "]";
+		}catch (IOException e) {
+			e.printStackTrace();
+			result = "TransformFileSet [srcFile=" + srcFile + ", dstFile=" + dstFile+ "]";
+		}
+		return result;
 	}
 }

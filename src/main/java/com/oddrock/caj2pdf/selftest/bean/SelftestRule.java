@@ -1,4 +1,4 @@
-package com.oddrock.caj2pdf.selftest;
+package com.oddrock.caj2pdf.selftest.bean;
 
 public class SelftestRule {
 	private String transformType;	// 测试的转换类型
@@ -25,10 +25,27 @@ public class SelftestRule {
 	public SelftestRule() {
 		super();
 	}
+	// 检验规则是否有效
+	public boolean isValid(){
+		// 转换类型为空无效
+		if(transformType==null || transformType.trim().length()==0){
+			return false;
+		}
+		// 测试文件数小于等于0或者测试次数小于等于0无效
+		if(fileCount<=0 || testCount<=0){
+			return false;
+		}
+		return true;
+	}
 	public SelftestRule(String transformType, int fileCount, int testCount) {
 		super();
 		this.transformType = transformType;
 		this.fileCount = fileCount;
 		this.testCount = testCount;
+	}
+	@Override
+	public String toString() {
+		return "SelftestRule [transformType=" + transformType + ", fileCount="
+				+ fileCount + ", testCount=" + testCount + "]，是否有效：" + isValid();
 	}
 }
