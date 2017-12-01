@@ -165,6 +165,19 @@ public class TxtUtils {
 		return extractFrontPart(srcTxtFile, size);
 	}
 	
+	public static File getFirstTxtFile() throws IOException {
+		File srcDir = new File(Prop.get("srcdirpath"));
+		if(!srcDir.exists() || !srcDir.isDirectory()) return null;
+		File srcTxtFile = null;
+		for(File file : srcDir.listFiles()) {
+			if(Common.isFileExists(file, "txt")) {
+				srcTxtFile=file;
+				break;
+			}
+		}
+		return srcTxtFile;
+	}
+	
 	/**
 	 * 提取源文件夹第一个txt文件
 	 * @return

@@ -28,17 +28,16 @@ public class Common {
 	// 邮件通知
 	public static void noticeMail(String content) throws UnsupportedEncodingException, MessagingException{
 		if(!Prop.getBool("notice.mail.flag")) return;
-		if((Prop.getBool("debug") || isInNoticeMailExcludetime()) 
-				&& !Prop.getBool("notice.mail.excludetime.takeplace")){
+		// 如果在排除时间段，而且没有替代通知人，就不做邮件通知
+		if(isInNoticeMailExcludetime() && !Prop.getBool("notice.mail.excludetime.takeplace")){
 			return;
 		}
 		//String content="所有caj文件转换为PDF已完成！！！";
 		String senderAccount = null;
 		String senderPasswd = null;
 		String recverAccounts = Prop.get("notice.mail.recver.accounts");
-		if((Prop.getBool("debug") || isInNoticeMailExcludetime()) 
-				&& Prop.getBool("notice.mail.excludetime.takeplace")){
-			// 发送给替代的收信人
+		// 如果在排除时间段，而且有替代通知人，则发送给替代的收信人
+		if(isInNoticeMailExcludetime() && Prop.getBool("notice.mail.excludetime.takeplace")){
 			recverAccounts = Prop.get("notice.mail.excludetime.takeplace.recver.accounts");
 		}
 		if(Prop.get("notice.mail.sender.type").equalsIgnoreCase("qq")){
@@ -67,7 +66,8 @@ public class Common {
 	
 	// 声音通知
 	public static void noticeSound(){
-		if(!Prop.getBool("debug") && Prop.getBool("notice.sound.flag") && !isInNoticeSoundExcludetime()){
+		// 如果不需要声音通知，或者不在通知时间段，都不需要声音通知
+		if(Prop.getBool("notice.sound.flag") && !isInNoticeSoundExcludetime()){
 			try {
 				WavPlayer.play(Prop.get("notice.sound.wavpath"), Prop.getInt("notice.sound.playcount"));
 				logger.warn("已进行声音通知");

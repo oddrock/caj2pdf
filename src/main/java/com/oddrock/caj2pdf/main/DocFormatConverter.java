@@ -17,6 +17,7 @@ import com.oddrock.caj2pdf.biz.Pdf2MobiUtils;
 import com.oddrock.caj2pdf.biz.Pdf2WordUtils;
 import com.oddrock.caj2pdf.biz.PdfUtils;
 import com.oddrock.caj2pdf.biz.Txt2MobiUtils;
+import com.oddrock.caj2pdf.persist.DocBakUtils;
 import com.oddrock.caj2pdf.persist.TransformInfoStater;
 import com.oddrock.caj2pdf.utils.Common;
 import com.oddrock.caj2pdf.utils.Prop;
@@ -27,6 +28,7 @@ import com.oddrock.common.pdf.PdfManager;
 import com.oddrock.common.windows.CmdExecutor;
 
 public class DocFormatConverter {
+	public static boolean selftest = false;
 	private static Logger logger = Logger.getLogger(DocFormatConverter.class);
 	private RobotManager robotMngr;
 	public DocFormatConverter() throws AWTException {
@@ -48,22 +50,45 @@ public class DocFormatConverter {
 	}
 	
 	// 转换后的动作
-	private void doAfterTransform(File srcDir, File dstDir, Set<File> needMoveFilesSet, String noticeContent) throws IOException, MessagingException {
+	private void doAfterTransform(File srcDir, File dstDir, Set<File> needMoveFilesSet, String noticeContent, String transformType, Set<File> needBakFileSet) throws IOException, MessagingException {
+		boolean debug = Prop.getBool("debug");
+		// 如果是调试或者自测模式，不需要备份
+		if(!debug || selftest) {
+			// 备份不是必须步骤，任何异常不要影响正常流程
+			try {
+				// 备份文件，以便未来测试
+				DocBakUtils.bakDoc(transformType, needBakFileSet);
+			}catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
 		// 将需要移动的文件移动到目标文件夹
 		dstDir = Common.mvAllFilesFromSrcToDst(needMoveFilesSet, dstDir);
-		// 完成后声音通知
-		Common.noticeSound();
-		// 完成后短信通知
-		Common.noticeMail(noticeContent);
+		// 如果是调试或者自测模式，不需要通知
+		if(!debug || selftest) {
+			// 通知不是必须步骤，任何异常不要影响正常流程
+			try {
+				// 完成后声音通知
+				Common.noticeSound();
+				// 完成后短信通知
+				Common.noticeMail(noticeContent);
+			}catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
 		// 打开完成后的文件夹窗口
 		Common.openFinishedWindows(dstDir);
-		// 在桌面生成一个已完成文件夹的bat文件，可以一运行立刻打开文件夹
-		Common.createBatDirectToFinishedWindows(dstDir);
+		// 如果是调试或者自测模式，则不需要修改桌面快捷方式
+		if(!debug || selftest) {
+			// 在桌面生成一个已完成文件夹的bat文件，可以一运行立刻打开文件夹
+			Common.createBatDirectToFinishedWindows(dstDir);
+		}
 		logger.warn(noticeContent+ ":" + srcDir.getCanonicalPath());
 	}
 	
 	// 批量caj转pdf
 	public void caj2pdf(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		String transformType="caj2pdf";
 		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("caj2pdf");
 		if(!srcDir.exists() || !srcDir.isDirectory()){
@@ -71,11 +96,13 @@ public class DocFormatConverter {
 		}
 		TransformFileSet fileSet;
 		Set<File> needMoveFilesSet = new HashSet<File>();
+		Set<File> needBakFileSet = new HashSet<File>();
 		for(File file : srcDir.listFiles()){
 			if(file==null) continue;
 			fileSet = Caj2PdfUtils.caj2pdf(robotMngr, file.getCanonicalPath());
 			if(fileSet.getSrcFile()!=null) {
 				needMoveFilesSet.add(fileSet.getSrcFile());
+				needBakFileSet.add(fileSet.getSrcFile());
 				tfis.addSrcFile(fileSet.getSrcFile());
 			}
 			if(fileSet.getDstFile()!=null) {
@@ -85,7 +112,7 @@ public class DocFormatConverter {
 			
 			
 		}
-		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "caj转pdf已完成");
+		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "caj转pdf已完成", transformType, needBakFileSet);
 		tfis.save2db();
 	}
 	
@@ -96,6 +123,7 @@ public class DocFormatConverter {
 	
 	// 批量caj转word
 	public void caj2word(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		String transformType="caj2word";
 		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("caj2word");
 		if(!srcDir.exists() || !srcDir.isDirectory()){
@@ -105,6 +133,7 @@ public class DocFormatConverter {
 		// 存放待转换的pdf文件
 		Set<File> pdfFileSet = new HashSet<File>();
 		Set<File> needMoveFilesSet = new HashSet<File>();
+		Set<File> needBakFileSet = new HashSet<File>();
 		// 先全部caj转pdf
 		for(File file : srcDir.listFiles()){
 			if(file==null) continue;
@@ -112,6 +141,7 @@ public class DocFormatConverter {
 			if(fileSet.getSrcFile()!=null) {
 				tfis.addSrcFile(file);
 				needMoveFilesSet.add(fileSet.getSrcFile());
+				needBakFileSet.add(fileSet.getSrcFile());
 			}
 			if(fileSet.getDstFile()!=null) {
 				needMoveFilesSet.add(fileSet.getDstFile());
@@ -130,7 +160,7 @@ public class DocFormatConverter {
 				needMoveFilesSet.add(fileSet.getDstFile());
 			}	
 		}
-		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "caj转word已完成");
+		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "caj转word已完成", transformType, needBakFileSet);
 		tfis.save2db();
 	}
 	
@@ -141,11 +171,13 @@ public class DocFormatConverter {
 	
 	// caj试转pdf
 	public void caj2pdf_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		String transformType="caj2pdf_test";
 		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("caj2pdf_test");
 		if(!srcDir.exists() || !srcDir.isDirectory()) return;
 		TransformFileSet fileSet = null;
 		Set<File> needMoveFilesSet = new HashSet<File>();
+		Set<File> needBakFileSet = new HashSet<File>();
 		for(File file : srcDir.listFiles()){
 			if(file==null) continue;
 			// 找到目录下第一个caj，并转换为pdf
@@ -153,6 +185,7 @@ public class DocFormatConverter {
 				fileSet = Caj2PdfUtils.caj2pdf(robotMngr, file.getCanonicalPath());
 				if(fileSet.getSrcFile()!=null) {
 					tfis.addSrcFile(fileSet.getSrcFile());
+					needBakFileSet.add(fileSet.getSrcFile());
 				}
 				break;
 			}
@@ -171,7 +204,7 @@ public class DocFormatConverter {
 		}
 		
 		// 进行完成后的各项通知和扫尾工作
-		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "caj试转pdf已完成");
+		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "caj试转pdf已完成",transformType,needBakFileSet);
 		tfis.save2db();
 	}
 	
@@ -182,17 +215,20 @@ public class DocFormatConverter {
 	
 	// caj试转word
 	public void caj2word_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		String transformType="caj2word_test";
 		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("caj2word_test");
 		if(!srcDir.exists() || !srcDir.isDirectory()) return;
 		TransformFileSet fileSet = null;
 		Set<File> needMoveFilesSet = new HashSet<File>();
+		Set<File> needBakFileSet = new HashSet<File>();
 		for(File file : srcDir.listFiles()){
 			if(file==null) continue;
 			// 找到目录下第一个caj，并转换为pdf
 			if(file.exists() && file.isFile() && file.getCanonicalPath().endsWith(".caj")) {
 				fileSet = Caj2PdfUtils.caj2pdf(robotMngr, file.getCanonicalPath());
 				tfis.addSrcFile(fileSet.getSrcFile());
+				needBakFileSet.add(fileSet.getSrcFile());
 				break;
 			}
 		}
@@ -210,7 +246,7 @@ public class DocFormatConverter {
 		needMoveFilesSet.add(fileSet.getDstFile());
 		tfis.addDstFile(fileSet.getDstFile());
 		// 进行完成后的各项通知和扫尾工作
-		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "caj试转word已完成");
+		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "caj试转word已完成",transformType, needBakFileSet);
 		tfis.save2db();
 	}
 	
@@ -221,6 +257,7 @@ public class DocFormatConverter {
 	
 	// pdf批量转word
 	public void pdf2word(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		String transformType="pdf2word";
 		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("pdf2word");
 		if(!srcDir.exists() || !srcDir.isDirectory()){
@@ -230,6 +267,7 @@ public class DocFormatConverter {
 		TransformFileSet fileSet;
 		// 存放需要移动的文件
 		Set<File> needMoveFilesSet = new HashSet<File>();
+		Set<File> needBakFileSet = new HashSet<File>();
 		for(File file : srcDir.listFiles()){
 			if(file==null) continue;
 			// 将单个pdf文件转换为word
@@ -238,8 +276,9 @@ public class DocFormatConverter {
 			needMoveFilesSet.add(fileSet.getSrcFile());
 			tfis.addDstFile(fileSet.getDstFile());
 			tfis.addSrcFile(fileSet.getSrcFile());
+			needBakFileSet.add(fileSet.getSrcFile());
 		}
-		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "pdf转word已完成");
+		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "pdf转word已完成",transformType, needBakFileSet);
 		tfis.save2db();
 	}
 	
@@ -250,6 +289,7 @@ public class DocFormatConverter {
 	
 	// pdf试转word
 	public void pdf2word_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		String transformType="pdf2word_test";
 		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("pdf2word_test");
 		if(!srcDir.exists() || !srcDir.isDirectory()){
@@ -259,6 +299,7 @@ public class DocFormatConverter {
 		TransformFileSet fileSet = null;
 		// 存放需要移动的文件
 		Set<File> needMoveFilesSet = new HashSet<File>();
+		Set<File> needBakFileSet = new HashSet<File>();
 		File pdfFile = null;
 		PdfManager pm = new PdfManager();
 		// 找到目录下页数最多那个pdf
@@ -268,13 +309,14 @@ public class DocFormatConverter {
 					pdfFile = file;
 				}else {
 					if(pm.pdfPageCount(file.getCanonicalPath())>pm.pdfPageCount(pdfFile.getCanonicalPath())) {
-						pdfFile = file;
+						pdfFile = file;		
 					}
 				}
 			}
 		}
 		if(pdfFile==null) return;
 		tfis.addSrcFile(pdfFile);
+		needBakFileSet.add(pdfFile);
 		// 获得转换得到的pdf的实际页数
 		int realPageCount = pm.pdfPageCount(pdfFile.getCanonicalPath());
 		// 计算出应该提取的页数
@@ -286,7 +328,7 @@ public class DocFormatConverter {
 		needMoveFilesSet.add(fileSet.getDstFile());
 		needMoveFilesSet.add(fileSet.getSrcFile());
 		tfis.addDstFile(fileSet.getDstFile());
-		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "pdf试转word已完成");
+		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "pdf试转word已完成", transformType, needBakFileSet);
 		tfis.save2db();
 	}
 	
@@ -298,6 +340,7 @@ public class DocFormatConverter {
 	
 	// 批量pdf转mobi，用calibre
 	public void pdf2mobiByCalibre(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		String transformType="pdf2mobiByCalibre";
 		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("pdf2mobiByCalibre");
 		if(!srcDir.exists() || !srcDir.isDirectory()){
@@ -305,6 +348,7 @@ public class DocFormatConverter {
 		}
 		TransformFileSet fileSet;
 		Set<File> needMoveFilesSet = new HashSet<File>();
+		Set<File> needBakFileSet = new HashSet<File>();
 		for(File file : srcDir.listFiles()){
 			if(file==null) continue;
 			fileSet = Pdf2MobiUtils.pdf2mobiByCalibre(robotMngr, file.getCanonicalPath());
@@ -312,8 +356,9 @@ public class DocFormatConverter {
 			needMoveFilesSet.add(fileSet.getDstFile());
 			tfis.addDstFile(fileSet.getDstFile());
 			tfis.addSrcFile(fileSet.getSrcFile());
+			needBakFileSet.add(fileSet.getSrcFile());
 		}
-		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "pdf转mobi已完成");
+		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "pdf转mobi已完成",transformType, needBakFileSet);
 		tfis.save2db();
 	}
 	
@@ -324,6 +369,7 @@ public class DocFormatConverter {
 	
 	// 试转pdf转mobi
 	public void pdf2mobiByCalibre_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		String transformType="pdf2mobiByCalibre_test";
 		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("pdf2mobiByCalibre_test");
 		if(!srcDir.exists() || !srcDir.isDirectory()){
@@ -333,6 +379,7 @@ public class DocFormatConverter {
 		TransformFileSet fileSet = null;
 		// 存放需要移动的文件
 		Set<File> needMoveFilesSet = new HashSet<File>();
+		Set<File> needBakFileSet = new HashSet<File>();
 		File pdfFile = null;
 		PdfManager pm = new PdfManager();
 		// 找到目录下页数最多那个pdf
@@ -349,6 +396,7 @@ public class DocFormatConverter {
 		}
 		if(pdfFile==null) return;
 		tfis.addSrcFile(pdfFile);
+		needBakFileSet.add(pdfFile);
 		// 获得转换得到的pdf的实际页数
 		int realPageCount = pm.pdfPageCount(pdfFile.getCanonicalPath());
 		// 计算出应该提取的页数
@@ -360,7 +408,7 @@ public class DocFormatConverter {
 		needMoveFilesSet.add(fileSet.getDstFile());
 		needMoveFilesSet.add(fileSet.getSrcFile());
 		tfis.addDstFile(fileSet.getDstFile());
-		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "pdf试转mobi已完成");
+		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "pdf试转mobi已完成",transformType,needBakFileSet);
 		tfis.save2db();
 	}
 	
@@ -371,6 +419,7 @@ public class DocFormatConverter {
 	
 	// 批量txt转mobi，用calibre
 	public void txt2mobi(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		String transformType="txt2mobi";
 		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("txt2mobi");
 		if(!srcDir.exists() || !srcDir.isDirectory()){
@@ -380,6 +429,7 @@ public class DocFormatConverter {
 		TxtUtils.splitTxtFiles(srcDir);
 		TransformFileSet fileSet;
 		Set<File> needMoveFilesSet = new HashSet<File>();
+		Set<File> needBakFileSet = new HashSet<File>();
 		for(File file : srcDir.listFiles()){
 			if(file==null || !Common.isFileExists(file, "txt")) continue;
 			fileSet = Txt2MobiUtils.txt2mobi(robotMngr, file.getCanonicalPath());
@@ -387,8 +437,9 @@ public class DocFormatConverter {
 			needMoveFilesSet.add(fileSet.getDstFile());
 			tfis.addDstFile(fileSet.getDstFile());
 			tfis.addSrcFile(fileSet.getSrcFile());
+			needBakFileSet.add(fileSet.getSrcFile());
 		}
-		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "txt转mobi已完成");
+		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "txt转mobi已完成",transformType,needBakFileSet);
 		tfis.save2db();
 	}
 	
@@ -398,20 +449,24 @@ public class DocFormatConverter {
 	
 	// 试转txt转mobi
 	public void txt2mobi_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		String transformType="txt2mobi_test";
 		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("txt2mobi_test");
-		File srcFile = TxtUtils.extractFrontPart();
+		File firstTxtFile = TxtUtils.getFirstTxtFile();
+		File srcFile = TxtUtils.extractFrontPart(firstTxtFile);
 		if(srcFile==null) {
 			logger.warn("没有txt文件可以试转");
 			return;
 		}
 		TransformFileSet fileSet = Txt2MobiUtils.txt2mobi(robotMngr, srcFile.getCanonicalPath());
 		Set<File> needMoveFilesSet = new HashSet<File>();
+		Set<File> needBakFileSet = new HashSet<File>();
 		needMoveFilesSet.add(fileSet.getSrcFile());
 		needMoveFilesSet.add(fileSet.getDstFile());
 		tfis.addDstFile(fileSet.getDstFile());
 		tfis.addSrcFile(fileSet.getSrcFile());
-		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "txt试转mobi已完成");
+		needBakFileSet.add(firstTxtFile);
+		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "txt试转mobi已完成",transformType, needBakFileSet);
 		tfis.save2db();
 	}
 	
@@ -421,6 +476,7 @@ public class DocFormatConverter {
 	
 	// 批量img转word
 	public void img2word(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		String transformType="img2word";
 		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("img2word");
 		if(!srcDir.exists() || !srcDir.isDirectory()){
@@ -430,6 +486,7 @@ public class DocFormatConverter {
 		// 存放待转换的pdf文件
 		Set<File> imgFileSet = new HashSet<File>();
 		Set<File> needMoveFilesSet = new HashSet<File>();
+		Set<File> needBakFileSet = new HashSet<File>();
 		// 先全部caj转pdf
 		for(File file : srcDir.listFiles()){
 			if(file==null) continue;
@@ -438,6 +495,7 @@ public class DocFormatConverter {
 			needMoveFilesSet.add(fileSet.getSrcFile());
 			imgFileSet.add(fileSet.getDstFile());
 			tfis.addSrcFile(fileSet.getSrcFile());
+			needBakFileSet.add(fileSet.getSrcFile());
 		}
 		// 再全部pdf转word
 		for(File file : imgFileSet){
@@ -447,7 +505,7 @@ public class DocFormatConverter {
 			needMoveFilesSet.add(fileSet.getSrcFile());
 			tfis.addDstFile(fileSet.getDstFile());
 		}
-		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "图片转word已完成");
+		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "图片转word已完成",transformType,needBakFileSet);
 		tfis.save2db();
 	}
 	
@@ -457,6 +515,7 @@ public class DocFormatConverter {
 	
 	// 试转img转word
 	public void img2word_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		String transformType="img2word_test";
 		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("img2word_test");
 		if(!srcDir.exists() || !srcDir.isDirectory()){
@@ -466,6 +525,7 @@ public class DocFormatConverter {
 		// 存放待转换的pdf文件
 		Set<File> imgFileSet = new HashSet<File>();
 		Set<File> needMoveFilesSet = new HashSet<File>();
+		Set<File> needBakFileSet = new HashSet<File>();
 		// 先全部caj转pdf
 		for(File file : srcDir.listFiles()){
 			if(file==null) continue;
@@ -474,6 +534,7 @@ public class DocFormatConverter {
 				needMoveFilesSet.add(fileSet.getDstFile());
 				imgFileSet.add(fileSet.getDstFile());
 				tfis.addSrcFile(fileSet.getSrcFile());
+				needBakFileSet.add(fileSet.getSrcFile());
 				break;
 			}
 		}
@@ -485,7 +546,7 @@ public class DocFormatConverter {
 			needMoveFilesSet.add(fileSet.getSrcFile());
 			tfis.addDstFile(fileSet.getDstFile());
 		}
-		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "图片试转word已完成");
+		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "图片试转word已完成", transformType, needBakFileSet);
 		tfis.save2db();
 	}
 	
@@ -495,6 +556,7 @@ public class DocFormatConverter {
 	
 	// pdf批量转epub
 	public void pdf2epub(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		String transformType="pdf2epub";
 		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("pdf2epub");
 		if(!srcDir.exists() || !srcDir.isDirectory()){
@@ -502,6 +564,7 @@ public class DocFormatConverter {
 		}
 		TransformFileSet fileSet;
 		Set<File> needMoveFilesSet = new HashSet<File>();
+		Set<File> needBakFileSet = new HashSet<File>();
 		for(File file : srcDir.listFiles()){
 			if(file==null) continue;
 			fileSet = Pdf2EpubUtils.pdf2epub(robotMngr, file.getCanonicalPath());
@@ -509,8 +572,9 @@ public class DocFormatConverter {
 			needMoveFilesSet.add(fileSet.getDstFile());
 			tfis.addDstFile(fileSet.getDstFile());
 			tfis.addSrcFile(fileSet.getSrcFile());
+			needBakFileSet.add(fileSet.getSrcFile());
 		}
-		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "pdf转epub已完成");
+		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "pdf转epub已完成", transformType, needBakFileSet);
 		tfis.save2db();
 	}
 	
@@ -520,6 +584,7 @@ public class DocFormatConverter {
 	
 	// 试转pdf转epub
 	public void pdf2epub_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		String transformType="pdf2epub_test";
 		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("pdf2epub_test");
 		if(!srcDir.exists() || !srcDir.isDirectory()){
@@ -529,6 +594,7 @@ public class DocFormatConverter {
 		TransformFileSet fileSet = null;
 		// 存放需要移动的文件
 		Set<File> needMoveFilesSet = new HashSet<File>();
+		Set<File> needBakFileSet = new HashSet<File>();
 		File pdfFile = null;
 		PdfManager pm = new PdfManager();
 		// 找到目录下页数最多那个pdf
@@ -545,6 +611,7 @@ public class DocFormatConverter {
 		}
 		if(pdfFile==null) return;
 		tfis.addSrcFile(pdfFile);
+		needBakFileSet.add(pdfFile);
 		// 获得转换得到的pdf的实际页数
 		int realPageCount = pm.pdfPageCount(pdfFile.getCanonicalPath());
 		// 计算出应该提取的页数
@@ -556,7 +623,7 @@ public class DocFormatConverter {
 		needMoveFilesSet.add(fileSet.getDstFile());
 		needMoveFilesSet.add(fileSet.getSrcFile());
 		tfis.addDstFile(fileSet.getDstFile());
-		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "pdf试转epub已完成");
+		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "pdf试转epub已完成", transformType, needBakFileSet);
 		tfis.save2db();
 	}
 	
@@ -566,6 +633,7 @@ public class DocFormatConverter {
 	
 	// 用abbyy进行pdf转mobi
 	public void pdf2mobiByAbbyy(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		String transformType="pdf2mobiByAbbyy";
 		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("pdf2mobiByAbbyy");
 		if(!srcDir.exists() || !srcDir.isDirectory()){
@@ -575,6 +643,7 @@ public class DocFormatConverter {
 		// 存放待转换的pdf文件
 		Set<File> imgFileSet = new HashSet<File>();
 		Set<File> needMoveFilesSet = new HashSet<File>();
+		Set<File> needBakFileSet = new HashSet<File>();
 		// 先全部pdf转epub
 		for(File file : srcDir.listFiles()){
 			if(file==null) continue;
@@ -583,6 +652,7 @@ public class DocFormatConverter {
 			needMoveFilesSet.add(fileSet.getSrcFile());
 			imgFileSet.add(fileSet.getDstFile());
 			tfis.addSrcFile(fileSet.getSrcFile());
+			needBakFileSet.add(fileSet.getSrcFile());
 		}
 		// 再全部epub转mobi
 		for(File file : imgFileSet){
@@ -592,7 +662,7 @@ public class DocFormatConverter {
 			needMoveFilesSet.add(fileSet.getSrcFile());
 			tfis.addDstFile(fileSet.getDstFile());
 		}
-		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "pdf转mobi已完成");
+		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "pdf转mobi已完成", transformType, needBakFileSet);
 		tfis.save2db();
 	}
 	
@@ -601,6 +671,7 @@ public class DocFormatConverter {
 	}
 	
 	public void pdf2mobiByAbbyy_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		String transformType="pdf2mobiByAbbyy_test";
 		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("pdf2mobiByAbbyy_test");
 		if(!srcDir.exists() || !srcDir.isDirectory()){
@@ -610,6 +681,7 @@ public class DocFormatConverter {
 		TransformFileSet fileSet = null;
 		// 存放需要移动的文件
 		Set<File> needMoveFilesSet = new HashSet<File>();
+		Set<File> needBakFileSet = new HashSet<File>();
 		File pdfFile = null;
 		PdfManager pm = new PdfManager();
 		// 找到目录下页数最多那个pdf
@@ -619,13 +691,14 @@ public class DocFormatConverter {
 					pdfFile = file;
 				}else {
 					if(pm.pdfPageCount(file.getCanonicalPath())>pm.pdfPageCount(pdfFile.getCanonicalPath())) {
-						pdfFile = file;
+						pdfFile = file;	
 					}
 				}
 			}
 		}
 		if(pdfFile==null) return;
 		tfis.addSrcFile(pdfFile);
+		needBakFileSet.add(pdfFile);
 		// 获得转换得到的pdf的实际页数
 		int realPageCount = pm.pdfPageCount(pdfFile.getCanonicalPath());
 		// 计算出应该提取的页数
@@ -639,7 +712,7 @@ public class DocFormatConverter {
 		needMoveFilesSet.add(fileSet.getDstFile());
 		needMoveFilesSet.add(fileSet.getSrcFile());
 		tfis.addDstFile(fileSet.getDstFile());
-		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "pdf试转mobi已完成");	
+		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "pdf试转mobi已完成", transformType, needBakFileSet);	
 		tfis.save2db();
 	}
 	
@@ -710,7 +783,7 @@ public class DocFormatConverter {
 		if(Prop.getBool("debug")) {		// 调试模式
 			//dfc.img2word();
 			//AbbyyUtils.openPdf(new RobotManager(), "C:\\Users\\qzfeng\\Desktop\\cajwait\\装配式建筑施工安全评价体系研究_杨爽.pdf");
-			dfc.pdf2mobiByCalibre_test();
+			dfc.pdf2word();
 		}else {
 			dfc.execTransform(args);
 		}
