@@ -64,7 +64,7 @@ public class DocFormatConverter {
 	private void doAfterTransform(File srcDir, File dstDir, Set<File> needMoveFilesSet, String noticeContent, String transformType, Set<File> needBakFileSet) throws IOException, MessagingException {
 		boolean debug = Prop.getBool("debug");
 		// 如果不是调试或者自测模式，则需要备份
-		if(!debug && !selftest && Prop.getBool("docbak.need")) {
+		if(!debug && (!selftest || Prop.getBool("selftest.simureal")) && Prop.getBool("docbak.need")) {
 			// 备份不是必须步骤，任何异常不要影响正常流程
 			try {
 				// 备份文件，以便未来测试
@@ -76,7 +76,7 @@ public class DocFormatConverter {
 		// 将需要移动的文件移动到目标文件夹
 		dstDir = Common.mvAllFilesFromSrcToDst(needMoveFilesSet, dstDir);
 		// 如果是调试或者自测模式，不需要通知
-		if(!debug && !selftest) {
+		if(!debug && (!selftest || Prop.getBool("selftest.simureal"))) {
 			// 通知不是必须步骤，任何异常不要影响正常流程
 			try {
 				// 完成后声音通知
@@ -88,12 +88,12 @@ public class DocFormatConverter {
 			}
 		}
 		// 如果是自测，不需要打开文件窗口
-		if(!selftest && Prop.getBool("needopenfinishedwindows")) {
+		if((!selftest || Prop.getBool("selftest.simureal")) && Prop.getBool("needopenfinishedwindows")) {
 			// 打开完成后的文件夹窗口
 			Common.openFinishedWindows(dstDir);
 		}
 		// 如果是调试或者自测模式，则不需要修改桌面快捷方式
-		if(!debug && !selftest && Prop.getBool("bat.directtofinishedwindows.need")) {
+		if(!debug && (!selftest || Prop.getBool("selftest.simureal")) && Prop.getBool("bat.directtofinishedwindows.need")) {
 			// 在桌面生成一个已完成文件夹的bat文件，可以一运行立刻打开文件夹
 			Common.createBatDirectToFinishedWindows(dstDir);
 		}
