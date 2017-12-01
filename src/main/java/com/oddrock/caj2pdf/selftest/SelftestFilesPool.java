@@ -16,8 +16,9 @@ import com.oddrock.common.file.FileUtils;
  *
  */
 public class SelftestFilesPool {
-	public static File getSingleRandomTestFile(String type){
-		File testTypeFileDir = new File(Prop.get("selftest.pool.basedirpath"), type);
+	// 生成指定文件类型的单个测试文件
+	public static File getSingleRandomTestFileByFileType(String fileType){
+		File testTypeFileDir = new File(Prop.get("selftest.pool.basedirpath"), fileType);
 		if(!testTypeFileDir.exists() || !testTypeFileDir.isDirectory()) {
 			return null;
 		}
@@ -31,15 +32,16 @@ public class SelftestFilesPool {
 		return testFiles[randomIndex];
 	}
 	
-	public static Set<File> getRandomTestFiles(String type, int count){
+	// 生成指定数量指定文件类型的测试文件
+	public static Set<File> getRandomTestFilesByFileType(String fileType, int count){
 		Set<File> fileSet = new HashSet<File>();
-		File testTypeFileDir = new File(Prop.get("test.pool.basedirpath"), type);
+		File testTypeFileDir = new File(Prop.get("selftest.pool.basedirpath"), fileType);
 		// 如果要获得的文件数量大于池中文件总数，则将池中文件全部返回
 		if(testTypeFileDir.listFiles().length<=count) {		
 			fileSet.addAll(Arrays.asList(testTypeFileDir.listFiles()));
 		}else {
 			while(count>0) {
-				File file = getSingleRandomTestFile(type);
+				File file = getSingleRandomTestFileByFileType(fileType);
 				if(!fileSet.contains(file)) {
 					fileSet.add(file);
 					count--;
@@ -49,12 +51,17 @@ public class SelftestFilesPool {
 		return fileSet;
 	}
 	
-	// 获取测试文件，拷贝到指定目录下
-	public static void copyRandomTestFilesToDstDir(String type, int count, File dstDir) throws IOException {
-		Set<File> fileSet = getRandomTestFiles(type, count);
+	// 生成指定数量指定文件类型的测试文件，拷贝到指定目录下
+	public static void generateTestFilesByFileType(String type, int count, File dstDir) throws IOException {
+		Set<File> fileSet = getRandomTestFilesByFileType(type, count);
 		for(File file : fileSet) {
 			FileUtils.copyFile(file.getCanonicalPath(), new File(dstDir, file.getName()).getCanonicalPath());
 		}
+	}
+	
+	// 在srcdirpath目录下生成指定数量指定文件类型的测试文件
+	public static void generateTestFilesByFileType(String type, int count) throws IOException {
+		generateTestFilesByFileType(type, count, new File(Prop.get("srcdirpath")));
 	}
 	
 	public static void main(String[] args) throws IOException {
@@ -63,6 +70,6 @@ public class SelftestFilesPool {
 		for(File file : fileSet) {
 			System.out.println(file.getCanonicalPath());
 		}*/
-		copyRandomTestFilesToDstDir("img", 10, new File(Prop.get("srcdirpath")));
+		generateTestFilesByFileType("img", 10);
 	}
 }

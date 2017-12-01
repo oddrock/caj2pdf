@@ -109,8 +109,6 @@ public class DocFormatConverter {
 				needMoveFilesSet.add(fileSet.getDstFile());
 				tfis.addDstFile(fileSet.getDstFile());
 			}
-			
-			
 		}
 		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "caj转pdf已完成", transformType, needBakFileSet);
 		tfis.save2db();
@@ -720,6 +718,11 @@ public class DocFormatConverter {
 		pdf2mobiByAbbyy_test(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
+	// 自测模式
+	public void selftest() {
+		
+	}
+	
 	public void execTransform(String[] args) throws IOException, InterruptedException, MessagingException {
 		String method = Prop.get("caj2pdf.start");
 		if(method==null) {
@@ -760,6 +763,8 @@ public class DocFormatConverter {
 			pdf2mobiByAbbyy();
 		}else if("pdf2mobi_byabbyy_test".equalsIgnoreCase(method)) {
 			pdf2mobiByAbbyy_test();
+		}else if("selftest".equalsIgnoreCase(method)) {
+			selftest();
 		}else if("captureimage".equalsIgnoreCase(method)) {
 			if(args.length>=6) {
 				Thread.sleep(Integer.parseInt(args[1])*1000);
