@@ -30,6 +30,7 @@ import com.oddrock.caj2pdf.utils.Prop;
 import com.oddrock.caj2pdf.utils.TransformRuleUtils;
 import com.oddrock.caj2pdf.utils.TxtUtils;
 import com.oddrock.common.awt.RobotManager;
+import com.oddrock.common.file.FileUtils;
 import com.oddrock.common.pdf.PdfManager;
 import com.oddrock.common.windows.CmdExecutor;
 
@@ -43,6 +44,10 @@ public class DocFormatConverter {
 	}
 	
 	private void doBeforeTransform(File srcDir) {
+		if(Prop.getBool("deletehiddenfile")) {
+			// 删除隐藏文件
+			FileUtils.deleteHiddenFiles(srcDir);
+		}
 		for(File file : srcDir.listFiles()) {
 			if(file.isHidden() || file.isDirectory()) continue;
 			String fileName = file.getName();
@@ -82,12 +87,19 @@ public class DocFormatConverter {
 				e.printStackTrace();
 			}
 		}
-		// 打开完成后的文件夹窗口
-		Common.openFinishedWindows(dstDir);
+		// 如果是自测，不需要打开文件窗口
+		if(!selftest) {
+			// 打开完成后的文件夹窗口
+			Common.openFinishedWindows(dstDir);
+		}
 		// 如果是调试或者自测模式，则不需要修改桌面快捷方式
 		if(!debug && !selftest) {
 			// 在桌面生成一个已完成文件夹的bat文件，可以一运行立刻打开文件夹
 			Common.createBatDirectToFinishedWindows(dstDir);
+		}
+		if(Prop.getBool("deletehiddenfile")) {
+			// 删除隐藏文件
+			FileUtils.deleteHiddenFiles(srcDir);
 		}
 		logger.warn(noticeContent+ ":" + srcDir.getCanonicalPath());
 	}
@@ -845,7 +857,7 @@ public class DocFormatConverter {
 		if(Prop.getBool("debug")) {		// 调试模式
 			//dfc.img2word();
 			//AbbyyUtils.openPdf(new RobotManager(), "C:\\Users\\qzfeng\\Desktop\\cajwait\\装配式建筑施工安全评价体系研究_杨爽.pdf");
-			dfc.pdf2word();
+			dfc.selftest();
 		}else {
 			dfc.execTransform(args);
 		}
