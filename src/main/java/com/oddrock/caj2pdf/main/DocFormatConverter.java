@@ -4,10 +4,13 @@ import java.awt.AWTException;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.mail.MessagingException;
+
 import org.apache.log4j.Logger;
+
 import com.oddrock.caj2pdf.bean.TransformFileSet;
 import com.oddrock.caj2pdf.biz.Caj2PdfUtils;
 import com.oddrock.caj2pdf.biz.Epub2MobiUtils;
@@ -19,6 +22,9 @@ import com.oddrock.caj2pdf.biz.PdfUtils;
 import com.oddrock.caj2pdf.biz.Txt2MobiUtils;
 import com.oddrock.caj2pdf.persist.DocBakUtils;
 import com.oddrock.caj2pdf.persist.TransformInfoStater;
+import com.oddrock.caj2pdf.selftest.SelftestFilesPool;
+import com.oddrock.caj2pdf.selftest.SelftestRuleUtils;
+import com.oddrock.caj2pdf.selftest.bean.SelftestRule;
 import com.oddrock.caj2pdf.utils.Common;
 import com.oddrock.caj2pdf.utils.Prop;
 import com.oddrock.caj2pdf.utils.TransformRuleUtils;
@@ -53,7 +59,7 @@ public class DocFormatConverter {
 	private void doAfterTransform(File srcDir, File dstDir, Set<File> needMoveFilesSet, String noticeContent, String transformType, Set<File> needBakFileSet) throws IOException, MessagingException {
 		boolean debug = Prop.getBool("debug");
 		// 如果是调试或者自测模式，不需要备份
-		if(!debug || selftest) {
+		if(!debug && !selftest) {
 			// 备份不是必须步骤，任何异常不要影响正常流程
 			try {
 				// 备份文件，以便未来测试
@@ -65,7 +71,7 @@ public class DocFormatConverter {
 		// 将需要移动的文件移动到目标文件夹
 		dstDir = Common.mvAllFilesFromSrcToDst(needMoveFilesSet, dstDir);
 		// 如果是调试或者自测模式，不需要通知
-		if(!debug || selftest) {
+		if(!debug && !selftest) {
 			// 通知不是必须步骤，任何异常不要影响正常流程
 			try {
 				// 完成后声音通知
@@ -79,7 +85,7 @@ public class DocFormatConverter {
 		// 打开完成后的文件夹窗口
 		Common.openFinishedWindows(dstDir);
 		// 如果是调试或者自测模式，则不需要修改桌面快捷方式
-		if(!debug || selftest) {
+		if(!debug && !selftest) {
 			// 在桌面生成一个已完成文件夹的bat文件，可以一运行立刻打开文件夹
 			Common.createBatDirectToFinishedWindows(dstDir);
 		}
@@ -337,10 +343,10 @@ public class DocFormatConverter {
 	
 	
 	// 批量pdf转mobi，用calibre
-	public void pdf2mobiByCalibre(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
-		String transformType="pdf2mobiByCalibre";
+	public void pdf2mobi_bycalibre(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		String transformType="pdf2mobi_bycalibre";
 		doBeforeTransform(srcDir);
-		TransformInfoStater tfis = new TransformInfoStater("pdf2mobiByCalibre");
+		TransformInfoStater tfis = new TransformInfoStater("pdf2mobi_bycalibre");
 		if(!srcDir.exists() || !srcDir.isDirectory()){
 			return;
 		}
@@ -361,15 +367,15 @@ public class DocFormatConverter {
 	}
 	
 	// 批量pdf转mobi，用calibre
-	public void pdf2mobiByCalibre() throws IOException, InterruptedException, MessagingException {
-		pdf2mobiByCalibre(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
+	public void pdf2mobi_bycalibre() throws IOException, InterruptedException, MessagingException {
+		pdf2mobi_bycalibre(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
 	// 试转pdf转mobi
-	public void pdf2mobiByCalibre_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
-		String transformType="pdf2mobiByCalibre_test";
+	public void pdf2mobi_bycalibre_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		String transformType="pdf2mobi_bycalibre_test";
 		doBeforeTransform(srcDir);
-		TransformInfoStater tfis = new TransformInfoStater("pdf2mobiByCalibre_test");
+		TransformInfoStater tfis = new TransformInfoStater("pdf2mobi_bycalibre_test");
 		if(!srcDir.exists() || !srcDir.isDirectory()){
 			return;
 		}
@@ -411,8 +417,8 @@ public class DocFormatConverter {
 	}
 	
 	// 试转pdf转mobi
-	public void pdf2mobiByCalibre_test() throws IOException, InterruptedException, MessagingException {
-		pdf2mobiByCalibre_test(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
+	public void pdf2mobi_bycalibre_test() throws IOException, InterruptedException, MessagingException {
+		pdf2mobi_bycalibre_test(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
 	// 批量txt转mobi，用calibre
@@ -630,10 +636,10 @@ public class DocFormatConverter {
 	}
 	
 	// 用abbyy进行pdf转mobi
-	public void pdf2mobiByAbbyy(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
-		String transformType="pdf2mobiByAbbyy";
+	public void pdf2mobi_byabbyy(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		String transformType="pdf2mobi_byabbyy";
 		doBeforeTransform(srcDir);
-		TransformInfoStater tfis = new TransformInfoStater("pdf2mobiByAbbyy");
+		TransformInfoStater tfis = new TransformInfoStater("pdf2mobi_byabbyy");
 		if(!srcDir.exists() || !srcDir.isDirectory()){
 			return;
 		}
@@ -664,14 +670,14 @@ public class DocFormatConverter {
 		tfis.save2db();
 	}
 	
-	public void pdf2mobiByAbbyy() throws IOException, InterruptedException, MessagingException {
-		pdf2mobiByAbbyy(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
+	public void pdf2mobi_byabbyy() throws IOException, InterruptedException, MessagingException {
+		pdf2mobi_byabbyy(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
-	public void pdf2mobiByAbbyy_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
-		String transformType="pdf2mobiByAbbyy_test";
+	public void pdf2mobi_byabbyy_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+		String transformType="pdf2mobi_byabbyy_test";
 		doBeforeTransform(srcDir);
-		TransformInfoStater tfis = new TransformInfoStater("pdf2mobiByAbbyy_test");
+		TransformInfoStater tfis = new TransformInfoStater("pdf2mobi_byabbyy_test");
 		if(!srcDir.exists() || !srcDir.isDirectory()){
 			return;
 		}
@@ -714,13 +720,64 @@ public class DocFormatConverter {
 		tfis.save2db();
 	}
 	
-	public void pdf2mobiByAbbyy_test() throws IOException, InterruptedException, MessagingException {
-		pdf2mobiByAbbyy_test(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
+	public void pdf2mobi_byabbyy_test() throws IOException, InterruptedException, MessagingException {
+		pdf2mobi_byabbyy_test(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
+	}
+	
+	// 执行单个测试计划
+	private void execSingleSelftestRule(SelftestRule rule) throws IOException, InterruptedException, MessagingException{
+		// 如果规则无效，则直接退出
+		if(rule==null || !rule.isValid()) return;
+		for(int i=0; i<rule.getTestCount(); i++){
+			SelftestFilesPool.generateTestFilesByTransformType(rule.getTransformType(),rule.getFileCount());
+			if(rule.getTransformType().equals("caj2pdf")){
+				caj2pdf();
+			}else if(rule.getTransformType().equals("caj2pdf_test")){
+				caj2pdf_test();
+			}else if(rule.getTransformType().equals("caj2word")){
+				caj2word();
+			}else if(rule.getTransformType().equals("caj2word_test")){
+				caj2word_test();
+			}else if(rule.getTransformType().equals("img2word")){
+				img2word();
+			}else if(rule.getTransformType().equals("img2word_test")){
+				img2word_test();
+			}else if(rule.getTransformType().equals("pdf2epub")){
+				pdf2epub();
+			}else if(rule.getTransformType().equals("pdf2epub_test")){
+				pdf2epub_test();
+			}else if(rule.getTransformType().equals("pdf2mobi_byabbyy")){
+				pdf2mobi_byabbyy();
+			}else if(rule.getTransformType().equals("pdf2mobi_byabbyy_test")){
+				pdf2mobi_byabbyy_test();
+			}else if(rule.getTransformType().equals("pdf2mobi_bycalibre")){
+				pdf2mobi_bycalibre();
+			}else if(rule.getTransformType().equals("pdf2mobi_bycalibre_test")){
+				pdf2mobi_bycalibre_test();
+			}else if(rule.getTransformType().equals("txt2mobi")){
+				txt2mobi();
+			}else if(rule.getTransformType().equals("txt2mobi_test")){
+				txt2mobi_test();
+			}else if(rule.getTransformType().equals("pdf2word")){
+				pdf2word();
+			}else if(rule.getTransformType().equals("pdf2word_test")){
+				pdf2word_test();
+			}
+		}
 	}
 	
 	// 自测模式
-	public void selftest() {
-		
+	public void selftest() throws IOException {
+		selftest = true;
+		List<SelftestRule> rules = SelftestRuleUtils.getSelftestRules();
+		for (SelftestRule sr : rules) {
+			try {
+				execSingleSelftestRule(sr);
+			} catch (Exception e) {		// 单次执行出现问题不影响其他测试
+				e.printStackTrace();
+			}
+		}
+		selftest = false;
 	}
 	
 	public void execTransform(String[] args) throws IOException, InterruptedException, MessagingException {
@@ -744,9 +801,9 @@ public class DocFormatConverter {
 		}else if("pdf2word_test".equalsIgnoreCase(method)) {
 			pdf2word_test();
 		}else if("pdf2mobi_bycalibre".equalsIgnoreCase(method)) {
-			pdf2mobiByCalibre();
+			pdf2mobi_bycalibre();
 		}else if("pdf2mobi_bycalibre_test".equalsIgnoreCase(method)) {
-			pdf2mobiByCalibre_test();
+			pdf2mobi_bycalibre_test();
 		}else if("txt2mobi".equalsIgnoreCase(method)) {
 			txt2mobi();
 		}else if("txt2mobi_test".equalsIgnoreCase(method)) {
@@ -760,9 +817,9 @@ public class DocFormatConverter {
 		}else if("pdf2epub_test".equalsIgnoreCase(method)) {
 			pdf2epub_test();
 		}else if("pdf2mobi_byabbyy".equalsIgnoreCase(method)) {
-			pdf2mobiByAbbyy();
+			pdf2mobi_byabbyy();
 		}else if("pdf2mobi_byabbyy_test".equalsIgnoreCase(method)) {
-			pdf2mobiByAbbyy_test();
+			pdf2mobi_byabbyy_test();
 		}else if("selftest".equalsIgnoreCase(method)) {
 			selftest();
 		}else if("captureimage".equalsIgnoreCase(method)) {

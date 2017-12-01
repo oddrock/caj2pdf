@@ -68,9 +68,60 @@ public class SelftestFilesPool {
 	}
 	
 	// 在srcdirpath目录下生成指定数量指定文件类型的测试文件
-	public static void generateTestFilesByFileType(String type, int count) throws IOException {
-		generateTestFilesByFileType(type, count, new File(Prop.get("srcdirpath")));
+	public static void generateTestFilesByFileType(String fileType, int count) throws IOException {
+		generateTestFilesByFileType(fileType, count, new File(Prop.get("srcdirpath")));
 	}
+	
+	// 根据转换类型生成测试文件，并copy到srcdirpath目录下
+	public static void generateTestFilesByTransformType(String transformType, int count) throws IOException {
+		generateTestFilesByTransformType(transformType, count, new File(Prop.get("srcdirpath")));
+	}
+	
+	// 根据转换类型生成测试文件，并copy到目标目录下
+	public static void generateTestFilesByTransformType(String transformType, int count, File dstDir) throws IOException {
+		logger.warn("开始从生成测试文件并拷贝到："+dstDir.getCanonicalPath());
+		String fileType = null;
+		if(transformType.equals("caj2pdf")){
+			fileType = "caj";
+		}else if(transformType.equals("caj2pdf_test")){
+			fileType = "caj";
+		}else if(transformType.equals("caj2word")){
+			fileType = "caj";
+		}else if(transformType.equals("caj2word_test")){
+			fileType = "caj";
+		}else if(transformType.equals("img2word")){
+			fileType = "img";
+		}else if(transformType.equals("img2word_test")){
+			fileType = "img";
+		}else if(transformType.equals("pdf2epub")){
+			fileType = "pdf";
+		}else if(transformType.equals("pdf2epub_test")){
+			fileType = "pdf";
+		}else if(transformType.equals("pdf2mobi_byabbyy")){
+			fileType = "pdf";
+		}else if(transformType.equals("pdf2mobi_byabbyy_test")){
+			fileType = "pdf";
+		}else if(transformType.equals("pdf2mobi_bycalibre")){
+			fileType = "pdf";
+		}else if(transformType.equals("pdf2mobi_bycalibre_test")){
+			fileType = "pdf";
+		}else if(transformType.equals("txt2mobi")){
+			fileType = "txt";
+		}else if(transformType.equals("txt2mobi_test")){
+			fileType = "txt";
+		}else if(transformType.equals("pdf2word")){
+			fileType = "pdf";
+		}else if(transformType.equals("pdf2word_test")){
+			fileType = "pdf";
+		}
+		if(fileType==null) return;
+		Set<File> fileSet = getRandomTestFilesByFileType(fileType, count);
+		for(File file : fileSet) {
+			FileUtils.copyFile(file.getCanonicalPath(), new File(dstDir, file.getName()).getCanonicalPath());
+		}
+		logger.warn("完成从生成测试文件并拷贝到："+dstDir.getCanonicalPath());
+	}
+
 	
 	public static void main(String[] args) throws IOException {
 		/*Set<File> fileSet = getRandomTestFiles("img",10);
