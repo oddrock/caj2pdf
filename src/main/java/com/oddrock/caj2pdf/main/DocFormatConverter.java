@@ -740,6 +740,12 @@ public class DocFormatConverter {
 	private void execSingleSelftestRule(SelftestRule rule) throws IOException, InterruptedException, MessagingException{
 		// 如果规则无效，则直接退出
 		if(rule==null || !rule.isValid()) return;
+		File[] oldFiles = new File(Prop.get("srcdirpath")).listFiles();
+		for(File oldFile : oldFiles) {
+			if(oldFile.exists() && oldFile.isFile()) {
+				oldFile.delete();
+			}
+		}
 		for(int i=0; i<rule.getTestCount(); i++){
 			SelftestFilesPool.generateTestFilesByTransformType(rule.getTransformType(),rule.getFileCount());
 			if(rule.getTransformType().equals("caj2pdf")){
