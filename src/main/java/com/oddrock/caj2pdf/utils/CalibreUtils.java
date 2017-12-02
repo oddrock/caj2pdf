@@ -4,6 +4,8 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import org.apache.log4j.Logger;
+
+import com.oddrock.caj2pdf.exception.TransformWaitTimeoutException;
 import com.oddrock.common.awt.RobotManager;
 import com.oddrock.common.windows.CmdExecutor;
 
@@ -79,8 +81,13 @@ public class CalibreUtils{
 	}
 	
 	// 等待添加书籍直到完成
-	public static void waitAddingBookEnd(RobotManager robotMngr) throws IOException, InterruptedException {
+	public static void waitAddingBookEnd(RobotManager robotMngr) throws IOException, InterruptedException, TransformWaitTimeoutException {
+		Timer timer = new Timer().start();
 		while(isAddingBook(robotMngr)) {
+			if(timer.getSpentTimeMillis()>TimeoutUtils.getTimeout("timeout.calibre.waitaddingbookend")) {
+				logger.warn("等待书籍添加时间过长，已达到："+timer.getSpentTimeMillis()/1000L+"秒");
+				throw new TransformWaitTimeoutException();
+			}
 			logger.warn("等待"+softwareName+"书籍添加完成......");
 			Common.waitM();
 		}
@@ -98,8 +105,13 @@ public class CalibreUtils{
 	}
 	
 	// 等待直到calibre打开转换页面
-	public static void waitTransformPageOpen(RobotManager robotMngr) throws IOException, InterruptedException {
+	public static void waitTransformPageOpen(RobotManager robotMngr) throws IOException, InterruptedException, TransformWaitTimeoutException {
+		Timer timer = new Timer().start();
 		while(!isTransformPageOpen(robotMngr)) {
+			if(timer.getSpentTimeMillis()>TimeoutUtils.getTimeout("timeout.calibre.waittransformpageopen")) {
+				logger.warn("等待转换页面打开时间过长，已达到："+timer.getSpentTimeMillis()/1000L+"秒");
+				throw new TransformWaitTimeoutException();
+			}
 			logger.warn("等待"+softwareName+"转换页面打开完成......");
 			Common.waitM();
 		}
@@ -123,12 +135,17 @@ public class CalibreUtils{
 	}
 	
 	// 打开并等待转换任务界面
-	public static void openAndWaitTransformTaskPage(RobotManager robotMngr) throws InterruptedException, IOException {
+	public static void openAndWaitTransformTaskPage(RobotManager robotMngr) throws InterruptedException, IOException, TransformWaitTimeoutException {
+		Timer timer = new Timer().start();
 		Common.waitM();
 		if(!isTransformTaskPageOpen(robotMngr)) {
 			toggleTransformTaskPage(robotMngr);
 		}
 		while(!isTransformTaskPageOpen(robotMngr)) {
+			if(timer.getSpentTimeMillis()>TimeoutUtils.getTimeout("timeout.calibre.waittransformtask")) {
+				logger.warn("等待转换任务页面打开时间过长，已达到："+timer.getSpentTimeMillis()/1000L+"秒");
+				throw new TransformWaitTimeoutException();
+			}
 			logger.warn("等待"+softwareName+"转换任务页面打开完成......");
 			Common.waitM();
 		}
@@ -141,8 +158,13 @@ public class CalibreUtils{
 	}
 	
 	// 等待直到转换任务完成
-	public  static void waitTransformTaskEnd(RobotManager robotMngr) throws IOException, InterruptedException {
+	public  static void waitTransformTaskEnd(RobotManager robotMngr) throws IOException, InterruptedException, TransformWaitTimeoutException {
+		Timer timer = new Timer().start();
 		while(!isTransformTaskEnd(robotMngr)) {
+			if(timer.getSpentTimeMillis()>TimeoutUtils.getTimeout("timeout.calibre.waittransformtaskend")) {
+				logger.warn("等待转换任务页面打开时间过长，已达到："+timer.getSpentTimeMillis()/1000L+"秒");
+				throw new TransformWaitTimeoutException();
+			}
 			logger.warn("等待"+softwareName+"转换任务完成......");
 			Common.waitM();
 		}
@@ -150,12 +172,17 @@ public class CalibreUtils{
 	}
 	
 	// 关闭并等待转换任务界面
-	public static void closeAndWaitTransformTaskPage(RobotManager robotMngr) throws InterruptedException, IOException {
+	public static void closeAndWaitTransformTaskPage(RobotManager robotMngr) throws InterruptedException, IOException, TransformWaitTimeoutException {
+		Timer timer = new Timer().start();
 		Common.waitM();
 		if(isTransformTaskPageOpen(robotMngr)) {
 			toggleTransformTaskPage(robotMngr);
 		}
 		while(isTransformTaskPageOpen(robotMngr)) {
+			if(timer.getSpentTimeMillis()>TimeoutUtils.getTimeout("timeout.calibre.waittransformtaskpageclose")) {
+				logger.warn("等待转换任务页面打开时间过长，已达到："+timer.getSpentTimeMillis()/1000L+"秒");
+				throw new TransformWaitTimeoutException();
+			}
 			logger.warn("等待"+softwareName+"转换任务页面关闭完成......");
 			Common.waitM();
 		}
@@ -199,9 +226,7 @@ public class CalibreUtils{
 		logger.warn("确认"+softwareName+"书籍删除已完成");
 	}
 	
-	// 用calibre打开一本书，并且保证只打开这一本书(即calibre里只有这本书)，如果有别的书就删除
-	public static void openSingleBook(RobotManager robotMngr, File file) throws IOException, InterruptedException {
-		if(!file.exists()&&!file.isFile()) return;
+	public static void openSingleBook_step1_1(RobotManager robotMngr, File file) throws IOException, InterruptedException {
 		// 鼠标挪开，避免挡事
 		Common.moveMouseAvoidHandicap(robotMngr);
 		// 关闭calibre
@@ -215,8 +240,20 @@ public class CalibreUtils{
 			// 不管有没有，点击确定导入
 			robotMngr.pressKey(KeyEvent.VK_ENTER);
 			Common.waitM();
+		}			
+	}
+	
+	public static void openSingleBook_step1(RobotManager robotMngr, File file) throws IOException, InterruptedException, TransformWaitTimeoutException {
+		openSingleBook_step1_1(robotMngr, file);
+		if(!isNoBook(robotMngr)) {
 			// 等待书导入完毕
-			waitAddingBookEnd(robotMngr);
+			try {
+				waitAddingBookEnd(robotMngr);
+			} catch (TransformWaitTimeoutException e) {
+				e.printStackTrace();
+				openSingleBook_step1_1(robotMngr, file);
+				waitAddingBookEnd(robotMngr);
+			}
 			Common.waitM();
 			// 然后删除calibre里所有书
 			delAllBooks(robotMngr);
@@ -225,8 +262,20 @@ public class CalibreUtils{
 			open(robotMngr, file);
 			Common.waitM();
 		}
+	}
+	
+	// 用calibre打开一本书，并且保证只打开这一本书(即calibre里只有这本书)，如果有别的书就删除
+	public static void openSingleBook(RobotManager robotMngr, File file) throws IOException, InterruptedException, TransformWaitTimeoutException {
+		if(!file.exists()&&!file.isFile()) return;
+		openSingleBook_step1(robotMngr, file);
 		// 等待书籍添加完毕
-		waitAddingBookEnd(robotMngr);
+		try {
+			waitAddingBookEnd(robotMngr);
+		} catch (TransformWaitTimeoutException e) {
+			e.printStackTrace();
+			openSingleBook_step1(robotMngr, file);
+			waitAddingBookEnd(robotMngr);
+		}
 		Common.waitLong();
 	}
 }

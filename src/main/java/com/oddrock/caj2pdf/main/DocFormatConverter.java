@@ -356,7 +356,7 @@ public class DocFormatConverter {
 	
 	
 	// 批量pdf转mobi，用calibre
-	public void pdf2mobi_bycalibre(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+	public void pdf2mobi_bycalibre(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException {
 		String transformType="pdf2mobi_bycalibre";
 		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("pdf2mobi_bycalibre");
@@ -380,12 +380,12 @@ public class DocFormatConverter {
 	}
 	
 	// 批量pdf转mobi，用calibre
-	public void pdf2mobi_bycalibre() throws IOException, InterruptedException, MessagingException {
+	public void pdf2mobi_bycalibre() throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException {
 		pdf2mobi_bycalibre(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
 	// 试转pdf转mobi
-	public void pdf2mobi_bycalibre_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+	public void pdf2mobi_bycalibre_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException {
 		String transformType="pdf2mobi_bycalibre_test";
 		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("pdf2mobi_bycalibre_test");
@@ -430,12 +430,12 @@ public class DocFormatConverter {
 	}
 	
 	// 试转pdf转mobi
-	public void pdf2mobi_bycalibre_test() throws IOException, InterruptedException, MessagingException {
+	public void pdf2mobi_bycalibre_test() throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException {
 		pdf2mobi_bycalibre_test(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
 	// 批量txt转mobi，用calibre
-	public void txt2mobi(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+	public void txt2mobi(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException {
 		String transformType="txt2mobi";
 		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("txt2mobi");
@@ -460,12 +460,12 @@ public class DocFormatConverter {
 		tfis.save2db();
 	}
 	
-	public void txt2mobi() throws IOException, InterruptedException, MessagingException {
+	public void txt2mobi() throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException {
 		txt2mobi(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
 	// 试转txt转mobi
-	public void txt2mobi_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+	public void txt2mobi_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException {
 		String transformType="txt2mobi_test";
 		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("txt2mobi_test");
@@ -487,7 +487,7 @@ public class DocFormatConverter {
 		tfis.save2db();
 	}
 	
-	public void txt2mobi_test() throws IOException, InterruptedException, MessagingException {
+	public void txt2mobi_test() throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException {
 		txt2mobi_test(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
@@ -649,7 +649,7 @@ public class DocFormatConverter {
 	}
 	
 	// 用abbyy进行pdf转mobi
-	public void pdf2mobi_byabbyy(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+	public void pdf2mobi_byabbyy(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException {
 		String transformType="pdf2mobi_byabbyy";
 		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("pdf2mobi_byabbyy");
@@ -683,11 +683,11 @@ public class DocFormatConverter {
 		tfis.save2db();
 	}
 	
-	public void pdf2mobi_byabbyy() throws IOException, InterruptedException, MessagingException {
+	public void pdf2mobi_byabbyy() throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException {
 		pdf2mobi_byabbyy(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
-	public void pdf2mobi_byabbyy_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+	public void pdf2mobi_byabbyy_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException {
 		String transformType="pdf2mobi_byabbyy_test";
 		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("pdf2mobi_byabbyy_test");
@@ -733,7 +733,7 @@ public class DocFormatConverter {
 		tfis.save2db();
 	}
 	
-	public void pdf2mobi_byabbyy_test() throws IOException, InterruptedException, MessagingException {
+	public void pdf2mobi_byabbyy_test() throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException {
 		pdf2mobi_byabbyy_test(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	

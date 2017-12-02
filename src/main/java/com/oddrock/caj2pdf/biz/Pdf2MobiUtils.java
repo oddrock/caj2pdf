@@ -8,6 +8,7 @@ import java.io.IOException;
 import org.apache.log4j.Logger;
 
 import com.oddrock.caj2pdf.bean.TransformFileSet;
+import com.oddrock.caj2pdf.exception.TransformWaitTimeoutException;
 import com.oddrock.caj2pdf.utils.CalibreUtils;
 import com.oddrock.caj2pdf.utils.Common;
 import com.oddrock.caj2pdf.utils.Prop;
@@ -17,17 +18,7 @@ import com.oddrock.common.windows.ClipboardUtils;
 public class Pdf2MobiUtils {
 	private static Logger logger = Logger.getLogger(Pdf2MobiUtils.class);
 	
-	// 用calibre实现pdf转mobi
-	public static TransformFileSet pdf2mobiByCalibre(RobotManager robotMngr, String pdfFilePath) throws IOException, InterruptedException {
-		// 移开鼠标避免挡事
-		Common.moveMouseAvoidHandicap(robotMngr);
-		TransformFileSet result = new TransformFileSet();
-		File srcFile = new File(pdfFilePath);
-		if(!Common.isFileExists(srcFile, "pdf")) {
-			logger.warn("文件不存在或后缀名不对："+pdfFilePath);
-			return result;
-		}
-		result.setSrcFile(srcFile);
+	public static void pdf2mobiByCalibre_step1_1(RobotManager robotMngr, File srcFile) throws IOException, InterruptedException, TransformWaitTimeoutException {
 		// 用calibre打开一本书，并且保证只打开这一本书(即calibre里只有这本书)，如果有别的书就删除
 		CalibreUtils.openSingleBook(robotMngr, srcFile);	
 		Common.waitShort();
@@ -49,8 +40,18 @@ public class Pdf2MobiUtils {
 		// 确认“逐个转换”
 		robotMngr.pressKey(KeyEvent.VK_ENTER);
 		Common.waitShort();
+	}
+	
+	public static void pdf2mobiByCalibre_step1(RobotManager robotMngr, File srcFile) throws IOException, InterruptedException, TransformWaitTimeoutException {
+		pdf2mobiByCalibre_step1_1(robotMngr, srcFile);
 		// 等待直到转换页面打开
-		CalibreUtils.waitTransformPageOpen(robotMngr);
+		try {
+			CalibreUtils.waitTransformPageOpen(robotMngr);
+		} catch (TransformWaitTimeoutException e) {
+			e.printStackTrace();
+			pdf2mobiByCalibre_step1_1(robotMngr, srcFile);
+			CalibreUtils.waitTransformPageOpen(robotMngr);
+		}
 		// 鼠标移动到“输出格式”上
 		robotMngr.moveMouseTo(Prop.getInt("calibre.coordinate.outformat.x"), 
 				Prop.getInt("calibre.coordinate.outformat.y"));
@@ -66,8 +67,28 @@ public class Pdf2MobiUtils {
 		// 开始转换
 		robotMngr.pressKey(KeyEvent.VK_ENTER);
 		Common.waitM();
+	}
+	
+	// 用calibre实现pdf转mobi
+	public static TransformFileSet pdf2mobiByCalibre(RobotManager robotMngr, String pdfFilePath) throws IOException, InterruptedException, TransformWaitTimeoutException {
+		// 移开鼠标避免挡事
+		Common.moveMouseAvoidHandicap(robotMngr);
+		TransformFileSet result = new TransformFileSet();
+		File srcFile = new File(pdfFilePath);
+		if(!Common.isFileExists(srcFile, "pdf")) {
+			logger.warn("文件不存在或后缀名不对："+pdfFilePath);
+			return result;
+		}
+		result.setSrcFile(srcFile);
+		pdf2mobiByCalibre_step1(robotMngr, srcFile);
 		// 等待直到打开转换任务页面
-		CalibreUtils.openAndWaitTransformTaskPage(robotMngr);
+		try {
+			CalibreUtils.openAndWaitTransformTaskPage(robotMngr);
+		} catch (TransformWaitTimeoutException e) {
+			e.printStackTrace();
+			pdf2mobiByCalibre_step1(robotMngr, srcFile);
+			CalibreUtils.openAndWaitTransformTaskPage(robotMngr);
+		}
 		Common.waitM();
 		// 等待直到转换任务完成
 		CalibreUtils.waitTransformTaskEnd(robotMngr);
@@ -140,7 +161,7 @@ public class Pdf2MobiUtils {
 		return result;
 	}
 
-	public static void main(String[] args) throws AWTException, IOException, InterruptedException {
+	public static void main(String[] args) throws AWTException, IOException, InterruptedException, TransformWaitTimeoutException {
 		String filePath = "C:\\Users\\qzfeng\\Desktop\\cajwait\\ZX粮油食品有限公司人力资源管理研究_何微.pdf";
 		RobotManager robotMngr = new RobotManager();
 		pdf2mobiByCalibre(robotMngr, filePath);

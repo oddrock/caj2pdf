@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import org.apache.log4j.Logger;
 import com.oddrock.caj2pdf.bean.TransformFileSet;
+import com.oddrock.caj2pdf.exception.TransformWaitTimeoutException;
 import com.oddrock.caj2pdf.utils.CalibreUtils;
 import com.oddrock.caj2pdf.utils.Common;
 import com.oddrock.caj2pdf.utils.Prop;
@@ -14,17 +15,7 @@ import com.oddrock.common.windows.ClipboardUtils;
 public class Txt2MobiUtils {
 	private static Logger logger = Logger.getLogger(Pdf2MobiUtils.class);
 
-	// 用calibre实现pdf转mobi
-	public static TransformFileSet txt2mobi(RobotManager robotMngr, String pdfFilePath) throws IOException, InterruptedException {
-		// 移开鼠标避免挡事
-		Common.moveMouseAvoidHandicap(robotMngr);
-		TransformFileSet result = new TransformFileSet();
-		File srcFile = new File(pdfFilePath);
-		if(!Common.isFileExists(srcFile, "txt")) {
-			logger.warn("文件不存在或后缀名不对："+pdfFilePath);
-			return result;
-		}
-		result.setSrcFile(srcFile);
+	public static void txt2mobi_step1(RobotManager robotMngr, File srcFile) throws IOException, InterruptedException, TransformWaitTimeoutException {
 		// 用calibre打开一本书，并且保证只打开这一本书(即calibre里只有这本书)，如果有别的书就删除
 		CalibreUtils.openSingleBook(robotMngr, srcFile);	
 		Common.waitShort();
@@ -63,8 +54,28 @@ public class Txt2MobiUtils {
 		// 开始转换
 		robotMngr.pressKey(KeyEvent.VK_ENTER);
 		Common.waitM();
+	}
+	
+	// 用calibre实现pdf转mobi
+	public static TransformFileSet txt2mobi(RobotManager robotMngr, String pdfFilePath) throws IOException, InterruptedException, TransformWaitTimeoutException {
+		// 移开鼠标避免挡事
+		Common.moveMouseAvoidHandicap(robotMngr);
+		TransformFileSet result = new TransformFileSet();
+		File srcFile = new File(pdfFilePath);
+		if(!Common.isFileExists(srcFile, "txt")) {
+			logger.warn("文件不存在或后缀名不对："+pdfFilePath);
+			return result;
+		}
+		result.setSrcFile(srcFile);
+		txt2mobi_step1(robotMngr, srcFile);
 		// 等待直到打开转换任务页面
-		CalibreUtils.openAndWaitTransformTaskPage(robotMngr);
+		try {
+			CalibreUtils.openAndWaitTransformTaskPage(robotMngr);
+		} catch (TransformWaitTimeoutException e) {
+			e.printStackTrace();
+			txt2mobi_step1(robotMngr, srcFile);
+			CalibreUtils.openAndWaitTransformTaskPage(robotMngr);
+		}
 		Common.waitM();
 		// 等待直到转换任务完成
 		CalibreUtils.waitTransformTaskEnd(robotMngr);

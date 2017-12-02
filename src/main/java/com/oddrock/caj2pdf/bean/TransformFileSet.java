@@ -8,7 +8,7 @@ import java.io.IOException;
  * @author qzfeng
  *
  */
-public class TransformFileSet {
+public class TransformFileSet{
 	private File srcFile;		// 源文件（转换前的文件）
 	private File dstFile;		// 目标文件（转换后的文件）
 	public File getSrcFile() {
