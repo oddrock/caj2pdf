@@ -20,6 +20,7 @@ import com.oddrock.caj2pdf.biz.Pdf2MobiUtils;
 import com.oddrock.caj2pdf.biz.Pdf2WordUtils;
 import com.oddrock.caj2pdf.biz.PdfUtils;
 import com.oddrock.caj2pdf.biz.Txt2MobiUtils;
+import com.oddrock.caj2pdf.exception.TransformWaitTimeoutException;
 import com.oddrock.caj2pdf.persist.DocBakUtils;
 import com.oddrock.caj2pdf.persist.TransformInfoStater;
 import com.oddrock.caj2pdf.selftest.SelftestFilesPool;
@@ -105,7 +106,7 @@ public class DocFormatConverter {
 	}
 	
 	// 批量caj转pdf
-	public void caj2pdf(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+	public void caj2pdf(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException {
 		String transformType="caj2pdf";
 		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("caj2pdf");
@@ -133,12 +134,12 @@ public class DocFormatConverter {
 	}
 	
 	// 批量caj转pdf，用默认的源文件夹和目标文件夹
-	public void caj2pdf() throws IOException, InterruptedException, MessagingException {
+	public void caj2pdf() throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException {
 		caj2pdf(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
 	// 批量caj转word
-	public void caj2word(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+	public void caj2word(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException {
 		String transformType="caj2word";
 		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("caj2word");
@@ -181,12 +182,12 @@ public class DocFormatConverter {
 	}
 	
 	// 批量caj转word
-	public void caj2word() throws IOException, InterruptedException, MessagingException {
+	public void caj2word() throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException {
 		caj2word(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
 	// caj试转pdf
-	public void caj2pdf_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+	public void caj2pdf_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException {
 		String transformType="caj2pdf_test";
 		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("caj2pdf_test");
@@ -225,12 +226,12 @@ public class DocFormatConverter {
 	}
 	
 	// caj试转pdf
-	public void caj2pdf_test() throws IOException, InterruptedException, MessagingException {
+	public void caj2pdf_test() throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException {
 		caj2pdf_test(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
 	// caj试转word
-	public void caj2word_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+	public void caj2word_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException {
 		String transformType="caj2word_test";
 		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("caj2word_test");
@@ -267,7 +268,7 @@ public class DocFormatConverter {
 	}
 	
 	// caj试转word
-	public void caj2word_test() throws IOException, InterruptedException, MessagingException{
+	public void caj2word_test() throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException{
 		caj2word_test(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
@@ -737,7 +738,7 @@ public class DocFormatConverter {
 	}
 	
 	// 执行单个测试计划
-	private void execSingleSelftestRule(SelftestRule rule) throws IOException, InterruptedException, MessagingException{
+	private void execSingleSelftestRule(SelftestRule rule) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException{
 		// 如果规则无效，则直接退出
 		if(rule==null || !rule.isValid()) return;
 		File[] oldFiles = new File(Prop.get("srcdirpath")).listFiles();
@@ -791,14 +792,14 @@ public class DocFormatConverter {
 		for (SelftestRule sr : rules) {
 			try {
 				execSingleSelftestRule(sr);
-			} catch (Exception e) {		// 单次执行出现问题不影响其他测试
+			} catch (Throwable e) {		// 单次执行出现任何问题都不影响其他测试
 				e.printStackTrace();
 			}
 		}
 		selftest = false;
 	}
 	
-	public void execTransform(String[] args) throws IOException, InterruptedException, MessagingException {
+	public void execTransform(String[] args) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException {
 		String method = Prop.get("caj2pdf.start");
 		if(method==null) {
 			method = "caj2word";
@@ -865,7 +866,15 @@ public class DocFormatConverter {
 			//AbbyyUtils.openPdf(new RobotManager(), "C:\\Users\\qzfeng\\Desktop\\cajwait\\装配式建筑施工安全评价体系研究_杨爽.pdf");
 			dfc.selftest();
 		}else {
-			dfc.execTransform(args);
+			try {
+				dfc.execTransform(args);
+			} catch (TransformWaitTimeoutException e) {
+				e.printStackTrace();
+				// 声音告警
+				Common.noticeAlertSound();
+				// 邮件告警
+				Common.noticeAlertMail("转换出现异常，请尽快人工处理！！！");
+			}
 		}
 	}
 }

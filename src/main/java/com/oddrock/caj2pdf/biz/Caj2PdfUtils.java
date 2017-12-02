@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 
 import com.oddrock.caj2pdf.bean.TransformFileSet;
+import com.oddrock.caj2pdf.exception.TransformWaitTimeoutException;
 import com.oddrock.caj2pdf.utils.CajViewerUtils;
 import com.oddrock.caj2pdf.utils.Common;
 import com.oddrock.caj2pdf.utils.FoxitUtils;
@@ -14,15 +15,7 @@ import com.oddrock.common.awt.RobotManager;
 import com.oddrock.common.windows.ClipboardUtils;
 
 public class Caj2PdfUtils {
-	public static TransformFileSet caj2pdf(RobotManager robotMngr, String cajFilePath) throws IOException, InterruptedException{
-		// 移开鼠标避免挡事
-		Common.moveMouseAvoidHandicap(robotMngr);
-		TransformFileSet result = new TransformFileSet();
-		File cajFile = new File(cajFilePath);
-		if(!cajFile.exists() || !cajFile.isFile() || !cajFile.getCanonicalPath().endsWith(".caj")) {
-			return result;
-		}
-		result.setSrcFile(cajFile);
+	public static void caj2pdf_step1(RobotManager robotMngr, String cajFilePath) throws IOException, InterruptedException {
 		// 关闭cajviewer
 		CajViewerUtils.close();
 		// 关闭foxit
@@ -42,8 +35,26 @@ public class Caj2PdfUtils {
 		// 等待直到打印完毕
 		CajViewerUtils.waitPrintFinish(robotMngr);
 		Common.wait(Prop.getInt("interval.waitminmillis"));
+	}
+	
+	public static TransformFileSet caj2pdf(RobotManager robotMngr, String cajFilePath) throws IOException, InterruptedException, TransformWaitTimeoutException{
+		// 移开鼠标避免挡事
+		Common.moveMouseAvoidHandicap(robotMngr);
+		TransformFileSet result = new TransformFileSet();
+		File cajFile = new File(cajFilePath);
+		if(!cajFile.exists() || !cajFile.isFile() || !cajFile.getCanonicalPath().endsWith(".caj")) {
+			return result;
+		}
+		result.setSrcFile(cajFile);
+		caj2pdf_step1(robotMngr, cajFilePath);
 		// 等待直到输入文件名
-		CajViewerUtils.waitInputfilename(robotMngr);
+		try {
+			CajViewerUtils.waitInputfilename(robotMngr);
+		} catch (TransformWaitTimeoutException e) {
+			e.printStackTrace();
+			caj2pdf_step1(robotMngr, cajFilePath);
+			CajViewerUtils.waitInputfilename(robotMngr);
+		}
 		// pdf文件生成在原地，只修改后缀
 		File pdfFile = new File(cajFile.getParent(), cajFile.getName().replaceAll(".caj$", ".pdf"));
 		result.setDstFile(pdfFile);
@@ -70,7 +81,7 @@ public class Caj2PdfUtils {
 		return result;
 	}
 	
-	public static void main(String[] args) throws AWTException, IOException, InterruptedException {
+	public static void main(String[] args) throws AWTException, IOException, InterruptedException, TransformWaitTimeoutException {
 		caj2pdf(new RobotManager(), "C:\\Users\\qzfeng\\Desktop\\cajwait\\ZX粮油食品有限公司人力资源管理研究_何微.caj");
 	}
 }

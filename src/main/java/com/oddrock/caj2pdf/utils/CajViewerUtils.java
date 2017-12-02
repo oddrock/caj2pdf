@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import org.apache.log4j.Logger;
 
+import com.oddrock.caj2pdf.exception.TransformWaitTimeoutException;
 import com.oddrock.common.awt.RobotManager;
 import com.oddrock.common.pic.BufferedImageUtils;
 import com.oddrock.common.pic.PictureComparator;
@@ -150,8 +151,13 @@ public class CajViewerUtils {
 		}
 	}
 	// 检查是否要输入文件名了，没有就等待
-	public static void waitInputfilename(RobotManager robotMngr) throws IOException, InterruptedException {
+	public static void waitInputfilename(RobotManager robotMngr) throws IOException, InterruptedException, TransformWaitTimeoutException {
+		Timer timer = new Timer().start();
 		while(!isInputfilename(robotMngr)){
+			if(timer.getSpentTimeMillis()>TimeoutUtils.getTimeout("timeout.cajviewer.waitinputfilename")) {
+				logger.warn("等待输入文件名时间过长，已达到："+timer.getSpentTimeMillis()/1000L+"秒");
+				throw new TransformWaitTimeoutException();
+			}
 			logger.warn("等待输入文件名");
 			Common.wait(Prop.getInt("interval.waitmillis"));
 		}

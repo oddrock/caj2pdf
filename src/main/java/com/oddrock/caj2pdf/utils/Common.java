@@ -52,6 +52,27 @@ public class Common {
 		logger.warn(senderAccount + "已发送邮件通知给：" + recverAccounts);
 	}
 	
+	// 发送告警邮件
+	public static void noticeAlertMail(String content) throws UnsupportedEncodingException, MessagingException{
+		String senderAccount = null;
+		String senderPasswd = null;
+		String recverAccounts = Prop.get("notice.mail.recver.accounts");
+		// 如果在排除时间段，而且有替代通知人，则发送给替代的收信人
+		if(isInNoticeMailExcludetime() && Prop.getBool("notice.mail.excludetime.takeplace")){
+			recverAccounts = Prop.get("notice.mail.excludetime.takeplace.recver.accounts");
+		}
+		if(Prop.get("notice.mail.sender.type").equalsIgnoreCase("qq")){
+			senderAccount = Prop.get("notice.mail.sender.qq.account");
+			senderPasswd = Prop.get("notice.mail.sender.qq.passwd");
+			MailSender.sendEmailFastByAuth(senderAccount, senderPasswd, recverAccounts, content, Prop.get("notice.mail.sender.qq.smtpport"));
+		}else if(Prop.get("notice.mail.sender.type").equalsIgnoreCase("163")) {
+			senderAccount = Prop.get("notice.mail.sender.163.account");
+			senderPasswd = Prop.get("notice.mail.sender.163.passwd");
+			MailSender.sendEmailFast(senderAccount, senderPasswd, recverAccounts, content);
+		}
+		logger.warn(senderAccount + "已发送邮件通知给：" + recverAccounts);
+	}
+	
 	/*
 	 * 截图并保存为文件，文件名为带毫秒数的时间字符串
 	 */
@@ -78,6 +99,20 @@ public class Common {
 			} catch (LineUnavailableException e) {
 				e.printStackTrace();
 			}
+		}
+	}
+	
+	// 异常声音通知
+	public static void noticeAlertSound(){
+		try {
+			WavPlayer.play(Prop.get("notice.exceptionsound.wavpath"), Prop.getInt("notice.exceptionsound.playcount"));
+			logger.warn("已进行异常声音通知");
+		} catch (UnsupportedAudioFileException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (LineUnavailableException e) {
+			e.printStackTrace();
 		}
 	}
 	
