@@ -56,11 +56,8 @@ public class Common {
 	public static void noticeAlertMail(String content) throws UnsupportedEncodingException, MessagingException{
 		String senderAccount = null;
 		String senderPasswd = null;
-		String recverAccounts = Prop.get("notice.mail.recver.accounts");
-		// 如果在排除时间段，而且有替代通知人，则发送给替代的收信人
-		if(isInNoticeMailExcludetime() && Prop.getBool("notice.mail.excludetime.takeplace")){
-			recverAccounts = Prop.get("notice.mail.excludetime.takeplace.recver.accounts");
-		}
+		// 发送给我
+		String recverAccounts = Prop.get("notice.mail.excludetime.takeplace.recver.accounts");
 		if(Prop.get("notice.mail.sender.type").equalsIgnoreCase("qq")){
 			senderAccount = Prop.get("notice.mail.sender.qq.account");
 			senderPasswd = Prop.get("notice.mail.sender.qq.passwd");
