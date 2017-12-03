@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.log4j.Logger;
 import com.oddrock.caj2pdf.selftest.bean.SelftestRule;
+import com.oddrock.caj2pdf.utils.Prop;
 import com.oddrock.common.file.FileUtils;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -15,18 +16,21 @@ public class SelftestRuleUtils {
 	
 	//  获取自测规则集合
 	public static List<SelftestRule> getSelftestRules() throws IOException {
-		File ruleFile = new File("settings\\selftestrule.json");
-		logger.warn("开始从本文件导入自测规则："+ruleFile.getCanonicalPath());
+		File testRuleDir = new File(Prop.get("selftest.rule.dirpath"));
+		logger.warn("开始从本目录导入自测规则："+testRuleDir.getCanonicalPath());
 		List<SelftestRule> result = new ArrayList<SelftestRule>();
-		String jsonStr = FileUtils.readFileContentToStr(ruleFile.getCanonicalPath());
-		JSONArray jsonArray = new JSONArray();
-		jsonArray = JSONArray.fromObject(jsonStr);
-		for (int i = 0; i < jsonArray.size(); i++) {
-			JSONObject jsonObj = (JSONObject) jsonArray.get(i);
-			SelftestRule sr = (SelftestRule) JSONObject.toBean(jsonObj,SelftestRule.class);
-			result.add(sr);
+		for(File ruleFile : testRuleDir.listFiles()) {
+			if(!ruleFile.isFile() || !ruleFile.getName().endsWith("json")) continue;
+			String jsonStr = FileUtils.readFileContentToStr(ruleFile.getCanonicalPath());
+			JSONArray jsonArray = new JSONArray();
+			jsonArray = JSONArray.fromObject(jsonStr);
+			for (int i = 0; i < jsonArray.size(); i++) {
+				JSONObject jsonObj = (JSONObject) jsonArray.get(i);
+				SelftestRule sr = (SelftestRule) JSONObject.toBean(jsonObj,SelftestRule.class);
+				result.add(sr);
+			}
 		}
-		logger.warn("完成从本文件导入自测规则："+ruleFile.getCanonicalPath());
+		logger.warn("完成从本目录导入自测规则："+testRuleDir.getCanonicalPath());
 		return result;
 	}
 
