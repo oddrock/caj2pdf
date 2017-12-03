@@ -162,7 +162,7 @@ public class CalibreUtils{
 		Timer timer = new Timer().start();
 		while(!isTransformTaskEnd(robotMngr)) {
 			if(timer.getSpentTimeMillis()>TimeoutUtils.getTimeout("timeout.calibre.waittransformtaskend")) {
-				logger.warn("等待转换任务页面打开时间过长，已达到："+timer.getSpentTimeMillis()/1000L+"秒");
+				logger.warn("等待转换任务时间过长，已达到："+timer.getSpentTimeMillis()/1000L+"秒");
 				throw new TransformWaitTimeoutException();
 			}
 			logger.warn("等待"+softwareName+"转换任务完成......");
