@@ -156,8 +156,8 @@ public class Common {
 		return new File(Prop.get("dstdirpath")+File.separator+DateUtils.timeStrInChinese());
 	}
 	
-	public static File generateDstDir(File dstDir) throws IOException {
-		return new File(dstDir.getCanonicalPath()+File.separator+DateUtils.timeStrInChinese());
+	public static File generateDstDir(File dstBaseDir) throws IOException {
+		return new File(dstBaseDir.getCanonicalPath()+File.separator+DateUtils.timeStrInChinese());
 	}
 	
 	public static File generateDstDir(File dstDir, boolean needMkdir) throws IOException {
@@ -193,6 +193,15 @@ public class Common {
 			}
 		}
 		return dstDir;
+	}
+	
+	public static void mvFileSet(Set<File> needMoveFilesSet, File dstDir) throws IOException {	
+		dstDir.mkdirs();
+		for(File file: needMoveFilesSet) {
+			if(file!=null && dstDir!=null) {
+				FileUtils.moveFile(file.getCanonicalPath(), dstDir.getCanonicalPath());
+			}
+		}
 	}
 	
 	// 打开已完成窗口
