@@ -8,9 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.mail.MessagingException;
-
 import org.apache.log4j.Logger;
-
 import com.oddrock.caj2pdf.bean.TransformFileSet;
 import com.oddrock.caj2pdf.biz.Caj2PdfUtils;
 import com.oddrock.caj2pdf.biz.Epub2MobiUtils;
@@ -20,6 +18,7 @@ import com.oddrock.caj2pdf.biz.Pdf2MobiUtils;
 import com.oddrock.caj2pdf.biz.Pdf2WordUtils;
 import com.oddrock.caj2pdf.biz.PdfUtils;
 import com.oddrock.caj2pdf.biz.Txt2MobiUtils;
+import com.oddrock.caj2pdf.exception.TransformNofileException;
 import com.oddrock.caj2pdf.exception.TransformWaitTimeoutException;
 import com.oddrock.caj2pdf.persist.DocBakUtils;
 import com.oddrock.caj2pdf.persist.TransformInfoStater;
@@ -106,7 +105,7 @@ public class DocFormatConverter {
 	}
 	
 	// 批量caj转pdf
-	public void caj2pdf(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException {
+	public void caj2pdf(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException {
 		String transformType="caj2pdf";
 		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("caj2pdf");
@@ -129,17 +128,20 @@ public class DocFormatConverter {
 				tfis.addDstFile(fileSet.getDstFile());
 			}
 		}
+		if(needMoveFilesSet.size()==0) {
+			throw new TransformNofileException();
+		}
 		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "caj转pdf已完成", transformType, needBakFileSet);
 		tfis.save2db();
 	}
 	
 	// 批量caj转pdf，用默认的源文件夹和目标文件夹
-	public void caj2pdf() throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException {
+	public void caj2pdf() throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException {
 		caj2pdf(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
 	// 批量caj转word
-	public void caj2word(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException {
+	public void caj2word(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException {
 		String transformType="caj2word";
 		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("caj2word");
@@ -165,6 +167,9 @@ public class DocFormatConverter {
 				pdfFileSet.add(fileSet.getDstFile());
 			}
 		}
+		if(pdfFileSet.size()==0) {
+			throw new TransformNofileException();
+		}
 		// 再全部pdf转word
 		for(File file : pdfFileSet){
 			if(file==null) continue;
@@ -182,12 +187,12 @@ public class DocFormatConverter {
 	}
 	
 	// 批量caj转word
-	public void caj2word() throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException {
+	public void caj2word() throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException {
 		caj2word(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
 	// caj试转pdf
-	public void caj2pdf_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException {
+	public void caj2pdf_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException {
 		String transformType="caj2pdf_test";
 		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("caj2pdf_test");
@@ -207,7 +212,9 @@ public class DocFormatConverter {
 				break;
 			}
 		}
-		if(fileSet==null) return;
+		if(fileSet==null) {
+			throw new TransformNofileException();
+		}
 		// 获得转换得到的pdf的实际页数
 		int realPageCount = new PdfManager().pdfPageCount(fileSet.getDstFile().getCanonicalPath());
 		// 计算出应该提取的页数
@@ -226,12 +233,12 @@ public class DocFormatConverter {
 	}
 	
 	// caj试转pdf
-	public void caj2pdf_test() throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException {
+	public void caj2pdf_test() throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException {
 		caj2pdf_test(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
 	// caj试转word
-	public void caj2word_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException {
+	public void caj2word_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException {
 		String transformType="caj2word_test";
 		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("caj2word_test");
@@ -249,7 +256,9 @@ public class DocFormatConverter {
 				break;
 			}
 		}
-		if(fileSet==null) return;
+		if(fileSet==null) {
+			throw new TransformNofileException();
+		}
 		// 获得转换得到的pdf的实际页数
 		int realPageCount = new PdfManager().pdfPageCount(fileSet.getDstFile().getCanonicalPath());
 		// 计算出应该提取的页数
@@ -268,12 +277,12 @@ public class DocFormatConverter {
 	}
 	
 	// caj试转word
-	public void caj2word_test() throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException{
+	public void caj2word_test() throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException{
 		caj2word_test(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
 	// pdf批量转word
-	public void pdf2word(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+	public void pdf2word(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformNofileException {
 		String transformType="pdf2word";
 		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("pdf2word");
@@ -295,17 +304,20 @@ public class DocFormatConverter {
 			tfis.addSrcFile(fileSet.getSrcFile());
 			needBakFileSet.add(fileSet.getSrcFile());
 		}
+		if(needMoveFilesSet.size()==0) {
+			throw new TransformNofileException();
+		}
 		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "pdf转word已完成",transformType, needBakFileSet);
 		tfis.save2db();
 	}
 	
 	// pdf批量转word
-	public void pdf2word() throws IOException, InterruptedException, MessagingException {
+	public void pdf2word() throws IOException, InterruptedException, MessagingException, TransformNofileException {
 		pdf2word(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
 	// pdf试转word
-	public void pdf2word_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+	public void pdf2word_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformNofileException {
 		String transformType="pdf2word_test";
 		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("pdf2word_test");
@@ -331,7 +343,9 @@ public class DocFormatConverter {
 				}
 			}
 		}
-		if(pdfFile==null) return;
+		if(pdfFile==null) {
+			throw new TransformNofileException();
+		}
 		tfis.addSrcFile(pdfFile);
 		needBakFileSet.add(pdfFile);
 		// 获得转换得到的pdf的实际页数
@@ -349,14 +363,14 @@ public class DocFormatConverter {
 		tfis.save2db();
 	}
 	
-	public void pdf2word_test() throws IOException, InterruptedException, MessagingException {
+	public void pdf2word_test() throws IOException, InterruptedException, MessagingException, TransformNofileException {
 		pdf2word_test(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
 	
 	
 	// 批量pdf转mobi，用calibre
-	public void pdf2mobi_bycalibre(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException {
+	public void pdf2mobi_bycalibre(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException {
 		String transformType="pdf2mobi_bycalibre";
 		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("pdf2mobi_bycalibre");
@@ -375,17 +389,20 @@ public class DocFormatConverter {
 			tfis.addSrcFile(fileSet.getSrcFile());
 			needBakFileSet.add(fileSet.getSrcFile());
 		}
+		if(needMoveFilesSet.size()==0) {
+			throw new TransformNofileException();
+		}
 		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "pdf转mobi已完成",transformType, needBakFileSet);
 		tfis.save2db();
 	}
 	
 	// 批量pdf转mobi，用calibre
-	public void pdf2mobi_bycalibre() throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException {
+	public void pdf2mobi_bycalibre() throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException {
 		pdf2mobi_bycalibre(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
 	// 试转pdf转mobi
-	public void pdf2mobi_bycalibre_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException {
+	public void pdf2mobi_bycalibre_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException {
 		String transformType="pdf2mobi_bycalibre_test";
 		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("pdf2mobi_bycalibre_test");
@@ -411,7 +428,9 @@ public class DocFormatConverter {
 				}
 			}
 		}
-		if(pdfFile==null) return;
+		if(pdfFile==null) {
+			throw new TransformNofileException();
+		}
 		tfis.addSrcFile(pdfFile);
 		needBakFileSet.add(pdfFile);
 		// 获得转换得到的pdf的实际页数
@@ -430,12 +449,12 @@ public class DocFormatConverter {
 	}
 	
 	// 试转pdf转mobi
-	public void pdf2mobi_bycalibre_test() throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException {
+	public void pdf2mobi_bycalibre_test() throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException {
 		pdf2mobi_bycalibre_test(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
 	// 批量txt转mobi，用calibre
-	public void txt2mobi(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException {
+	public void txt2mobi(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException {
 		String transformType="txt2mobi";
 		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("txt2mobi");
@@ -456,24 +475,26 @@ public class DocFormatConverter {
 			tfis.addSrcFile(fileSet.getSrcFile());
 			needBakFileSet.add(fileSet.getSrcFile());
 		}
+		if(needMoveFilesSet.size()==0) {
+			throw new TransformNofileException();
+		}
 		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "txt转mobi已完成",transformType,needBakFileSet);
 		tfis.save2db();
 	}
 	
-	public void txt2mobi() throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException {
+	public void txt2mobi() throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException {
 		txt2mobi(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
 	// 试转txt转mobi
-	public void txt2mobi_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException {
+	public void txt2mobi_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException {
 		String transformType="txt2mobi_test";
 		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("txt2mobi_test");
 		File firstTxtFile = TxtUtils.getFirstTxtFile();
 		File srcFile = TxtUtils.extractFrontPart(firstTxtFile);
 		if(srcFile==null) {
-			logger.warn("没有txt文件可以试转");
-			return;
+			throw new TransformNofileException();
 		}
 		TransformFileSet fileSet = Txt2MobiUtils.txt2mobi(robotMngr, srcFile.getCanonicalPath());
 		Set<File> needMoveFilesSet = new HashSet<File>();
@@ -487,12 +508,12 @@ public class DocFormatConverter {
 		tfis.save2db();
 	}
 	
-	public void txt2mobi_test() throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException {
+	public void txt2mobi_test() throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException {
 		txt2mobi_test(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
 	// 批量img转word
-	public void img2word(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+	public void img2word(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformNofileException {
 		String transformType="img2word";
 		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("img2word");
@@ -514,6 +535,9 @@ public class DocFormatConverter {
 			tfis.addSrcFile(fileSet.getSrcFile());
 			needBakFileSet.add(fileSet.getSrcFile());
 		}
+		if(needMoveFilesSet.size()==0) {
+			throw new TransformNofileException();
+		}
 		// 再全部pdf转word
 		for(File file : imgFileSet){
 			if(file==null) continue;
@@ -526,12 +550,12 @@ public class DocFormatConverter {
 		tfis.save2db();
 	}
 	
-	public void img2word() throws IOException, InterruptedException, MessagingException {
+	public void img2word() throws IOException, InterruptedException, MessagingException, TransformNofileException {
 		img2word(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
 	// 试转img转word
-	public void img2word_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+	public void img2word_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformNofileException {
 		String transformType="img2word_test";
 		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("img2word_test");
@@ -555,6 +579,9 @@ public class DocFormatConverter {
 				break;
 			}
 		}
+		if(needMoveFilesSet.size()==0) {
+			throw new TransformNofileException();
+		}
 		// 再全部pdf转word
 		for(File file : imgFileSet){
 			if(file==null) continue;
@@ -567,12 +594,12 @@ public class DocFormatConverter {
 		tfis.save2db();
 	}
 	
-	public void img2word_test() throws IOException, InterruptedException, MessagingException {
+	public void img2word_test() throws IOException, InterruptedException, MessagingException, TransformNofileException {
 		img2word_test(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
 	// pdf批量转epub
-	public void pdf2epub(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+	public void pdf2epub(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformNofileException {
 		String transformType="pdf2epub";
 		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("pdf2epub");
@@ -591,16 +618,19 @@ public class DocFormatConverter {
 			tfis.addSrcFile(fileSet.getSrcFile());
 			needBakFileSet.add(fileSet.getSrcFile());
 		}
+		if(needMoveFilesSet.size()==0) {
+			throw new TransformNofileException();
+		}
 		doAfterTransform(srcDir, dstDir, needMoveFilesSet, "pdf转epub已完成", transformType, needBakFileSet);
 		tfis.save2db();
 	}
 	
-	public void pdf2epub() throws IOException, InterruptedException, MessagingException {
+	public void pdf2epub() throws IOException, InterruptedException, MessagingException, TransformNofileException {
 		pdf2epub(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
 	// 试转pdf转epub
-	public void pdf2epub_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException {
+	public void pdf2epub_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformNofileException {
 		String transformType="pdf2epub_test";
 		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("pdf2epub_test");
@@ -626,7 +656,9 @@ public class DocFormatConverter {
 				}
 			}
 		}
-		if(pdfFile==null) return;
+		if(pdfFile==null) {
+			throw new TransformNofileException();
+		}
 		tfis.addSrcFile(pdfFile);
 		needBakFileSet.add(pdfFile);
 		// 获得转换得到的pdf的实际页数
@@ -644,12 +676,12 @@ public class DocFormatConverter {
 		tfis.save2db();
 	}
 	
-	public void pdf2epub_test() throws IOException, InterruptedException, MessagingException {
+	public void pdf2epub_test() throws IOException, InterruptedException, MessagingException, TransformNofileException {
 		pdf2epub_test(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
 	// 用abbyy进行pdf转mobi
-	public void pdf2mobi_byabbyy(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException {
+	public void pdf2mobi_byabbyy(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException {
 		String transformType="pdf2mobi_byabbyy";
 		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("pdf2mobi_byabbyy");
@@ -671,6 +703,9 @@ public class DocFormatConverter {
 			tfis.addSrcFile(fileSet.getSrcFile());
 			needBakFileSet.add(fileSet.getSrcFile());
 		}
+		if(needMoveFilesSet.size()==0) {
+			throw new TransformNofileException();
+		}
 		// 再全部epub转mobi
 		for(File file : imgFileSet){
 			if(file==null) continue;
@@ -683,11 +718,11 @@ public class DocFormatConverter {
 		tfis.save2db();
 	}
 	
-	public void pdf2mobi_byabbyy() throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException {
+	public void pdf2mobi_byabbyy() throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException {
 		pdf2mobi_byabbyy(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
-	public void pdf2mobi_byabbyy_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException {
+	public void pdf2mobi_byabbyy_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException {
 		String transformType="pdf2mobi_byabbyy_test";
 		doBeforeTransform(srcDir);
 		TransformInfoStater tfis = new TransformInfoStater("pdf2mobi_byabbyy_test");
@@ -713,7 +748,9 @@ public class DocFormatConverter {
 				}
 			}
 		}
-		if(pdfFile==null) return;
+		if(pdfFile==null) {
+			throw new TransformNofileException();
+		}
 		tfis.addSrcFile(pdfFile);
 		needBakFileSet.add(pdfFile);
 		// 获得转换得到的pdf的实际页数
@@ -733,12 +770,12 @@ public class DocFormatConverter {
 		tfis.save2db();
 	}
 	
-	public void pdf2mobi_byabbyy_test() throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException {
+	public void pdf2mobi_byabbyy_test() throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException {
 		pdf2mobi_byabbyy_test(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
 	// 执行单个测试计划
-	private void execSingleSelftestRule(SelftestRule rule) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException{
+	private void execSingleSelftestRule(SelftestRule rule) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException{
 		// 如果规则无效，则直接退出
 		if(rule==null || !rule.isValid()) return;
 		File[] oldFiles = new File(Prop.get("srcdirpath")).listFiles();
@@ -799,7 +836,7 @@ public class DocFormatConverter {
 		selftest = false;
 	}
 	
-	public void execTransform(String[] args) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException {
+	public void execTransform(String[] args) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException {
 		String method = Prop.get("caj2pdf.start");
 		if(method==null) {
 			method = "caj2word";
@@ -859,12 +896,12 @@ public class DocFormatConverter {
 		}
 	}
 	
-	public static void main(String[] args) throws AWTException, IOException, InterruptedException, MessagingException {
+	public static void main(String[] args) throws AWTException, IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException {
 		DocFormatConverter dfc = new DocFormatConverter();
 		if(Prop.getBool("debug")) {		// 调试模式
 			//dfc.img2word();
 			//AbbyyUtils.openPdf(new RobotManager(), "C:\\Users\\qzfeng\\Desktop\\cajwait\\装配式建筑施工安全评价体系研究_杨爽.pdf");
-			dfc.selftest();
+			dfc.caj2word();
 		}else {
 			try {
 				dfc.execTransform(args);
@@ -873,7 +910,13 @@ public class DocFormatConverter {
 				// 声音告警
 				Common.noticeAlertSound();
 				// 邮件告警
-				Common.noticeAlertMail("转换出现异常，请尽快人工处理！！！");
+				Common.noticeAlertMail("转换错误：转换等待时间过长！！！");
+			}catch (TransformNofileException e) {
+				e.printStackTrace();
+				// 声音告警
+				Common.noticeAlertSound();
+				// 邮件告警
+				Common.noticeAlertMail("转换错误：文件夹里没有要转换的文件！！！");
 			}
 		}
 	}
