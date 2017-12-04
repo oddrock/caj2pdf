@@ -830,7 +830,7 @@ public class DocFormatConverter {
 		if(Prop.getBool("debug")) {		// 调试模式
 			//dfc.img2word();
 			//AbbyyUtils.openPdf(new RobotManager(), "C:\\Users\\qzfeng\\Desktop\\cajwait\\装配式建筑施工安全评价体系研究_杨爽.pdf");
-			dfc.pdf2mobi_byabbyy_test();
+			dfc.selftest();
 		}else {
 			try {
 				dfc.execTransform(args);

@@ -100,6 +100,8 @@ public class CajViewerUtils {
 	}
 	
 	public static void close() throws IOException, InterruptedException {
+		// 防止右下角一直有一个进度条没杀掉
+		CmdExecutor.getSingleInstance().killApp("pdfSaver");
 		if(isStart()) {
 			CmdExecutor.getSingleInstance().exeCmd("taskkill /f /im \"" + Prop.get("cajviewer.appname") + "\"");
 		}
