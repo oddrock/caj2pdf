@@ -19,6 +19,13 @@ public class TransformInfo {
 	private String remark;
 	private long src_file_size;
 	private long dst_file_size;
+	private int selftest;		// 是否是自测，是的话，就为1，否则为0
+	public int getSelftest() {
+		return selftest;
+	}
+	public void setSelftest(int selftest) {
+		this.selftest = selftest;
+	}
 	public String getSrc_file_type() {
 		return src_file_type;
 	}

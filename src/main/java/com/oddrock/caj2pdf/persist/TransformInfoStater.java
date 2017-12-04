@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 
 import com.oddrock.caj2pdf.bean.TransformFileInfo;
 import com.oddrock.caj2pdf.bean.TransformInfo;
+import com.oddrock.caj2pdf.main.DocFormatConverter;
 import com.oddrock.common.file.FileUtils;
 
 /**
@@ -52,6 +53,11 @@ public class TransformInfoStater {
 		}
 		info.setSrc_file_names(file_names);
 		info.setSrc_file_size(info.getSrc_file_size()+fileInfo.getFile_size());
+		if(DocFormatConverter.selftest) {
+			info.setSelftest(1);
+		}else {
+			info.setSelftest(0);
+		}
 	}
 	
 	public void addDstFile(File file) throws IOException {
