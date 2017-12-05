@@ -6,18 +6,12 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.Set;
-
 import javax.mail.MessagingException;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
-
 import org.apache.log4j.Logger;
-
 import com.oddrock.common.DateUtils;
 import com.oddrock.common.awt.RobotManager;
 import com.oddrock.common.file.FileUtils;
 import com.oddrock.common.mail.MailSender;
-import com.oddrock.common.media.WavPlayer;
 import com.oddrock.common.pic.BufferedImageUtils;
 import com.oddrock.common.pic.PictureComparator;
 import com.oddrock.common.windows.CmdExecutor;
@@ -43,7 +37,8 @@ public class Common {
 		if(Prop.get("notice.mail.sender.type").equalsIgnoreCase("qq")){
 			senderAccount = Prop.get("notice.mail.sender.qq.account");
 			senderPasswd = Prop.get("notice.mail.sender.qq.passwd");
-			MailSender.sendEmailFastByAuth(senderAccount, senderPasswd, recverAccounts, content, Prop.get("notice.mail.sender.qq.smtpport"));
+			//MailSender.sendEmailFastByAuth(senderAccount, senderPasswd, recverAccounts, content, Prop.get("notice.mail.sender.qq.smtpport"));
+			new Thread(new QQMailNoticer(senderAccount, senderPasswd, recverAccounts, content, Prop.get("notice.mail.sender.qq.smtpport"))).start();
 		}else if(Prop.get("notice.mail.sender.type").equalsIgnoreCase("163")) {
 			senderAccount = Prop.get("notice.mail.sender.163.account");
 			senderPasswd = Prop.get("notice.mail.sender.163.passwd");
@@ -61,7 +56,8 @@ public class Common {
 		if(Prop.get("notice.mail.sender.type").equalsIgnoreCase("qq")){
 			senderAccount = Prop.get("notice.mail.sender.qq.account");
 			senderPasswd = Prop.get("notice.mail.sender.qq.passwd");
-			MailSender.sendEmailFastByAuth(senderAccount, senderPasswd, recverAccounts, content, Prop.get("notice.mail.sender.qq.smtpport"));
+			//MailSender.sendEmailFastByAuth(senderAccount, senderPasswd, recverAccounts, content, Prop.get("notice.mail.sender.qq.smtpport"));
+			new Thread(new QQMailNoticer(senderAccount, senderPasswd, recverAccounts, content, Prop.get("notice.mail.sender.qq.smtpport"))).start();
 		}else if(Prop.get("notice.mail.sender.type").equalsIgnoreCase("163")) {
 			senderAccount = Prop.get("notice.mail.sender.163.account");
 			senderPasswd = Prop.get("notice.mail.sender.163.passwd");
@@ -86,31 +82,17 @@ public class Common {
 	public static void noticeSound(){
 		// 如果不需要声音通知，或者不在通知时间段，都不需要声音通知
 		if(Prop.getBool("notice.sound.flag") && !isInNoticeSoundExcludetime()){
-			try {
-				WavPlayer.play(Prop.get("notice.sound.wavpath"), Prop.getInt("notice.sound.playcount"));
-				logger.warn("已进行声音通知");
-			} catch (UnsupportedAudioFileException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (LineUnavailableException e) {
-				e.printStackTrace();
-			}
+			//WavPlayer.play(Prop.get("notice.sound.wavpath"), Prop.getInt("notice.sound.playcount"));
+			new Thread(new SoundNoticer(Prop.get("notice.sound.wavpath"), Prop.getInt("notice.sound.playcount"))).start();
+			logger.warn("已进行声音通知");
 		}
 	}
 	
 	// 异常声音通知
 	public static void noticeAlertSound(){
-		try {
-			WavPlayer.play(Prop.get("notice.exceptionsound.wavpath"), Prop.getInt("notice.exceptionsound.playcount"));
-			logger.warn("已进行异常声音通知");
-		} catch (UnsupportedAudioFileException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (LineUnavailableException e) {
-			e.printStackTrace();
-		}
+		//WavPlayer.play(Prop.get("notice.exceptionsound.wavpath"), Prop.getInt("notice.exceptionsound.playcount"));
+		new Thread(new SoundNoticer(Prop.get("notice.exceptionsound.wavpath"), Prop.getInt("notice.exceptionsound.playcount"))).start();
+		logger.warn("已进行异常声音通知");
 	}
 	
 	// 等待时间
@@ -279,5 +261,6 @@ public class Common {
 	
 	public static void main(String[] args) throws UnsupportedEncodingException, MessagingException {
 		noticeMail("test");
+		noticeSound();
 	}
 }
