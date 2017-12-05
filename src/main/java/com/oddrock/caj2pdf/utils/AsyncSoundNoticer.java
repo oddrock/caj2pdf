@@ -7,10 +7,10 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 
 import com.oddrock.common.media.WavPlayer;
 
-public class SoundNoticer implements Runnable{
+public class AsyncSoundNoticer implements Runnable{
 	private int count;
 	private String wavpath;
-	public SoundNoticer(String wavpath, int count) {
+	public AsyncSoundNoticer(String wavpath, int count) {
 		super();
 		this.count = count;
 		this.wavpath = wavpath;
@@ -26,5 +26,7 @@ public class SoundNoticer implements Runnable{
 			e.printStackTrace();
 		}
 	}
-	
+	public static void makeSound(String wavpath, int count){
+		new Thread(new AsyncSoundNoticer(wavpath, count)).start();
+	}
 }

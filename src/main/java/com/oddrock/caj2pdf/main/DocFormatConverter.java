@@ -5,8 +5,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
+
 import javax.mail.MessagingException;
+
 import org.apache.log4j.Logger;
+
 import com.oddrock.caj2pdf.bean.TransformFileSet;
 import com.oddrock.caj2pdf.biz.Caj2PdfUtils;
 import com.oddrock.caj2pdf.biz.Epub2MobiUtils;
@@ -25,6 +28,7 @@ import com.oddrock.caj2pdf.selftest.SelftestFilesPool;
 import com.oddrock.caj2pdf.selftest.SelftestRuleUtils;
 import com.oddrock.caj2pdf.selftest.bean.SelftestRule;
 import com.oddrock.caj2pdf.utils.Common;
+import com.oddrock.caj2pdf.utils.AsnycHiddenFileDeleter;
 import com.oddrock.caj2pdf.utils.Prop;
 import com.oddrock.caj2pdf.utils.TransformRuleUtils;
 import com.oddrock.caj2pdf.utils.TxtUtils;
@@ -176,7 +180,7 @@ public class DocFormatConverter {
 		}
 		if(Prop.getBool("deletehiddenfile")) {
 			// 删除隐藏文件
-			FileUtils.deleteHiddenFiles(tfis.getSrcDir());
+			AsnycHiddenFileDeleter.delete(tfis.getSrcDir());
 		}
 		logger.warn(noticeContent+ ":" + tfis.getSrcDir().getCanonicalPath());
 	}

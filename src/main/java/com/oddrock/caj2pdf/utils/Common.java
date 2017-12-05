@@ -38,7 +38,7 @@ public class Common {
 			senderAccount = Prop.get("notice.mail.sender.qq.account");
 			senderPasswd = Prop.get("notice.mail.sender.qq.passwd");
 			//MailSender.sendEmailFastByAuth(senderAccount, senderPasswd, recverAccounts, content, Prop.get("notice.mail.sender.qq.smtpport"));
-			new Thread(new QQMailNoticer(senderAccount, senderPasswd, recverAccounts, content, Prop.get("notice.mail.sender.qq.smtpport"))).start();
+			AsyncQQMailNoticer.sendMail(senderAccount, senderPasswd, recverAccounts, content, Prop.get("notice.mail.sender.qq.smtpport"));
 		}else if(Prop.get("notice.mail.sender.type").equalsIgnoreCase("163")) {
 			senderAccount = Prop.get("notice.mail.sender.163.account");
 			senderPasswd = Prop.get("notice.mail.sender.163.passwd");
@@ -57,7 +57,7 @@ public class Common {
 			senderAccount = Prop.get("notice.mail.sender.qq.account");
 			senderPasswd = Prop.get("notice.mail.sender.qq.passwd");
 			//MailSender.sendEmailFastByAuth(senderAccount, senderPasswd, recverAccounts, content, Prop.get("notice.mail.sender.qq.smtpport"));
-			new Thread(new QQMailNoticer(senderAccount, senderPasswd, recverAccounts, content, Prop.get("notice.mail.sender.qq.smtpport"))).start();
+			AsyncQQMailNoticer.sendMail(senderAccount, senderPasswd, recverAccounts, content, Prop.get("notice.mail.sender.qq.smtpport"));
 		}else if(Prop.get("notice.mail.sender.type").equalsIgnoreCase("163")) {
 			senderAccount = Prop.get("notice.mail.sender.163.account");
 			senderPasswd = Prop.get("notice.mail.sender.163.passwd");
@@ -83,7 +83,7 @@ public class Common {
 		// 如果不需要声音通知，或者不在通知时间段，都不需要声音通知
 		if(Prop.getBool("notice.sound.flag") && !isInNoticeSoundExcludetime()){
 			//WavPlayer.play(Prop.get("notice.sound.wavpath"), Prop.getInt("notice.sound.playcount"));
-			new Thread(new SoundNoticer(Prop.get("notice.sound.wavpath"), Prop.getInt("notice.sound.playcount"))).start();
+			AsyncSoundNoticer.makeSound(Prop.get("notice.sound.wavpath"), Prop.getInt("notice.sound.playcount"));
 			logger.warn("已进行声音通知");
 		}
 	}
@@ -91,7 +91,7 @@ public class Common {
 	// 异常声音通知
 	public static void noticeAlertSound(){
 		//WavPlayer.play(Prop.get("notice.exceptionsound.wavpath"), Prop.getInt("notice.exceptionsound.playcount"));
-		new Thread(new SoundNoticer(Prop.get("notice.exceptionsound.wavpath"), Prop.getInt("notice.exceptionsound.playcount"))).start();
+		AsyncSoundNoticer.makeSound(Prop.get("notice.exceptionsound.wavpath"), Prop.getInt("notice.exceptionsound.playcount"));
 		logger.warn("已进行异常声音通知");
 	}
 	
@@ -262,5 +262,6 @@ public class Common {
 	public static void main(String[] args) throws UnsupportedEncodingException, MessagingException {
 		noticeMail("test");
 		noticeSound();
+		AsnycHiddenFileDeleter.delete(new File(Prop.get("srcdirpath")));
 	}
 }

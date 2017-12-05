@@ -1,19 +1,22 @@
 package com.oddrock.caj2pdf.utils;
 
 import java.io.UnsupportedEncodingException;
+
 import javax.mail.MessagingException;
+
 import org.apache.log4j.Logger;
+
 import com.oddrock.common.mail.MailSender;
 
-public class QQMailNoticer implements Runnable{
+public class AsyncQQMailNoticer implements Runnable{
 	@SuppressWarnings("unused")
-	private static Logger logger = Logger.getLogger(QQMailNoticer.class);
+	private static Logger logger = Logger.getLogger(AsyncQQMailNoticer.class);
 	private String subject;
 	private String senderAccount;
 	private String senderPasswd;
 	private String recverAccounts;
 	private String smtpPort;
-	public QQMailNoticer(String senderAccount,
+	public AsyncQQMailNoticer(String senderAccount,
 			String senderPasswd, String recverAccounts, String subject, String smtpPort) {
 		super();
 		this.senderAccount = senderAccount;
@@ -30,5 +33,8 @@ public class QQMailNoticer implements Runnable{
 		} catch (MessagingException e) {
 			e.printStackTrace();
 		}
+	}
+	public static void sendMail(String senderAccount, String senderPasswd, String recverAccounts, String content, String smtpPort){
+		new Thread(new AsyncQQMailNoticer(senderAccount, senderPasswd, recverAccounts, content, smtpPort)).start();
 	}
 }
