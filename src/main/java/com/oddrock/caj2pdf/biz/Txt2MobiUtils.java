@@ -14,8 +14,8 @@ import com.oddrock.common.windows.ClipboardUtils;
 
 public class Txt2MobiUtils {
 	private static Logger logger = Logger.getLogger(Pdf2MobiUtils.class);
-
-	public static void txt2mobi_step1(RobotManager robotMngr, File srcFile) throws IOException, InterruptedException, TransformWaitTimeoutException {
+	
+	public static void txt2mobi_step1_1(RobotManager robotMngr, File srcFile) throws TransformWaitTimeoutException, IOException, InterruptedException {
 		// 用calibre打开一本书，并且保证只打开这一本书(即calibre里只有这本书)，如果有别的书就删除
 		CalibreUtils.openSingleBook(robotMngr, srcFile);	
 		Common.waitShort();
@@ -37,8 +37,41 @@ public class Txt2MobiUtils {
 		// 确认“逐个转换”
 		robotMngr.pressKey(KeyEvent.VK_ENTER);
 		Common.waitShort();
-		// 等待直到转换页面打开
-		CalibreUtils.waitTransformPageOpen(robotMngr);
+	}
+
+	public static void txt2mobi_step1(RobotManager robotMngr, File srcFile) throws IOException, InterruptedException, TransformWaitTimeoutException {
+		txt2mobi_step1_1(robotMngr, srcFile);
+		try {
+			// 等待直到转换页面打开
+			CalibreUtils.waitTransformPageOpen(robotMngr);
+		}catch(TransformWaitTimeoutException e) {
+			e.printStackTrace();
+			txt2mobi_step1_1(robotMngr, srcFile);
+			CalibreUtils.waitTransformPageOpen(robotMngr);
+		}
+		
+		/*// 鼠标移动到“txt input”上
+		robotMngr.moveMouseTo(Prop.getInt("calibre.coordinate.transformpage.txtinput.x"), 
+				Prop.getInt("calibre.coordinate.transformpage.txtinput.y"));
+		Common.waitM();
+		robotMngr.clickMouseLeft();
+		Common.waitShort();
+		// 等待txt input页面打开
+		CalibreUtils.waitTransformPageTxtinputOpen(robotMngr);
+		Common.waitM();
+		// 鼠标移动到“formatting style”上
+		robotMngr.moveMouseTo(Prop.getInt("calibre.coordinate.transformpage.formattingstyle.x"), 
+				Prop.getInt("calibre.coordinate.transformpage.formattingstyle.y"));
+		Common.waitM();
+		robotMngr.clickMouseLeft();
+		Common.waitShort();
+		// 选择“plain”
+		robotMngr.pressKey(KeyEvent.VK_DOWN);
+		Common.waitShort();
+		// 确定选择“plain”
+		robotMngr.pressKey(KeyEvent.VK_ENTER);*/
+		
+		Common.waitM();
 		// 鼠标移动到“输出格式”上
 		robotMngr.moveMouseTo(Prop.getInt("calibre.coordinate.outformat.x"), 
 				Prop.getInt("calibre.coordinate.outformat.y"));

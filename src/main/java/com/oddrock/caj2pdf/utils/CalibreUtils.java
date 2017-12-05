@@ -118,6 +118,23 @@ public class CalibreUtils{
 		logger.warn("确认"+softwareName+"转换页面打开已完成");
 	}
 	
+	public static boolean isTransformPageTxtinputOpen(RobotManager robotMngr)throws IOException {
+		return Common.comparePic(robotMngr, softwareName+".mark.transformpage.txtinput");
+	}
+	
+	public static void waitTransformPageTxtinputOpen(RobotManager robotMngr) throws IOException, InterruptedException, TransformWaitTimeoutException {
+		Timer timer = new Timer().start();
+		while(!isTransformPageTxtinputOpen(robotMngr)) {
+			if(timer.getSpentTimeMillis()>TimeoutUtils.getTimeout("timeout.calibre.waittransformpagetxtinput")) {
+				logger.warn("等待转换txtinput页面打开时间过长，已达到："+timer.getSpentTimeMillis()/1000L+"秒");
+				throw new TransformWaitTimeoutException();
+			}
+			logger.warn("等待"+softwareName+"转换txtinput页面打开完成......");
+			Common.waitM();
+		}
+		logger.warn("确认"+softwareName+"转换txtinput页面打开已完成");
+	}
+	
 	// 检查转换任务页面是否被打开
 	public static boolean isTransformTaskPageOpen(RobotManager robotMngr) throws IOException {
 		return Common.comparePic(robotMngr, softwareName+".mark.transformtaskpageopen");
