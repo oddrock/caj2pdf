@@ -1,4 +1,4 @@
-package com.oddrock.caj2pdf;
+package com.oddrock.caj2pdf.mail;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Part;
