@@ -1,4 +1,4 @@
-package com.oddrock.caj2pdf;
+package com.oddrock.caj2pdf.mail;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
