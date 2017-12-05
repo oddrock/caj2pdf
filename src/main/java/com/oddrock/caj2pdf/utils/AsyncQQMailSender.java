@@ -8,15 +8,15 @@ import org.apache.log4j.Logger;
 
 import com.oddrock.common.mail.MailSender;
 
-public class AsyncQQMailNoticer implements Runnable{
+public class AsyncQQMailSender implements Runnable{
 	@SuppressWarnings("unused")
-	private static Logger logger = Logger.getLogger(AsyncQQMailNoticer.class);
+	private static Logger logger = Logger.getLogger(AsyncQQMailSender.class);
 	private String subject;
 	private String senderAccount;
 	private String senderPasswd;
 	private String recverAccounts;
 	private String smtpPort;
-	public AsyncQQMailNoticer(String senderAccount,
+	public AsyncQQMailSender(String senderAccount,
 			String senderPasswd, String recverAccounts, String subject, String smtpPort) {
 		super();
 		this.senderAccount = senderAccount;
@@ -35,6 +35,6 @@ public class AsyncQQMailNoticer implements Runnable{
 		}
 	}
 	public static void sendMail(String senderAccount, String senderPasswd, String recverAccounts, String content, String smtpPort){
-		new Thread(new AsyncQQMailNoticer(senderAccount, senderPasswd, recverAccounts, content, smtpPort)).start();
+		new Thread(new AsyncQQMailSender(senderAccount, senderPasswd, recverAccounts, content, smtpPort)).start();
 	}
 }

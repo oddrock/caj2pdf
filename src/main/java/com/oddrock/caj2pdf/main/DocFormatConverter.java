@@ -276,7 +276,7 @@ public class DocFormatConverter {
 		// 获得转换得到的pdf的实际页数
 		int realPageCount = new PdfManager().pdfPageCount(fileSet.getDstFile().getCanonicalPath());
 		// 计算出应该提取的页数
-		int tiquPageCount = TransformRuleUtils.computeTestPageCount(realPageCount);
+		int tiquPageCount = TransformRuleUtils.computeTestPageCount(realPageCount, tfis.getInfo().getTransform_type());
 		// 从已转换的pdf中提取相应页数，另存为新的pdf，新的pdf名为在已有PDF名称前加上“提取页面 ”
 		fileSet = PdfUtils.extractPage(robotMngr, fileSet.getDstFile().getCanonicalPath(), tiquPageCount);
 		if(fileSet.getDstFile()!=null) {
@@ -314,7 +314,7 @@ public class DocFormatConverter {
 		// 获得转换得到的pdf的实际页数
 		int realPageCount = new PdfManager().pdfPageCount(fileSet.getDstFile().getCanonicalPath());
 		// 计算出应该提取的页数
-		int tiquPageCount = TransformRuleUtils.computeTestPageCount(realPageCount);
+		int tiquPageCount = TransformRuleUtils.computeTestPageCount(realPageCount, tfis.getInfo().getTransform_type());
 		// 从已转换的pdf中提取相应页数，另存为新的pdf，新的pdf名为在已有PDF名称前加上“提取页面 ”
 		fileSet = PdfUtils.extractPage(robotMngr, fileSet.getDstFile().getCanonicalPath(), tiquPageCount);
 		// 将提取后的页面转为word
@@ -384,7 +384,7 @@ public class DocFormatConverter {
 		// 获得转换得到的pdf的实际页数
 		int realPageCount = pm.pdfPageCount(pdfFile.getCanonicalPath());
 		// 计算出应该提取的页数
-		int tiquPageCount = TransformRuleUtils.computeTestPageCount(realPageCount);
+		int tiquPageCount = TransformRuleUtils.computeTestPageCount(realPageCount, tfis.getInfo().getTransform_type());
 		// 从已转换的pdf中提取相应页数，另存为新的pdf，新的pdf名为在已有PDF名称前加上“提取页面 ”
 		fileSet = PdfUtils.extractPage(robotMngr, pdfFile.getCanonicalPath(), tiquPageCount);
 		// 将提取后的页面转为word
@@ -451,7 +451,7 @@ public class DocFormatConverter {
 		// 获得转换得到的pdf的实际页数
 		int realPageCount = pm.pdfPageCount(pdfFile.getCanonicalPath());
 		// 计算出应该提取的页数
-		int tiquPageCount = TransformRuleUtils.computeTestPageCount(realPageCount);
+		int tiquPageCount = TransformRuleUtils.computeTestPageCount(realPageCount, tfis.getInfo().getTransform_type());
 		// 从已转换的pdf中提取相应页数，另存为新的pdf，新的pdf名为在已有PDF名称前加上“提取页面 ”
 		fileSet = PdfUtils.extractPage(robotMngr, pdfFile.getCanonicalPath(), tiquPageCount);
 		// 将提取后的页面转为word
@@ -621,7 +621,7 @@ public class DocFormatConverter {
 		// 获得转换得到的pdf的实际页数
 		int realPageCount = pm.pdfPageCount(pdfFile.getCanonicalPath());
 		// 计算出应该提取的页数
-		int tiquPageCount = TransformRuleUtils.computeTestPageCount(realPageCount);
+		int tiquPageCount = TransformRuleUtils.computeTestPageCount(realPageCount, tfis.getInfo().getTransform_type());
 		// 从已转换的pdf中提取相应页数，另存为新的pdf，新的pdf名为在已有PDF名称前加上“提取页面 ”
 		fileSet = PdfUtils.extractPage(robotMngr, pdfFile.getCanonicalPath(), tiquPageCount);
 		// 将提取后的页面转为epub
@@ -691,7 +691,7 @@ public class DocFormatConverter {
 		// 获得转换得到的pdf的实际页数
 		int realPageCount = pm.pdfPageCount(pdfFile.getCanonicalPath());
 		// 计算出应该提取的页数
-		int tiquPageCount = TransformRuleUtils.computeTestPageCount(realPageCount);
+		int tiquPageCount = TransformRuleUtils.computeTestPageCount(realPageCount, tfis.getInfo().getTransform_type());
 		// 从已转换的pdf中提取相应页数，另存为新的pdf，新的pdf名为在已有PDF名称前加上“提取页面 ”
 		fileSet = PdfUtils.extractPage(robotMngr, pdfFile.getCanonicalPath(), tiquPageCount);
 		// 将提取后的页面转为epub
@@ -834,7 +834,7 @@ public class DocFormatConverter {
 		if(Prop.getBool("debug")) {		// 调试模式
 			//dfc.img2word();
 			//AbbyyUtils.openPdf(new RobotManager(), "C:\\Users\\qzfeng\\Desktop\\cajwait\\装配式建筑施工安全评价体系研究_杨爽.pdf");
-			dfc.selftest();
+			dfc.pdf2mobi_bycalibre_test();
 		}else {
 			try {
 				dfc.execTransform(args);

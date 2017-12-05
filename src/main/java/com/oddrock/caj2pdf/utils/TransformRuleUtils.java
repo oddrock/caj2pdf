@@ -1,14 +1,24 @@
 package com.oddrock.caj2pdf.utils;
 
 public class TransformRuleUtils {
+	
 	/**
 	 * 计算试转应该提取多少页
 	 * @param realPageCount
+	 * @param transformType
 	 * @return
 	 */
-	public static int computeTestPageCount(int realPageCount) {
+	public static int computeTestPageCount(int realPageCount, String transformType) {
 		int testcount = Prop.getInt("test.pagecount");
+		if(Prop.get("test."+transformType+".pagecount")!=null 
+				&& Prop.get("test."+transformType+".pagecount").length()>0) {
+			testcount = Prop.getInt("test."+transformType+".pagecount");
+		}
 		int testcountmin = Prop.getInt("test.minpagecount");
+		if(Prop.get("test."+transformType+".minpagecount")!=null 
+				&& Prop.get("test."+transformType+".minpagecount").length()>0) {
+			testcount = Prop.getInt("test."+transformType+".minpagecount");
+		}
 		if(realPageCount>=testcount*2) {
 			return testcount;
 		}else if(realPageCount>=testcountmin*2) {
