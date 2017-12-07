@@ -33,10 +33,7 @@ public class Browser360Utils {
 	public static void waitQQFileDownloadButtonExists(RobotManager robotMngr) throws IOException, InterruptedException, TransformWaitTimeoutException{
 		Timer timer = new Timer().start();
 		while(isQQFileDownloadButtonExists(robotMngr)){
-			if(timer.getSpentTimeMillis()>TimeoutUtils.getTimeout("timeout.long")) {
-				logger.warn("等待QQ下载按钮出现时间过长，已达到："+timer.getSpentTimeMillis()/1000L+"秒");
-				throw new TransformWaitTimeoutException();
-			}
+			timer.checkTimeout(TimeoutUtils.getTimeout("timeout.long"), "360浏览器_QQ下载按钮出现", logger);
 			Common.waitM();
 		}
 		logger.warn("确认QQ下载按钮已出现");

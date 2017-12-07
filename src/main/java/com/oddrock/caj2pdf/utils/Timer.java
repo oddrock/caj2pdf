@@ -1,5 +1,9 @@
 package com.oddrock.caj2pdf.utils;
 
+import org.apache.log4j.Logger;
+
+import com.oddrock.caj2pdf.exception.TransformWaitTimeoutException;
+
 public class Timer {
 	private Long startTime;
 	private Long endTime;
@@ -38,5 +42,12 @@ public class Timer {
 		super();
 		this.startTime = -1L;
 		this.endTime = -1L;
+	}
+	// 检查是否超时
+	public void checkTimeout(long timeoutMillis, String warnLogContent, Logger logger) throws TransformWaitTimeoutException{
+		if(getSpentTimeMillis()>timeoutMillis) {
+			logger.warn("等待"+warnLogContent+"时间过长，已达到："+getSpentTimeMillis()/1000L+"秒");
+			throw new TransformWaitTimeoutException();
+		}
 	}
 }
