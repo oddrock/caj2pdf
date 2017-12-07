@@ -20,6 +20,7 @@ import com.oddrock.caj2pdf.exception.TransformNofileException;
 import com.oddrock.caj2pdf.exception.TransformWaitTimeoutException;
 import com.oddrock.caj2pdf.persist.DocBakUtils;
 import com.oddrock.caj2pdf.persist.TransformInfoStater;
+import com.oddrock.caj2pdf.qqmail.QQMailRcvUtils;
 import com.oddrock.caj2pdf.selftest.SelftestFilesPool;
 import com.oddrock.caj2pdf.selftest.SelftestRuleUtils;
 import com.oddrock.caj2pdf.selftest.bean.SelftestRule;
@@ -63,6 +64,37 @@ public class DocFormatConverter {
 			if(fileName.matches("^.*\\.nh$")) {
 				fileName = fileName.replaceAll("\\.nh$", ".caj");
 				file.renameTo(new File(srcDir, fileName));
+			}
+		}
+	}
+	
+	private void doAfter(String noticeContent, File dstDir, boolean exception) throws IOException {
+		boolean debug = Prop.getBool("debug");
+		boolean selftest_simureal = Prop.getBool("selftest.simureal");
+		boolean needopenfinishedwindows = Prop.getBool("needopenfinishedwindows");
+		// 如果是调试或者自测模式，不需要通知
+		if(!debug && (!selftest || selftest_simureal)) {
+			// 通知不是必须步骤，任何异常不要影响正常流程
+			try {
+				if(!exception) {
+					// 完成后声音通知
+					Common.noticeSound();
+					// 完成后短信通知
+					Common.noticeMail(noticeContent);
+				}else {
+					// 声音告警
+					Common.noticeAlertSound();
+					// 邮件告警
+					Common.noticeAlertMail(noticeContent);
+				}
+			}catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
+		// 如果是自测，不需要打开文件窗口
+		if((!selftest || selftest_simureal) && needopenfinishedwindows) {
+			if(dstDir!=null && dstDir.exists()) {
+				Common.openFinishedWindows(dstDir);
 			}
 		}
 	}
@@ -719,6 +751,30 @@ public class DocFormatConverter {
 		selftest = false;
 	}
 	
+	// 下载QQ邮件中的附件
+	public void download_qqmailfiles() throws IOException {
+		logger.warn("开始下载QQ邮件...");
+		String noticeContent = "下载QQ邮件成功，请回到电脑继续操作！！！";
+		File dstDir = null;
+		boolean exception = false;
+		String imapserver = Prop.get("qqmail.imapserver");
+		String account = Prop.get("qqmail.account"); 
+		String passwd = Prop.get("qqmail.passwd"); 
+		String foldername = Prop.get("qqmail.foldername"); 
+		boolean readwrite = Prop.getBool("qqmail.readwrite");
+		String savefolder = Prop.get("qqmail.savefolder");
+		try {
+			dstDir = QQMailRcvUtils.rcvMail(imapserver, account, passwd, foldername, readwrite, true, savefolder);
+		} catch (Exception e) {
+			e.printStackTrace();
+			noticeContent = "下载QQ邮件失败，请自行手动下载QQ邮件！！！";
+			exception = true;
+		}finally {
+			doAfter(noticeContent,dstDir,exception);
+		}
+		logger.warn("完成下载QQ邮件...");
+	}
+	
 	public void execTransform(String[] args) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException {
 		String method = Prop.get("caj2pdf.start");
 		if(method==null) {
@@ -761,6 +817,8 @@ public class DocFormatConverter {
 			pdf2mobi_byabbyy_test();
 		}else if("selftest".equalsIgnoreCase(method)) {
 			selftest();
+		}else if("download_qqmailfiles".equalsIgnoreCase(method)) {
+			download_qqmailfiles();
 		}else if("captureimage".equalsIgnoreCase(method)) {
 			if(args.length>=6) {
 				Thread.sleep(Integer.parseInt(args[1])*1000);
@@ -784,7 +842,7 @@ public class DocFormatConverter {
 		if(Prop.getBool("debug")) {		// 调试模式
 			//dfc.img2word();
 			//AbbyyUtils.openPdf(new RobotManager(), "C:\\Users\\qzfeng\\Desktop\\cajwait\\装配式建筑施工安全评价体系研究_杨爽.pdf");
-			dfc.selftest();
+			dfc.download_qqmailfiles();
 		}else {
 			try {
 				dfc.execTransform(args);

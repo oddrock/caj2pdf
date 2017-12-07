@@ -19,18 +19,20 @@ import com.oddrock.common.mail.qqmail.QQFileDownloader;
 public class QQMailRcvUtils {
 	private static Logger logger = Logger.getLogger(QQMailRcvUtils.class);
 	
-	public static void rcvMail(String imapServer, String account, String passwd, 
+	public static File rcvMail(String imapServer, String account, String passwd, 
 			String folderName, boolean readwriteFlag, boolean downloadAttachToLocal, String localBaseDirPath) throws Exception{
 		ImapMailRcvr imr = new ImapMailRcvr();
 		List<MailRecv> mails = imr.rcvMail(imapServer, account, passwd, folderName, readwriteFlag, downloadAttachToLocal, localBaseDirPath, new FromMailAttachDownloadDirGenerator());
+		File dstDir = null;
 		for(MailRecv mail : mails){
-			downloadQQFileInMail(mail, localBaseDirPath);
+			dstDir = downloadQQFileInMail(mail, localBaseDirPath);
 		}
+		return dstDir;
 	}
 
-	private static void downloadQQFileInMail(MailRecv mail, String localBaseDirPath) throws TransformWaitTimeoutException, IOException, InterruptedException, AWTException {
+	private static File downloadQQFileInMail(MailRecv mail, String localBaseDirPath) throws TransformWaitTimeoutException, IOException, InterruptedException, AWTException {
 		List<QQFileDownloadPage> list = QQFileDownloader.parseQQFileDownloadPageFromQQMail(mail.getPlainContent());
-		if(list.size()==0) return;
+		if(list.size()==0) return null;
 		logger.warn("开始下载【"+mail.getFrom()+"】主题为【"+mail.getSubject()+"】的邮件中的QQ中转站文件...");
 		String[] urlArr = new String[list.size()];
 		int i = 0;
@@ -42,6 +44,7 @@ public class QQMailRcvUtils {
 		localDir.mkdirs();
 		QQFileDownloadUtils.download(new RobotManager(), localDir, urlArr);
 		logger.warn("结束下载【"+mail.getFrom()+"】主题为【"+mail.getSubject()+"】的邮件中的QQ中转站文件");
+		return localDir;
 	}
 	
 	public static void main(String[] args) throws Exception {
