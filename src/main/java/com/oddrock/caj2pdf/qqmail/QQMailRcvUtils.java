@@ -11,6 +11,7 @@ import com.oddrock.caj2pdf.exception.TransformWaitTimeoutException;
 import com.oddrock.caj2pdf.utils.Prop;
 import com.oddrock.common.awt.RobotManager;
 import com.oddrock.common.mail.FromMailAttachDownloadDirGenerator;
+import com.oddrock.common.mail.GeneralAttachDownloadDirGenerator;
 import com.oddrock.common.mail.ImapMailRcvr;
 import com.oddrock.common.mail.MailRecv;
 import com.oddrock.common.mail.qqmail.QQFileDownloadPage;
@@ -22,7 +23,7 @@ public class QQMailRcvUtils {
 	public static File rcvMail(String imapServer, String account, String passwd, 
 			String folderName, boolean readwriteFlag, boolean downloadAttachToLocal, String localBaseDirPath) throws Exception{
 		ImapMailRcvr imr = new ImapMailRcvr();
-		List<MailRecv> mails = imr.rcvMail(imapServer, account, passwd, folderName, readwriteFlag, downloadAttachToLocal, localBaseDirPath, new FromMailAttachDownloadDirGenerator());
+		List<MailRecv> mails = imr.rcvMail(imapServer, account, passwd, folderName, readwriteFlag, downloadAttachToLocal, localBaseDirPath, new GeneralAttachDownloadDirGenerator());
 		File dstDir = null;
 		for(MailRecv mail : mails){
 			dstDir = downloadQQFileInMail(mail, localBaseDirPath);
