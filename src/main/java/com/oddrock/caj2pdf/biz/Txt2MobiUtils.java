@@ -5,10 +5,13 @@ import java.io.File;
 import java.io.IOException;
 import org.apache.log4j.Logger;
 import com.oddrock.caj2pdf.bean.TransformFileSet;
+import com.oddrock.caj2pdf.exception.TransformNofileException;
 import com.oddrock.caj2pdf.exception.TransformWaitTimeoutException;
+import com.oddrock.caj2pdf.persist.TransformInfoStater;
 import com.oddrock.caj2pdf.utils.CalibreUtils;
 import com.oddrock.caj2pdf.utils.Common;
 import com.oddrock.caj2pdf.utils.Prop;
+import com.oddrock.caj2pdf.utils.TxtUtils;
 import com.oddrock.common.awt.RobotManager;
 import com.oddrock.common.windows.ClipboardUtils;
 
@@ -179,5 +182,33 @@ public class Txt2MobiUtils {
 		// 关闭calibre
 		CalibreUtils.close();
 		return result;
+	}
+	
+	public static void txt2mobi_batch(TransformInfoStater tfis) throws TransformNofileException, IOException, InterruptedException, TransformWaitTimeoutException {
+		if(!tfis.hasFileToTransform()) {
+			throw new TransformNofileException();
+		}
+		RobotManager robotMngr = tfis.getRobotMngr();
+		// 将srcDir目录下的txt文件全部切割为不超过500KB大小，并且删除超过500KB大小的源文件。
+		TxtUtils.splitTxtFiles(tfis.getSrcDir());
+		TransformFileSet fileSet;
+		for(File file : tfis.getSrcDir().listFiles()){
+			if(file==null || !Common.isFileExists(file, "txt")) continue;
+			fileSet = Txt2MobiUtils.txt2mobi(robotMngr, file.getCanonicalPath());
+			tfis.addDstFile(fileSet.getDstFile());
+			tfis.addSrcFile(fileSet.getSrcFile());
+		}
+	}
+	
+	public static void txt2mobi_test(TransformInfoStater tfis) throws TransformNofileException, IOException, TransformWaitTimeoutException, InterruptedException {
+		if(!tfis.hasFileToTransform()) {
+			throw new TransformNofileException();
+		}
+		RobotManager robotMngr = tfis.getRobotMngr();
+		File firstTxtFile = TxtUtils.getFirstTxtFile();
+		File srcFile = TxtUtils.extractFrontPart(firstTxtFile);
+		TransformFileSet fileSet = Txt2MobiUtils.txt2mobi(robotMngr, srcFile.getCanonicalPath());
+		tfis.addDstFile(fileSet.getDstFile());
+		tfis.addSrcFile(fileSet.getSrcFile());
 	}
 }

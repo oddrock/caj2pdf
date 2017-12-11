@@ -79,6 +79,16 @@ public class TransformRuleUtils {
 				return true;
 			}
 		}
+		if(transformType.equalsIgnoreCase("txt2mobi") 
+				|| transformType.equalsIgnoreCase("txt2mobi_test")) {
+			if(file.getCanonicalPath().endsWith(".txt")) {
+				return true;
+			}
+		}
+		if(transformType.equalsIgnoreCase("img2word") 
+				|| transformType.equalsIgnoreCase("img2word_test")) {
+			return Common.isImgFile(file);
+		}
 		return false;
 	}
 	

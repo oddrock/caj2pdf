@@ -14,7 +14,9 @@ import com.oddrock.caj2pdf.persist.TransformInfoStater;
 import com.oddrock.caj2pdf.utils.CalibreUtils;
 import com.oddrock.caj2pdf.utils.Common;
 import com.oddrock.caj2pdf.utils.Prop;
+import com.oddrock.caj2pdf.utils.TransformRuleUtils;
 import com.oddrock.common.awt.RobotManager;
+import com.oddrock.common.pdf.PdfManager;
 import com.oddrock.common.windows.ClipboardUtils;
 
 public class Pdf2MobiUtils {
@@ -175,6 +177,88 @@ public class Pdf2MobiUtils {
 			tfis.addDstFile(fileSet.getDstFile());
 			tfis.addSrcFile(fileSet.getSrcFile());
 		}	
+	}
+	
+	public static void pdf2mobi_bycalibre_test(TransformInfoStater tfis) throws IOException, TransformNofileException, InterruptedException, TransformWaitTimeoutException {
+		if(!tfis.hasFileToTransform()) throw new TransformNofileException();
+		RobotManager robotMngr = tfis.getRobotMngr();
+		// 存放每次单次转换后的源文件和目标文件
+		TransformFileSet fileSet = null;
+		File pdfFile = null;
+		PdfManager pm = new PdfManager();
+		// 找到目录下页数最多那个pdf
+		for(File file : tfis.getQualifiedSrcFileSet()){
+			if(pdfFile==null) {
+				pdfFile = file;
+			}else {
+				if(pm.pdfPageCount(file.getCanonicalPath())>pm.pdfPageCount(pdfFile.getCanonicalPath())) {
+					pdfFile = file;
+				}
+			}
+		}
+		if(pdfFile==null) return;
+		tfis.addSrcFile(pdfFile);
+		// 获得转换得到的pdf的实际页数
+		int realPageCount = pm.pdfPageCount(pdfFile.getCanonicalPath());
+		// 计算出应该提取的页数
+		int tiquPageCount = TransformRuleUtils.computeTestPageCount(realPageCount, tfis.getInfo().getTransform_type());
+		// 从已转换的pdf中提取相应页数，另存为新的pdf，新的pdf名为在已有PDF名称前加上“提取页面 ”
+		fileSet = PdfUtils.extractPage(robotMngr, pdfFile.getCanonicalPath(), tiquPageCount);
+		// 将提取后的页面转为word
+		fileSet = Pdf2MobiUtils.pdf2mobiByCalibre(robotMngr, fileSet.getDstFile().getCanonicalPath());
+		tfis.addMidFile(fileSet.getSrcFile());
+		tfis.addDstFile(fileSet.getDstFile());
+	}
+	
+	public static void pdf2mobi_byabbyy_batch(TransformInfoStater tfis) throws IOException, InterruptedException, TransformNofileException, TransformWaitTimeoutException {
+		if(!tfis.hasFileToTransform()) throw new TransformNofileException();
+		RobotManager robotMngr = tfis.getRobotMngr();
+		TransformFileSet fileSet;
+		// 先全部pdf转epub
+		for(File file : tfis.getQualifiedSrcFileSet()){
+			if(file==null) continue;
+			fileSet = Pdf2EpubUtils.pdf2epub(robotMngr, file.getCanonicalPath());
+			tfis.addSrcFile(fileSet.getSrcFile());
+			tfis.addMidFile(fileSet.getDstFile());
+		}
+		// 再全部epub转mobi
+		for(File file : tfis.getMidFileSet()){
+			if(file==null) continue;
+			fileSet = Epub2MobiUtils.epub2mobiByCalibre(robotMngr, file.getCanonicalPath());
+			tfis.addDstFile(fileSet.getDstFile());
+		}
+	}
+	
+	public static void pdf2mobi_byabbyy_test(TransformInfoStater tfis) throws IOException, TransformNofileException, InterruptedException, TransformWaitTimeoutException {
+		if(!tfis.hasFileToTransform()) throw new TransformNofileException();
+		RobotManager robotMngr = tfis.getRobotMngr();
+		// 存放每次单次转换后的源文件和目标文件
+		TransformFileSet fileSet = null;
+		File pdfFile = null;
+		PdfManager pm = new PdfManager();
+		// 找到目录下页数最多那个pdf
+		for(File file : tfis.getQualifiedSrcFileSet()){
+			if(pdfFile==null) {
+				pdfFile = file;
+			}else {
+				if(pm.pdfPageCount(file.getCanonicalPath())>pm.pdfPageCount(pdfFile.getCanonicalPath())) {
+					pdfFile = file;	
+				}
+			}
+		}
+		if(pdfFile==null) return;
+		tfis.addSrcFile(pdfFile);
+		// 获得转换得到的pdf的实际页数
+		int realPageCount = pm.pdfPageCount(pdfFile.getCanonicalPath());
+		// 计算出应该提取的页数
+		int tiquPageCount = TransformRuleUtils.computeTestPageCount(realPageCount, tfis.getInfo().getTransform_type());
+		// 从已转换的pdf中提取相应页数，另存为新的pdf，新的pdf名为在已有PDF名称前加上“提取页面 ”
+		fileSet = PdfUtils.extractPage(robotMngr, pdfFile.getCanonicalPath(), tiquPageCount);
+		// 将提取后的页面转为epub
+		fileSet = Pdf2EpubUtils.pdf2epub(robotMngr, fileSet.getDstFile().getCanonicalPath());
+		fileSet = Epub2MobiUtils.epub2mobiByCalibre(robotMngr, fileSet.getDstFile().getCanonicalPath());
+		tfis.addMidFile(fileSet.getSrcFile());
+		tfis.addDstFile(fileSet.getDstFile());
 	}
 
 	public static void main(String[] args) throws AWTException, IOException, InterruptedException, TransformWaitTimeoutException {

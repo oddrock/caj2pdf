@@ -6,12 +6,16 @@ import java.io.File;
 import java.io.IOException;
 
 import com.oddrock.caj2pdf.bean.TransformFileSet;
+import com.oddrock.caj2pdf.exception.TransformNofileException;
+import com.oddrock.caj2pdf.persist.TransformInfoStater;
 import com.oddrock.caj2pdf.utils.AbbyyUtils;
 import com.oddrock.caj2pdf.utils.CalibreUtils;
 import com.oddrock.caj2pdf.utils.Common;
 import com.oddrock.caj2pdf.utils.MicrosoftWordUtils;
 import com.oddrock.caj2pdf.utils.Prop;
+import com.oddrock.caj2pdf.utils.TransformRuleUtils;
 import com.oddrock.common.awt.RobotManager;
+import com.oddrock.common.pdf.PdfManager;
 import com.oddrock.common.windows.ClipboardUtils;
 
 public class Pdf2EpubUtils {
@@ -71,6 +75,48 @@ public class Pdf2EpubUtils {
 		CalibreUtils.close();
 		Common.wait(Prop.getInt("interval.waitmillis"));
 		return result;
+	}
+	
+	public static void pdf2epub_batch(TransformInfoStater tfis) throws TransformNofileException, IOException, InterruptedException {
+		if(!tfis.hasFileToTransform()) throw new TransformNofileException();
+		RobotManager robotMngr = tfis.getRobotMngr();
+		TransformFileSet fileSet;
+		for(File file : tfis.getQualifiedSrcFileSet()){
+			if(file==null) continue;
+			fileSet = Pdf2EpubUtils.pdf2epub(robotMngr, file.getCanonicalPath());
+			tfis.addDstFile(fileSet.getDstFile());
+			tfis.addSrcFile(fileSet.getSrcFile());
+		}
+	}
+	
+	public static void pdf2epub_test(TransformInfoStater tfis) throws IOException, TransformNofileException, InterruptedException {
+		if(!tfis.hasFileToTransform()) throw new TransformNofileException();
+		RobotManager robotMngr = tfis.getRobotMngr();
+		// 存放每次单次转换后的源文件和目标文件
+		TransformFileSet fileSet = null;
+		File pdfFile = null;
+		PdfManager pm = new PdfManager();
+		// 找到目录下页数最多那个pdf
+		for(File file : tfis.getQualifiedSrcFileSet()){
+			if(pdfFile==null) {
+				pdfFile = file;
+			}else {
+				if(pm.pdfPageCount(file.getCanonicalPath())>pm.pdfPageCount(pdfFile.getCanonicalPath())) {
+					pdfFile = file;
+				}
+			}
+		}
+		tfis.addSrcFile(pdfFile);
+		// 获得转换得到的pdf的实际页数
+		int realPageCount = pm.pdfPageCount(pdfFile.getCanonicalPath());
+		// 计算出应该提取的页数
+		int tiquPageCount = TransformRuleUtils.computeTestPageCount(realPageCount, tfis.getInfo().getTransform_type());
+		// 从已转换的pdf中提取相应页数，另存为新的pdf，新的pdf名为在已有PDF名称前加上“提取页面 ”
+		fileSet = PdfUtils.extractPage(robotMngr, pdfFile.getCanonicalPath(), tiquPageCount);
+		// 将提取后的页面转为epub
+		fileSet = Pdf2EpubUtils.pdf2epub(robotMngr, fileSet.getDstFile().getCanonicalPath());
+		tfis.addMidFile(fileSet.getSrcFile());
+		tfis.addDstFile(fileSet.getDstFile());
 	}
 	
 	public static void main(String[] args) throws AWTException, IOException, InterruptedException {
