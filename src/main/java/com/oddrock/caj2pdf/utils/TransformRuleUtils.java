@@ -1,5 +1,10 @@
 package com.oddrock.caj2pdf.utils;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
+
 public class TransformRuleUtils {
 	
 	/**
@@ -47,5 +52,45 @@ public class TransformRuleUtils {
 		}else {
 			return 1*1024;
 		}
+	}
+	
+	// 检查是否是合格的输入文件
+	public static boolean isQualifiedSrcFile(File file, String transformType) throws IOException {
+		if(file==null || !file.exists() || !file.isFile()) return false;
+		if(transformType==null) return false;
+		transformType = transformType.trim();
+		if(transformType.equalsIgnoreCase("caj2pdf") 
+				|| transformType.equalsIgnoreCase("caj2pdf_test")
+				|| transformType.equalsIgnoreCase("caj2word")
+				|| transformType.equalsIgnoreCase("caj2word_test")) {
+			if(file.getCanonicalPath().endsWith(".caj") || file.getCanonicalPath().endsWith(".nh")) {
+				return true;
+			}
+		}
+		if(transformType.equalsIgnoreCase("pdf2word") 
+				|| transformType.equalsIgnoreCase("pdf2word_test")
+				|| transformType.equalsIgnoreCase("pdf2epub")
+				|| transformType.equalsIgnoreCase("pdf2epub_test")
+				|| transformType.equalsIgnoreCase("pdf2mobi_byabbyy")
+				|| transformType.equalsIgnoreCase("pdf2mobi_byabbyy_test")
+				|| transformType.equalsIgnoreCase("pdf2mobi_bycalibre")
+				|| transformType.equalsIgnoreCase("pdf2mobi_bycalibre_test")) {
+			if(file.getCanonicalPath().endsWith(".pdf")) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	// 从目录里找出符合需要转换要求的源文件
+	public static Set<File> getQualifiedSrcFileSet(File srcDir, String transformType) throws IOException{
+		Set<File> fileSet = new HashSet<File>();
+		if(srcDir==null || !srcDir.exists() || !srcDir.isDirectory()) return fileSet;
+		for(File file : srcDir.listFiles()) {
+			if(isQualifiedSrcFile(file, transformType)) {
+				fileSet.add(file);
+			}
+		}
+		return fileSet;
 	}
 }

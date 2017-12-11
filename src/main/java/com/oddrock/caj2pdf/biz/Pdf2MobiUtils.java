@@ -8,7 +8,9 @@ import java.io.IOException;
 import org.apache.log4j.Logger;
 
 import com.oddrock.caj2pdf.bean.TransformFileSet;
+import com.oddrock.caj2pdf.exception.TransformNofileException;
 import com.oddrock.caj2pdf.exception.TransformWaitTimeoutException;
+import com.oddrock.caj2pdf.persist.TransformInfoStater;
 import com.oddrock.caj2pdf.utils.CalibreUtils;
 import com.oddrock.caj2pdf.utils.Common;
 import com.oddrock.caj2pdf.utils.Prop;
@@ -159,6 +161,20 @@ public class Pdf2MobiUtils {
 		// 关闭calibre
 		CalibreUtils.close();
 		return result;
+	}
+	
+	public static void pdf2mobi_bycalibre_batch(TransformInfoStater tfis) throws TransformNofileException, IOException, TransformWaitTimeoutException, InterruptedException {
+		if(!tfis.hasFileToTransform()) {
+			throw new TransformNofileException();
+		}
+		TransformFileSet fileSet;
+		RobotManager robotMngr = tfis.getRobotMngr();
+		for(File file : tfis.getQualifiedSrcFileSet()){
+			if(file==null) continue;
+			fileSet = Pdf2MobiUtils.pdf2mobiByCalibre(robotMngr, file.getCanonicalPath());
+			tfis.addDstFile(fileSet.getDstFile());
+			tfis.addSrcFile(fileSet.getSrcFile());
+		}	
 	}
 
 	public static void main(String[] args) throws AWTException, IOException, InterruptedException, TransformWaitTimeoutException {

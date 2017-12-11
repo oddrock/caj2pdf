@@ -15,6 +15,8 @@ import org.apache.log4j.Logger;
 import com.oddrock.caj2pdf.bean.TransformFileInfo;
 import com.oddrock.caj2pdf.bean.TransformInfo;
 import com.oddrock.caj2pdf.main.DocFormatConverter;
+import com.oddrock.caj2pdf.utils.TransformRuleUtils;
+import com.oddrock.common.awt.RobotManager;
 import com.oddrock.common.file.FileUtils;
 
 /**
@@ -25,11 +27,38 @@ import com.oddrock.common.file.FileUtils;
 public class TransformInfoStater {
 	private static Logger logger = Logger.getLogger(TransformInfoStater.class);
 	private TransformInfo info;
-	private Set<File> srcFileSet;		// 源文件集合
-	private Set<File> dstFileSet;		// 目标文件集合
-	private Set<File> midFileSet;		// 中间文件集合
+	private RobotManager robotMngr;
+	private Set<File> qualifiedSrcFileSet;	// 初选的可被转换的源文件
+	private Set<File> srcFileSet;		// 源文件集合（被成功转换的源文件）
+	private Set<File> dstFileSet;		// 目标文件集合（被成功转换的目标文件）
+	private Set<File> midFileSet;		// 中间文件集合（被成功转换的中间文件）
 	private File srcDir;
 	private File dstDir;
+	// 检查是否有文件需要转换
+	public boolean hasFileToTransform() throws IOException {
+		Set<File> fileSet = getQualifiedSrcFileSet();
+		if(fileSet.size()==0) {
+			return false;
+		}else {
+			return true;
+		}
+	}
+	public Set<File> getQualifiedSrcFileSet() throws IOException {
+		// 如果没有待转换的源文件，就从源文件目录扫描得到待转换源文件
+		if(qualifiedSrcFileSet.size()==0) {
+			qualifiedSrcFileSet = TransformRuleUtils.getQualifiedSrcFileSet(srcDir, info.getTransform_type());
+		}
+		return qualifiedSrcFileSet;
+	}
+	public void setQualifiedSrcFileSet(Set<File> waitSrcFileSet) {
+		this.qualifiedSrcFileSet = waitSrcFileSet;
+	}
+	public RobotManager getRobotMngr() {
+		return robotMngr;
+	}
+	public void setRobotMngr(RobotManager robotMngr) {
+		this.robotMngr = robotMngr;
+	}
 	public File getSrcDir() {
 		return srcDir;
 	}
@@ -60,6 +89,7 @@ public class TransformInfoStater {
 		srcFileSet = new HashSet<File>();
 		midFileSet = new HashSet<File>();
 		dstFileSet = new HashSet<File>();
+		qualifiedSrcFileSet = new HashSet<File>();
 		info = new TransformInfo();
 		info.setStart_time(new Date());
 	}
@@ -73,6 +103,11 @@ public class TransformInfoStater {
 		this(transformType);
 		this.srcDir = srcDir;
 		this.dstDir = dstDir;
+	}
+	
+	public TransformInfoStater(String transformType, File srcDir, File dstDir, RobotManager robotMngr) {
+		this(transformType,srcDir,dstDir);
+		this.robotMngr = robotMngr;
 	}
 
 	public void addSrcFile(File file) throws IOException {
@@ -116,6 +151,9 @@ public class TransformInfoStater {
 	
 	public void addMidFile(File file) throws IOException {
 		midFileSet.add(file);
+	}
+	public void addQualidfiedSrcFile(File file) throws IOException {
+		qualifiedSrcFileSet.add(file);
 	}
 	
 	// 从文件中获取信息

@@ -4,14 +4,17 @@ import java.awt.AWTException;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
-
 import com.oddrock.caj2pdf.bean.TransformFileSet;
+import com.oddrock.caj2pdf.exception.TransformNofileException;
 import com.oddrock.caj2pdf.exception.TransformWaitTimeoutException;
+import com.oddrock.caj2pdf.persist.TransformInfoStater;
 import com.oddrock.caj2pdf.utils.CajViewerUtils;
 import com.oddrock.caj2pdf.utils.Common;
 import com.oddrock.caj2pdf.utils.FoxitUtils;
 import com.oddrock.caj2pdf.utils.Prop;
+import com.oddrock.caj2pdf.utils.TransformRuleUtils;
 import com.oddrock.common.awt.RobotManager;
+import com.oddrock.common.pdf.PdfManager;
 import com.oddrock.common.windows.ClipboardUtils;
 
 public class Caj2PdfUtils {
@@ -36,6 +39,8 @@ public class Caj2PdfUtils {
 		CajViewerUtils.waitPrintFinish(robotMngr);
 		Common.wait(Prop.getInt("interval.waitminmillis"));
 	}
+	
+
 	
 	public static TransformFileSet caj2pdf(RobotManager robotMngr, String cajFilePath) throws IOException, InterruptedException, TransformWaitTimeoutException{
 		// 移开鼠标避免挡事
@@ -79,6 +84,50 @@ public class Caj2PdfUtils {
 		// 关闭foxit
 		FoxitUtils.close();
 		return result;
+	}
+	
+	public static void caj2pdf_batch(TransformInfoStater tfis) throws TransformWaitTimeoutException, IOException, InterruptedException, TransformNofileException {
+		TransformFileSet fileSet;
+		if(!tfis.hasFileToTransform()) {
+			throw new TransformNofileException();
+		}
+		for(File file : tfis.getQualifiedSrcFileSet()){
+			fileSet = caj2pdf(tfis.getRobotMngr(), file.getCanonicalPath());
+			if(fileSet.getSrcFile()!=null) {
+				tfis.addSrcFile(fileSet.getSrcFile());
+			}
+			if(fileSet.getDstFile()!=null) {
+				tfis.addDstFile(fileSet.getDstFile());
+			}
+		}
+	}
+	
+	public static void caj2pdf_test(TransformInfoStater tfis) throws TransformWaitTimeoutException, IOException, InterruptedException, TransformNofileException {
+		RobotManager robotMngr = tfis.getRobotMngr();
+		TransformFileSet fileSet = null;
+		if(!tfis.hasFileToTransform()) {
+			throw new TransformNofileException();
+		}
+		// 找到目录下第一个caj，并转换为pdf
+		for(File file : tfis.getQualifiedSrcFileSet()){
+			fileSet = caj2pdf(robotMngr, file.getCanonicalPath());
+			break;
+		}	
+		if(fileSet.getSrcFile()!=null) {
+			tfis.addSrcFile(fileSet.getSrcFile());
+		}
+		if(fileSet.getDstFile()!=null) {
+			tfis.addMidFile(fileSet.getDstFile());
+		}
+		// 获得转换得到的pdf的实际页数
+		int realPageCount = new PdfManager().pdfPageCount(fileSet.getDstFile().getCanonicalPath());
+		// 计算出应该提取的页数
+		int tiquPageCount = TransformRuleUtils.computeTestPageCount(realPageCount, tfis.getInfo().getTransform_type());
+		// 从已转换的pdf中提取相应页数，另存为新的pdf，新的pdf名为在已有PDF名称前加上“提取页面 ”
+		fileSet = PdfUtils.extractPage(robotMngr, fileSet.getDstFile().getCanonicalPath(), tiquPageCount);
+		if(fileSet.getDstFile()!=null) {
+			tfis.addDstFile(fileSet.getDstFile());
+		}
 	}
 	
 	public static void main(String[] args) throws AWTException, IOException, InterruptedException, TransformWaitTimeoutException {
