@@ -14,16 +14,28 @@ import com.oddrock.common.mail.FromMailAttachDownloadDirGenerator;
 import com.oddrock.common.mail.GeneralAttachDownloadDirGenerator;
 import com.oddrock.common.mail.ImapMailRcvr;
 import com.oddrock.common.mail.MailRecv;
+import com.oddrock.common.mail.PopMailRcvr;
 import com.oddrock.common.mail.qqmail.QQFileDownloadPage;
 import com.oddrock.common.mail.qqmail.QQFileDownloader;
 
 public class QQMailRcvUtils {
 	private static Logger logger = Logger.getLogger(QQMailRcvUtils.class);
 	
-	public static File rcvMail(String imapServer, String account, String passwd, 
+	public static File rcvMailByImap(String imapServer, String account, String passwd, 
 			String folderName, boolean readwriteFlag, boolean downloadAttachToLocal, String localBaseDirPath) throws Exception{
 		ImapMailRcvr imr = new ImapMailRcvr();
 		List<MailRecv> mails = imr.rcvMail(imapServer, account, passwd, folderName, readwriteFlag, downloadAttachToLocal, localBaseDirPath, new GeneralAttachDownloadDirGenerator());
+		File dstDir = null;
+		for(MailRecv mail : mails){
+			dstDir = downloadQQFileInMail(mail, localBaseDirPath);
+		}
+		return dstDir;
+	}
+	
+	public static File rcvMail(String server, String account, String passwd, 
+			String folderName, boolean readwriteFlag, boolean downloadAttachToLocal, String localBaseDirPath) throws Exception{
+		PopMailRcvr imr = new PopMailRcvr();
+		List<MailRecv> mails = imr.rcvMail(server, account, passwd, folderName, readwriteFlag, downloadAttachToLocal, localBaseDirPath, new GeneralAttachDownloadDirGenerator());
 		File dstDir = null;
 		for(MailRecv mail : mails){
 			dstDir = downloadQQFileInMail(mail, localBaseDirPath);
@@ -49,7 +61,7 @@ public class QQMailRcvUtils {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		String imapserver = Prop.get("qqmail.imapserver");
+		String imapserver = Prop.get("qqmail.popserver");
 		String account = Prop.get("qqmail.account"); 
 		String passwd = Prop.get("qqmail.passwd"); 
 		String foldername = Prop.get("qqmail.foldername"); 
