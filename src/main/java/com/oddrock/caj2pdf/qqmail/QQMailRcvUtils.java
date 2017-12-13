@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 import com.oddrock.caj2pdf.exception.TransformWaitTimeoutException;
 import com.oddrock.caj2pdf.utils.Prop;
 import com.oddrock.common.awt.RobotManager;
+import com.oddrock.common.file.FileUtils;
 import com.oddrock.common.mail.AttachDownloadDirGenerator;
 import com.oddrock.common.mail.GeneralAttachDownloadDirGenerator;
 import com.oddrock.common.mail.MailRecv;
@@ -35,6 +36,11 @@ public class QQMailRcvUtils {
 			if(mails!=null) {
 				for(MailRecv mail: mails) {
 					PopMailReadRecordManager.instance.setUnRead(account, mail.getUID());
+					if(mail.getAttachments()!=null) {
+						System.out.println(new File(mail.getAttachments().get(0).getLocalFilePath()).getParentFile().getCanonicalPath());
+						FileUtils.deleteDirAndAllFiles(new File(mail.getAttachments().get(0).getLocalFilePath()).getParentFile());
+					}
+					
 				}
 			}
 			throw e;

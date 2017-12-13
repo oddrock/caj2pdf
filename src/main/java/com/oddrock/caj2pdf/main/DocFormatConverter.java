@@ -137,31 +137,6 @@ public class DocFormatConverter {
 		
 	}
 	
-	private void doBeforeTransform(File srcDir) throws TransformNodirException {
-		if(!srcDir.exists() || !srcDir.isDirectory()){
-			throw new TransformNodirException(srcDir+"：该目录不存在！");
-		}
-		if(Prop.getBool("deletehiddenfile")) {
-			// 删除隐藏文件
-			FileUtils.deleteHiddenFiles(srcDir);
-		}
-		for(File file : srcDir.listFiles()) {
-			if(file.isHidden() || file.isDirectory()) continue;
-			String fileName = file.getName();
-			// 看文件名中是否有多个连续的空格，如果有，则替换为1个空格。
-			// 因为名字里有两个空格的文件，无法用CmdExecutor打开
-			if(fileName.matches(".*\\s{2,}.*")) {
-				fileName = fileName.replaceAll("\\s{2,}", " ");
-				file.renameTo(new File(srcDir, fileName));
-			}
-			// 有的caj文件用nh结尾，需要修改后缀名
-			if(fileName.matches("^.*\\.nh$")) {
-				fileName = fileName.replaceAll("\\.nh$", ".caj");
-				file.renameTo(new File(srcDir, fileName));
-			}
-		}
-	}
-	
 	private void doAfter(String noticeContent, File dstDir, boolean exception) throws IOException {
 		boolean debug = Prop.getBool("debug");
 		boolean selftest_simureal = Prop.getBool("selftest.simureal");
@@ -249,7 +224,7 @@ public class DocFormatConverter {
 	// pdf批量转word
 	public void pdf2word(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformNofileException, TransformNodirException {
 		TransformInfoStater tfis = new TransformInfoStater("pdf2word",srcDir, dstDir, robotMngr);
-		doBeforeTransform(srcDir);
+		doBeforeTransform(tfis);
 		Pdf2WordUtils.pdf2word_batch(tfis);
 		doAfterTransform(tfis);
 	}
