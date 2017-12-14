@@ -33,6 +33,7 @@ import com.oddrock.caj2pdf.utils.AsyncDbSaver;
 import com.oddrock.caj2pdf.utils.Prop;
 import com.oddrock.common.awt.RobotManager;
 import com.oddrock.common.file.FileUtils;
+import com.oddrock.common.windows.ClipboardUtils;
 import com.oddrock.common.windows.CmdExecutor;
 
 public class DocFormatConverter {
@@ -144,6 +145,9 @@ public class DocFormatConverter {
 		}
 		// 保存信息到数据库
 		AsyncDbSaver.saveDb(tfis);
+		if(tfis.isNeedCopyContentOnClipboard()) {
+			ClipboardUtils.setSysClipboardText(tfis.getClipboardContent());
+		}
 		logger.warn(noticeContent+ ":" + tfis.getSrcDir().getCanonicalPath());
 		
 	}
@@ -489,19 +493,39 @@ public class DocFormatConverter {
 		tfis.setNeedDelSrcDir(true);
 		tfis.setNeedSendDstFileMail(true);
 		tfis.setMaildir(md);
+		tfis.setNeedCopyContentOnClipboard(true);
+		tfis.setClipboardContent("您的文件已经转好发到您的邮箱了。");
 		doBeforeTransform(tfis);
 		Caj2WordUtils.caj2word_batch(tfis);
 		doAfterTransform(tfis);
 	}
 	
-	private void caj2word_sendmail_batch() throws TransformNodirException, TransformWaitTimeoutException, TransformNofileException, IOException, InterruptedException, MessagingException {
+	private void caj2word_sendmail() throws TransformNodirException, TransformWaitTimeoutException, TransformNofileException, IOException, InterruptedException, MessagingException {
 		Set<MailDir> set = MailDir.scanAndGetMailDir(new File(Prop.get("srcdirpath")));
 		for(MailDir md : set) {
 			caj2word_sendmail(md);
 		}
 	}
 	
-	
+	private void caj2word_test_sendmail() throws TransformNodirException, TransformNofileException, TransformWaitTimeoutException, IOException, InterruptedException, MessagingException {
+		Set<MailDir> set = MailDir.scanAndGetMailDir(new File(Prop.get("srcdirpath")));
+		for(MailDir md : set) {
+			caj2word_test_sendmail(md);
+		}
+	}
+
+	private void caj2word_test_sendmail(MailDir md) throws TransformNodirException, TransformNofileException, TransformWaitTimeoutException, IOException, InterruptedException, MessagingException {
+		TransformInfoStater tfis = new TransformInfoStater("caj2word_test", md.getDir(), new File(Prop.get("dstdirpath")), robotMngr, new MailDateStrTransformDstDirGenerator());
+		tfis.setNeedDelSrcDir(false);
+		tfis.setNeedSendDstFileMail(true);
+		tfis.setMaildir(md);
+		tfis.setNeedCopyContentOnClipboard(true);
+		tfis.setClipboardContent("您的文件试转效果已经转好发到您的邮箱了。");
+		doBeforeTransform(tfis);
+		Caj2WordUtils.caj2word_test(tfis);
+		doAfterTransform(tfis);
+	}
+
 	public void execTransform(String[] args) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException {
 		String method = Prop.get("caj2pdf.start");
 		if(method==null) {
@@ -510,8 +534,10 @@ public class DocFormatConverter {
 		if(args.length>=1) {
 			method = args[0].trim(); 
 		}
-		if("caj2word_sendmail_batch".equalsIgnoreCase(method)) {
-			caj2word_sendmail_batch();
+		if("caj2word_sendmail".equalsIgnoreCase(method)) {
+			caj2word_sendmail();
+		}else if("caj2word_test_sendmail".equalsIgnoreCase(method)) {
+			caj2word_test_sendmail();
 		}else if("caj2word".equalsIgnoreCase(method)) {
 			caj2word();
 		}else if("caj2word_test".equalsIgnoreCase(method)) {
@@ -567,17 +593,15 @@ public class DocFormatConverter {
 			CmdExecutor.getSingleInstance().exportTasklistToFile(new File(dstDir, filename));
 		}
 	}
-	
-	
 
 	
-
 	public static void main(String[] args) throws AWTException, IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException {
 		DocFormatConverter dfc = new DocFormatConverter();
 		if(Prop.getBool("debug")) {		// 调试模式
 			//dfc.img2word();
 			//AbbyyUtils.openPdf(new RobotManager(), "C:\\Users\\qzfeng\\Desktop\\cajwait\\装配式建筑施工安全评价体系研究_杨爽.pdf");
-			dfc.download_one_qqmailfiles();
+			//dfc.download_one_qqmailfiles();
+			dfc.caj2word_test_sendmail();
 			//dfc.selftest();
 		}else {
 			try {

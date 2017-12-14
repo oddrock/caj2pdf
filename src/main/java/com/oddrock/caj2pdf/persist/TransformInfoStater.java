@@ -31,6 +31,8 @@ import com.oddrock.common.file.FileUtils;
 public class TransformInfoStater {
 	private static Logger logger = Logger.getLogger(TransformInfoStater.class);
 	private MailDir maildir;
+	private boolean needCopyContentOnClipboard;
+	private String clipboardContent;
 	private boolean needSendDstFileMail;			// 是否需要发含目标文件邮件
 	private boolean needMoveSrcFile;
 	private boolean needMoveMidFile;
@@ -47,6 +49,18 @@ public class TransformInfoStater {
 	private File dstParentDir;			// 目标地址父路径
 	private TransformDstDirGenerator dstDirgenerator;		// 目标路径生成器
 	private boolean needDelSrcDir;
+	public boolean isNeedCopyContentOnClipboard() {
+		return needCopyContentOnClipboard;
+	}
+	public void setNeedCopyContentOnClipboard(boolean needCopyContentOnClipboard) {
+		this.needCopyContentOnClipboard = needCopyContentOnClipboard;
+	}
+	public String getClipboardContent() {
+		return clipboardContent;
+	}
+	public void setClipboardContent(String clipboardContent) {
+		this.clipboardContent = clipboardContent;
+	}
 	public MailDir getMaildir() {
 		return maildir;
 	}
@@ -154,6 +168,7 @@ public class TransformInfoStater {
 		super();
 		needDelSrcDir = false;
 		needSendDstFileMail = false;
+		needCopyContentOnClipboard = false;
 		dstDirgenerator = new DateStrTransformDstDirGenerator();
 		needMoveSrcFile = Prop.getBool("needmove.srcfile");
 		needMoveMidFile = Prop.getBool("needmove.midfile");
