@@ -70,5 +70,6 @@ public class MailDir {
 	public static void main(String[] args) {
 		String path = "C:\\Users\\qzfeng\\Desktop\\cajwait";
 		scanAndGetMailDir(new File(path));
+		
 	}
 }

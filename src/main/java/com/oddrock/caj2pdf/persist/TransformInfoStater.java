@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 import com.oddrock.caj2pdf.bean.TransformFileInfo;
 import com.oddrock.caj2pdf.bean.TransformInfo;
 import com.oddrock.caj2pdf.main.DocFormatConverter;
+import com.oddrock.caj2pdf.qqmail.MailDir;
 import com.oddrock.caj2pdf.utils.DateStrTransformDstDirGenerator;
 import com.oddrock.caj2pdf.utils.Prop;
 import com.oddrock.caj2pdf.utils.TransformDstDirGenerator;
@@ -29,6 +30,8 @@ import com.oddrock.common.file.FileUtils;
  */
 public class TransformInfoStater {
 	private static Logger logger = Logger.getLogger(TransformInfoStater.class);
+	private MailDir maildir;
+	private boolean needSendDstFileMail;			// 是否需要发含目标文件邮件
 	private boolean needMoveSrcFile;
 	private boolean needMoveMidFile;
 	private boolean needMoveDstFile;
@@ -44,6 +47,18 @@ public class TransformInfoStater {
 	private File dstParentDir;			// 目标地址父路径
 	private TransformDstDirGenerator dstDirgenerator;		// 目标路径生成器
 	private boolean needDelSrcDir;
+	public MailDir getMaildir() {
+		return maildir;
+	}
+	public void setMaildir(MailDir maildir) {
+		this.maildir = maildir;
+	}
+	public boolean isNeedSendDstFileMail() {
+		return needSendDstFileMail;
+	}
+	public void setNeedSendDstFileMail(boolean needSendDstFileMail) {
+		this.needSendDstFileMail = needSendDstFileMail;
+	}
 	public void setNeedDelSrcDir(boolean needDelSrcDir) {
 		this.needDelSrcDir = needDelSrcDir;
 	}
@@ -138,6 +153,7 @@ public class TransformInfoStater {
 	public TransformInfoStater() {
 		super();
 		needDelSrcDir = false;
+		needSendDstFileMail = false;
 		dstDirgenerator = new DateStrTransformDstDirGenerator();
 		needMoveSrcFile = Prop.getBool("needmove.srcfile");
 		needMoveMidFile = Prop.getBool("needmove.midfile");

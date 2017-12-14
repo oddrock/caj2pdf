@@ -22,6 +22,7 @@ import com.oddrock.caj2pdf.persist.DocBakUtils;
 import com.oddrock.caj2pdf.persist.TransformInfoStater;
 import com.oddrock.caj2pdf.qqmail.MailDir;
 import com.oddrock.caj2pdf.qqmail.QQMailRcvUtils;
+import com.oddrock.caj2pdf.qqmail.QQMailSendUtils;
 import com.oddrock.caj2pdf.selftest.SelftestFilesPool;
 import com.oddrock.caj2pdf.selftest.SelftestRuleUtils;
 import com.oddrock.caj2pdf.selftest.bean.SelftestRule;
@@ -73,6 +74,10 @@ public class DocFormatConverter {
 	private void doAfterTransform(TransformInfoStater tfis) throws IOException, MessagingException {
 		String noticeContent = tfis.getInfo().getTransform_type().replace("2", "转") + "已完成";
 		boolean debug = Prop.getBool("debug");
+		// 如果需要发邮件
+		if(tfis.isNeedSendDstFileMail()) {
+			QQMailSendUtils.sendMailWithFile(tfis);
+		}
 		// 如果不是调试或者自测模式，则需要备份
 		if(!debug && (!selftest || Prop.getBool("selftest.simureal")) && Prop.getBool("docbak.need")) {
 			// 备份不是必须步骤，任何异常不要影响正常流程
@@ -464,6 +469,8 @@ public class DocFormatConverter {
 	private void caj2word_sendmail(MailDir md) throws TransformNodirException, TransformWaitTimeoutException, TransformNofileException, IOException, InterruptedException, MessagingException {
 		TransformInfoStater tfis = new TransformInfoStater("caj2word", md.getDir(), new File(Prop.get("dstdirpath")), robotMngr, new MailDateStrTransformDstDirGenerator());
 		tfis.setNeedDelSrcDir(true);
+		tfis.setNeedSendDstFileMail(true);
+		tfis.setMaildir(md);
 		doBeforeTransform(tfis);
 		Caj2WordUtils.caj2word_batch(tfis);
 		doAfterTransform(tfis);
@@ -485,7 +492,7 @@ public class DocFormatConverter {
 		if(args.length>=1) {
 			method = args[0].trim(); 
 		}
-		if("caj2word&sendmail".equalsIgnoreCase(method)) {
+		if("caj2word_sendmail_batch".equalsIgnoreCase(method)) {
 			caj2word_sendmail_batch();
 		}else if("caj2word".equalsIgnoreCase(method)) {
 			caj2word();
