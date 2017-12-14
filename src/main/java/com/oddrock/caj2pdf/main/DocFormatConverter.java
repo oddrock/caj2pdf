@@ -445,25 +445,43 @@ public class DocFormatConverter {
 	// 下载QQ邮件中的附件
 	public void download_qqmailfiles() throws IOException {
 		logger.warn("开始下载QQ邮件...");
-		String noticeContent = "下载QQ邮件成功，请回到电脑继续操作！！！";
+		String noticeContent = "下载QQ邮件成功，请回到电脑继续操作！";
 		File dstDir = null;
 		boolean exception = false;
-		String imapserver = Prop.get("qqmail.imapserver");
+		String imapserver = Prop.get("qqmail.popserver");
 		String account = Prop.get("qqmail.account"); 
 		String passwd = Prop.get("qqmail.passwd"); 
 		String foldername = Prop.get("qqmail.foldername"); 
 		boolean readwrite = Prop.getBool("qqmail.readwrite");
 		String savefolder = Prop.get("qqmail.savefolder");
 		try {
-			dstDir = QQMailRcvUtils.rcvMail(imapserver, account, passwd, foldername, readwrite, true, savefolder);
+			dstDir = QQMailRcvUtils.rcvAllUnreadMails(imapserver, account, passwd, foldername, readwrite, true, savefolder);
 		} catch (Exception e) {
+			e.printStackTrace();
+			noticeContent = "下载QQ邮件失败，请自行手动下载QQ邮件！！！";
+			exception = true;
+		}finally {
+			if(dstDir==null) noticeContent="没有需要下载的QQ邮件，请回到电脑继续操作！";
+			doAfter(noticeContent,dstDir,exception);
+		}
+		logger.warn("完成下载QQ邮件...");
+	}
+	
+	private void download_one_qqmailfiles() throws IOException {
+		logger.warn("开始下载一封含附件的QQ未读邮件...");
+		String noticeContent = "下载QQ邮件成功，请回到电脑继续操作！！！";
+		File dstDir = null;
+		boolean exception = false;
+		try {
+			dstDir = QQMailRcvUtils.rcvOneUnreadMailToSrcDir();
+		}catch (Exception e) {
 			e.printStackTrace();
 			noticeContent = "下载QQ邮件失败，请自行手动下载QQ邮件！！！";
 			exception = true;
 		}finally {
 			doAfter(noticeContent,dstDir,exception);
 		}
-		logger.warn("完成下载QQ邮件...");
+		logger.warn("结束下载一封含附件的QQ未读邮件...");
 	}
 	
 	private void caj2word_sendmail(MailDir md) throws TransformNodirException, TransformWaitTimeoutException, TransformNofileException, IOException, InterruptedException, MessagingException {
@@ -530,6 +548,8 @@ public class DocFormatConverter {
 			selftest();
 		}else if("download_qqmailfiles".equalsIgnoreCase(method)) {
 			download_qqmailfiles();
+		}else if("download_one_qqmailfiles".equalsIgnoreCase(method)) {
+			download_one_qqmailfiles();
 		}else if("captureimage".equalsIgnoreCase(method)) {
 			if(args.length>=6) {
 				Thread.sleep(Integer.parseInt(args[1])*1000);
@@ -550,12 +570,14 @@ public class DocFormatConverter {
 	
 	
 
+	
+
 	public static void main(String[] args) throws AWTException, IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException {
 		DocFormatConverter dfc = new DocFormatConverter();
 		if(Prop.getBool("debug")) {		// 调试模式
 			//dfc.img2word();
 			//AbbyyUtils.openPdf(new RobotManager(), "C:\\Users\\qzfeng\\Desktop\\cajwait\\装配式建筑施工安全评价体系研究_杨爽.pdf");
-			dfc.caj2word_sendmail_batch();
+			dfc.download_one_qqmailfiles();
 			//dfc.selftest();
 		}else {
 			try {

@@ -20,14 +20,15 @@ import com.oddrock.common.mail.qqmail.QQFileDownloader;
 public class QQMailRcvUtils {
 	private static Logger logger = Logger.getLogger(QQMailRcvUtils.class);
 	
-	public static File rcvMail(String server, String account, String passwd, 
-			String folderName, boolean readwriteFlag, boolean downloadAttachToLocal, String localBaseDirPath) throws Exception{
+	public static File rcvAllUnreadMails(String server, String account, String passwd, 
+			String folderName, boolean readwriteFlag, boolean downloadAttachToLocal, 
+			String localBaseDirPath) throws Exception{
 		List<MailRecv> mails = null;
 		File dstDir = null;
 		try {
-			PopMailRcvr imr = new PopMailRcvr();
+			PopMailRcvr pmr = new PopMailRcvr();
 			AttachDownloadDirGenerator generator = new GeneralAttachDownloadDirGenerator();
-			mails = imr.rcvMail(server, account, passwd, folderName, readwriteFlag, downloadAttachToLocal, localBaseDirPath, generator);
+			mails = pmr.rcvMail(server, account, passwd, folderName, readwriteFlag, downloadAttachToLocal, localBaseDirPath, generator);
 			for(MailRecv mail : mails){
 				dstDir = downloadQQFileInMail(mail, localBaseDirPath, generator);
 			}
@@ -37,13 +38,89 @@ public class QQMailRcvUtils {
 				for(MailRecv mail: mails) {
 					PopMailReadRecordManager.instance.setUnRead(account, mail.getUID());
 					if(mail.getAttachments()!=null) {
-						System.out.println(new File(mail.getAttachments().get(0).getLocalFilePath()).getParentFile().getCanonicalPath());
+						//System.out.println(new File(mail.getAttachments().get(0).getLocalFilePath()).getParentFile().getCanonicalPath());
 						FileUtils.deleteDirAndAllFiles(new File(mail.getAttachments().get(0).getLocalFilePath()).getParentFile());
 					}
 					
 				}
 			}
 			throw e;
+		}
+		return dstDir;
+	}
+	
+	public static File rcvOneUnreadMail() throws Exception {
+		String server = Prop.get("qqmail.popserver");
+		String account = Prop.get("qqmail.account"); 
+		String passwd = Prop.get("qqmail.passwd"); 
+		String foldername = Prop.get("qqmail.foldername"); 
+		boolean readwrite = Prop.getBool("qqmail.readwrite");
+		String savefolder = Prop.get("qqmail.savefolder");
+		return rcvOneUnreadMail(server, account, passwd, foldername, readwrite, true, savefolder);
+	}
+	
+	public static File rcvOneUnreadMailToSrcDir() throws Exception {
+		File mailDir = rcvOneUnreadMail();
+		File maildirInSrcDir = null;
+		if(mailDir!=null) {
+			File srcDir = new File(Prop.get("srcdirpath"));
+			if(!srcDir.exists()) {
+				srcDir.mkdirs();
+			}else {
+				FileUtils.clearDir(srcDir);
+			}
+			FileUtils.copyDirToParentDir(mailDir, srcDir);
+		}
+		return maildirInSrcDir;
+	}
+	
+	// 读取一封邮件
+	public static File rcvOneUnreadMail(String server, String account, String passwd, 
+			String folderName, boolean readwriteFlag, boolean downloadAttachToLocal, 
+			String localBaseDirPath) throws Exception{
+		MailRecv mail = null;
+		File dstDir = null;
+		try {
+			PopMailRcvr imr = new PopMailRcvr();
+			AttachDownloadDirGenerator generator = new GeneralAttachDownloadDirGenerator();
+			mail = imr.rcvOneUnreadMail(server, account, passwd, folderName, readwriteFlag, downloadAttachToLocal, localBaseDirPath, generator);
+			if(mail!=null) {
+				downloadQQFileInMail(mail, localBaseDirPath, generator);
+				dstDir = generator.generateDir(new File(localBaseDirPath), mail);
+			}
+			
+		}catch(Exception e) {
+			// 如果出现异常，则回滚已记录的邮件UID，便于重新下载。
+			if(mail!=null) {
+				PopMailReadRecordManager.instance.setUnRead(account, mail.getUID());
+				if(mail.getAttachments()!=null) {
+					System.out.println(new File(mail.getAttachments().get(0).getLocalFilePath()).getParentFile().getCanonicalPath());
+					FileUtils.deleteDirAndAllFiles(new File(mail.getAttachments().get(0).getLocalFilePath()).getParentFile());
+				}
+			}
+			throw e;
+		}
+		// 如果收了一封没有附件的邮件，就继续收下一封
+		while(mail!=null && dstDir!=null && dstDir.listFiles().length==0) {
+			try {
+				PopMailRcvr imr = new PopMailRcvr();
+				AttachDownloadDirGenerator generator = new GeneralAttachDownloadDirGenerator();
+				mail = imr.rcvOneUnreadMail(server, account, passwd, folderName, readwriteFlag, downloadAttachToLocal, localBaseDirPath, generator);
+				if(mail!=null) {
+					downloadQQFileInMail(mail, localBaseDirPath, generator);
+					dstDir = generator.generateDir(new File(localBaseDirPath), mail);
+				}
+			}catch(Exception e) {
+				// 如果出现异常，则回滚已记录的邮件UID，便于重新下载。
+				if(mail!=null) {
+					PopMailReadRecordManager.instance.setUnRead(account, mail.getUID());
+					if(mail.getAttachments()!=null) {
+						//System.out.println(new File(mail.getAttachments().get(0).getLocalFilePath()).getParentFile().getCanonicalPath());
+						FileUtils.deleteDirAndAllFiles(new File(mail.getAttachments().get(0).getLocalFilePath()).getParentFile());
+					}
+				}
+				throw e;
+			}
 		}
 		return dstDir;
 	}
@@ -72,6 +149,6 @@ public class QQMailRcvUtils {
 		String foldername = Prop.get("qqmail.foldername"); 
 		boolean readwrite = Prop.getBool("qqmail.readwrite");
 		String savefolder = Prop.get("qqmail.savefolder"); 
-		rcvMail(imapserver, account, passwd, foldername, readwrite, true, savefolder);
+		rcvAllUnreadMails(imapserver, account, passwd, foldername, readwrite, true, savefolder);
 	}
 }

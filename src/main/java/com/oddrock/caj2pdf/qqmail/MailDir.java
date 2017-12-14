@@ -52,7 +52,7 @@ public class MailDir {
 		Set<MailDir> set = new HashSet<MailDir>();
 		for(File sonDir : dir.listFiles()) {
 			if(sonDir==null || !sonDir.exists() || !sonDir.isDirectory()) continue;
-			Pattern pattern1 = Pattern.compile("(\\d{2}月\\d{2}日\\d{2}时\\d{2}分)\\]-{1,}\\[(.*)\\]-{1,}\\[(.*@.*)\\]-{1,}\\[(.*)");
+			Pattern pattern1 = Pattern.compile("(\\d{4}年\\d{2}月\\d{2}日\\d{2}时\\d{2}分)\\]-{1,}\\[(.*)\\]-{1,}\\[(.*@.*)\\]-{1,}\\[(.*)");
 	        Matcher matcher = pattern1.matcher(sonDir.getName());
 	        if(matcher.matches()) {
 	        	MailDir md = new MailDir();
