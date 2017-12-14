@@ -629,6 +629,25 @@ public class DocFormatConverter {
 		Pdf2MobiUtils.pdf2mobi_bycalibre_batch(tfis);
 		doAfterTransform(tfis);
 	}
+	
+	private void pdf2mobi_bycalibre_test_sendmail() throws TransformNodirException, TransformNofileException, TransformWaitTimeoutException, IOException, InterruptedException, MessagingException {
+		Set<MailDir> set = MailDir.scanAndGetMailDir(new File(Prop.get("srcdirpath")));
+		for(MailDir md : set) {
+			pdf2mobi_bycalibre_test_sendmail(md);
+		}
+	}
+
+	private void pdf2mobi_bycalibre_test_sendmail(MailDir md) throws TransformNodirException, TransformNofileException, TransformWaitTimeoutException, IOException, InterruptedException, MessagingException {
+		TransformInfoStater tfis = new TransformInfoStater("pdf2mobi_bycalibre_test", md.getDir(), new File(Prop.get("dstdirpath")), robotMngr, new MailDateStrTransformDstDirGenerator());
+		tfis.setNeedDelSrcDir(false);
+		tfis.setNeedSendDstFileMail(true);
+		tfis.setMaildir(md);
+		tfis.setNeedCopyContentOnClipboard(true);
+		tfis.setClipboardContent("您的文件试转效果已经转好发到您的邮箱了。");
+		doBeforeTransform(tfis);
+		Pdf2MobiUtils.pdf2mobi_bycalibre_test(tfis);
+		doAfterTransform(tfis);
+	}
 
 	public void execTransform(String[] args) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException {
 		String method = Prop.get("caj2pdf.start");
@@ -652,6 +671,8 @@ public class DocFormatConverter {
 			pdf2word_test_sendmail();
 		}else if("pdf2mobi_bycalibre_sendmail".equalsIgnoreCase(method)) {
 			pdf2mobi_bycalibre_sendmail();
+		}else if("pdf2mobi_bycalibre_test_sendmail".equalsIgnoreCase(method)) {
+			pdf2mobi_bycalibre_test_sendmail();
 		}else if("caj2word".equalsIgnoreCase(method)) {
 			caj2word();
 		}else if("caj2word_test".equalsIgnoreCase(method)) {
@@ -714,11 +735,13 @@ public class DocFormatConverter {
 
 	
 
+	
+
 	public static void main(String[] args) throws AWTException, IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException {
 		DocFormatConverter dfc = new DocFormatConverter();
 		if(Prop.getBool("debug")) {		// 调试模式
 			//dfc.download_one_qqmailfiles();
-			dfc.pdf2mobi_bycalibre_sendmail();
+			dfc.pdf2mobi_bycalibre_test_sendmail();
 			//dfc.selftest();
 		}else {
 			try {
