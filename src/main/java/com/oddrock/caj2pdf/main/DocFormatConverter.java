@@ -75,9 +75,18 @@ public class DocFormatConverter {
 	private void doAfterTransform(TransformInfoStater tfis) throws IOException, MessagingException {
 		String noticeContent = tfis.getInfo().getTransform_type().replace("2", "转") + "已完成";
 		boolean debug = Prop.getBool("debug");
+		/*boolean isError = false;
+		TransformException exception = null;*/
 		// 如果需要发邮件
 		if(tfis.isNeedSendDstFileMail()) {
-			QQMailSendUtils.sendMailWithFile(tfis);
+			try {
+				QQMailSendUtils.sendMailWithFile(tfis);
+			}catch(Exception e) {
+				e.printStackTrace();
+				/*isError = true;
+				exception = new TransformSendFileMailException("发送邮件发生异常");*/
+				noticeContent += "但发送邮件失败，请手动发送邮件！";
+			}
 		}
 		// 如果不是调试或者自测模式，则需要备份
 		if(!debug && (!selftest || Prop.getBool("selftest.simureal")) && Prop.getBool("docbak.need")) {
@@ -525,6 +534,101 @@ public class DocFormatConverter {
 		Caj2WordUtils.caj2word_test(tfis);
 		doAfterTransform(tfis);
 	}
+	
+	private void caj2pdf_sendmail() throws TransformNodirException, TransformWaitTimeoutException, TransformNofileException, IOException, InterruptedException, MessagingException {
+		Set<MailDir> set = MailDir.scanAndGetMailDir(new File(Prop.get("srcdirpath")));
+		for(MailDir md : set) {
+			caj2pdf_sendmail(md);
+		}
+	}
+
+	private void caj2pdf_sendmail(MailDir md) throws TransformNodirException, TransformWaitTimeoutException, TransformNofileException, IOException, InterruptedException, MessagingException {
+		TransformInfoStater tfis = new TransformInfoStater("caj2pdf", md.getDir(), new File(Prop.get("dstdirpath")), robotMngr, new MailDateStrTransformDstDirGenerator());
+		tfis.setNeedDelSrcDir(true);
+		tfis.setNeedSendDstFileMail(true);
+		tfis.setMaildir(md);
+		tfis.setNeedCopyContentOnClipboard(true);
+		tfis.setClipboardContent("您的文件已经转好发到您的邮箱了。");
+		doBeforeTransform(tfis);
+		Caj2PdfUtils.caj2pdf_batch(tfis);
+		doAfterTransform(tfis);
+	}
+	
+	private void caj2pdf_test_sendmail() throws TransformNodirException, TransformWaitTimeoutException, TransformNofileException, IOException, InterruptedException, MessagingException {
+		Set<MailDir> set = MailDir.scanAndGetMailDir(new File(Prop.get("srcdirpath")));
+		for(MailDir md : set) {
+			caj2pdf_test_sendmail(md);
+		}
+	}
+
+	private void caj2pdf_test_sendmail(MailDir md) throws TransformNodirException, TransformWaitTimeoutException, TransformNofileException, IOException, InterruptedException, MessagingException {
+		TransformInfoStater tfis = new TransformInfoStater("caj2pdf_test", md.getDir(), new File(Prop.get("dstdirpath")), robotMngr, new MailDateStrTransformDstDirGenerator());
+		tfis.setNeedDelSrcDir(false);
+		tfis.setNeedSendDstFileMail(true);
+		tfis.setMaildir(md);
+		tfis.setNeedCopyContentOnClipboard(true);
+		tfis.setClipboardContent("您的文件试转效果已经转好发到您的邮箱了。");
+		doBeforeTransform(tfis);
+		Caj2PdfUtils.caj2pdf_test(tfis);
+		doAfterTransform(tfis);
+	}
+	
+	private void pdf2word_sendmail() throws TransformNodirException, TransformNofileException, IOException, InterruptedException, MessagingException {
+		Set<MailDir> set = MailDir.scanAndGetMailDir(new File(Prop.get("srcdirpath")));
+		for(MailDir md : set) {
+			pdf2word_sendmail(md);
+		}
+	}
+
+	private void pdf2word_sendmail(MailDir md) throws TransformNodirException, TransformNofileException, IOException, InterruptedException, MessagingException {
+		TransformInfoStater tfis = new TransformInfoStater("pdf2word", md.getDir(), new File(Prop.get("dstdirpath")), robotMngr, new MailDateStrTransformDstDirGenerator());
+		tfis.setNeedDelSrcDir(true);
+		tfis.setNeedSendDstFileMail(true);
+		tfis.setMaildir(md);
+		tfis.setNeedCopyContentOnClipboard(true);
+		tfis.setClipboardContent("您的文件已经转好发到您的邮箱了。");
+		doBeforeTransform(tfis);
+		Pdf2WordUtils.pdf2word_batch(tfis);
+		doAfterTransform(tfis);
+	}
+	
+	private void pdf2word_test_sendmail() throws TransformNofileException, TransformNodirException, IOException, InterruptedException, MessagingException {
+		Set<MailDir> set = MailDir.scanAndGetMailDir(new File(Prop.get("srcdirpath")));
+		for(MailDir md : set) {
+			pdf2word_test_sendmail(md);
+		}
+	}
+
+	private void pdf2word_test_sendmail(MailDir md) throws TransformNofileException, IOException, InterruptedException, TransformNodirException, MessagingException {
+		TransformInfoStater tfis = new TransformInfoStater("pdf2word_test", md.getDir(), new File(Prop.get("dstdirpath")), robotMngr, new MailDateStrTransformDstDirGenerator());
+		tfis.setNeedDelSrcDir(false);
+		tfis.setNeedSendDstFileMail(true);
+		tfis.setMaildir(md);
+		tfis.setNeedCopyContentOnClipboard(true);
+		tfis.setClipboardContent("您的文件试转效果已经转好发到您的邮箱了。");
+		doBeforeTransform(tfis);
+		Pdf2WordUtils.pdf2word_test(tfis);
+		doAfterTransform(tfis);
+	}
+	
+	private void pdf2mobi_bycalibre_sendmail() throws TransformNofileException, TransformWaitTimeoutException, TransformNodirException, IOException, InterruptedException, MessagingException {
+		Set<MailDir> set = MailDir.scanAndGetMailDir(new File(Prop.get("srcdirpath")));
+		for(MailDir md : set) {
+			pdf2mobi_bycalibre_sendmail(md);
+		}
+	}
+
+	private void pdf2mobi_bycalibre_sendmail(MailDir md) throws TransformNofileException, TransformWaitTimeoutException, IOException, InterruptedException, TransformNodirException, MessagingException {
+		TransformInfoStater tfis = new TransformInfoStater("pdf2mobi_bycalibre", md.getDir(), new File(Prop.get("dstdirpath")), robotMngr, new MailDateStrTransformDstDirGenerator());
+		tfis.setNeedDelSrcDir(true);
+		tfis.setNeedSendDstFileMail(true);
+		tfis.setMaildir(md);
+		tfis.setNeedCopyContentOnClipboard(true);
+		tfis.setClipboardContent("您的文件已经转好发到您的邮箱了。");
+		doBeforeTransform(tfis);
+		Pdf2MobiUtils.pdf2mobi_bycalibre_batch(tfis);
+		doAfterTransform(tfis);
+	}
 
 	public void execTransform(String[] args) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException {
 		String method = Prop.get("caj2pdf.start");
@@ -538,6 +642,16 @@ public class DocFormatConverter {
 			caj2word_sendmail();
 		}else if("caj2word_test_sendmail".equalsIgnoreCase(method)) {
 			caj2word_test_sendmail();
+		}else if("caj2pdf_sendmail".equalsIgnoreCase(method)) {
+			caj2pdf_sendmail();
+		}else if("caj2pdf_test_sendmail".equalsIgnoreCase(method)) {
+			caj2pdf_test_sendmail();
+		}else if("pdf2word_sendmail".equalsIgnoreCase(method)) {
+			pdf2word_sendmail();
+		}else if("pdf2word_test_sendmail".equalsIgnoreCase(method)) {
+			pdf2word_test_sendmail();
+		}else if("pdf2mobi_bycalibre_sendmail".equalsIgnoreCase(method)) {
+			pdf2mobi_bycalibre_sendmail();
 		}else if("caj2word".equalsIgnoreCase(method)) {
 			caj2word();
 		}else if("caj2word_test".equalsIgnoreCase(method)) {
@@ -595,13 +709,16 @@ public class DocFormatConverter {
 	}
 
 	
+
+	
+
+	
+
 	public static void main(String[] args) throws AWTException, IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException {
 		DocFormatConverter dfc = new DocFormatConverter();
 		if(Prop.getBool("debug")) {		// 调试模式
-			//dfc.img2word();
-			//AbbyyUtils.openPdf(new RobotManager(), "C:\\Users\\qzfeng\\Desktop\\cajwait\\装配式建筑施工安全评价体系研究_杨爽.pdf");
 			//dfc.download_one_qqmailfiles();
-			dfc.caj2word_test_sendmail();
+			dfc.pdf2mobi_bycalibre_sendmail();
 			//dfc.selftest();
 		}else {
 			try {
