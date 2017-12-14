@@ -4,6 +4,8 @@ import java.awt.AWTException;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
+
 import javax.mail.MessagingException;
 import org.apache.log4j.Logger;
 import com.oddrock.caj2pdf.biz.Caj2PdfUtils;
@@ -18,11 +20,13 @@ import com.oddrock.caj2pdf.exception.TransformNofileException;
 import com.oddrock.caj2pdf.exception.TransformWaitTimeoutException;
 import com.oddrock.caj2pdf.persist.DocBakUtils;
 import com.oddrock.caj2pdf.persist.TransformInfoStater;
+import com.oddrock.caj2pdf.qqmail.MailDir;
 import com.oddrock.caj2pdf.qqmail.QQMailRcvUtils;
 import com.oddrock.caj2pdf.selftest.SelftestFilesPool;
 import com.oddrock.caj2pdf.selftest.SelftestRuleUtils;
 import com.oddrock.caj2pdf.selftest.bean.SelftestRule;
 import com.oddrock.caj2pdf.utils.Common;
+import com.oddrock.caj2pdf.utils.MailDateStrTransformDstDirGenerator;
 import com.oddrock.caj2pdf.utils.AsnycHiddenFileDeleter;
 import com.oddrock.caj2pdf.utils.AsyncDbSaver;
 import com.oddrock.caj2pdf.utils.Prop;
@@ -79,23 +83,22 @@ public class DocFormatConverter {
 				e.printStackTrace();
 			}
 		}
-		if(Prop.getBool("needdel.midfile")){
+		if(tfis.isNeedDelMidFile()){
 			for(File file: tfis.getMidFileSet()) {
 				file.delete();
 			}
 		}
 		// 将需要移动的文件移动到目标文件夹
-		if(Prop.getBool("needmove.srcfile") || Prop.getBool("needmove.midfile") || Prop.getBool("needmove.dstfile")) {
-			tfis.setDstDir(Common.generateDstDir(tfis.getDstDir()));
-			if(Prop.getBool("needmove.srcfile") && 
-					(!tfis.getInfo().getTransform_type().contains("test") 
-							|| (Prop.getBool("testtransform.needmove.srcfile")))) {
+		if(tfis.isNeedMoveSrcFile() || tfis.isNeedMoveMidFile() || tfis.isNeedMoveDstFile()) {
+			if(tfis.isNeedMoveSrcFile() && 
+						(!tfis.getInfo().getTransform_type().contains("test") 
+						|| tfis.isTesttransformNeedMoveSrcFile())) {
 				Common.mvFileSet(tfis.getSrcFileSet(), tfis.getDstDir());	
 			}
-			if(Prop.getBool("needmove.midfile")) {
+			if(tfis.isNeedMoveMidFile()) {
 				Common.mvFileSet(tfis.getMidFileSet(), tfis.getDstDir());
 			}
-			if(Prop.getBool("needmove.dstfile")) {
+			if(tfis.isNeedMoveDstFile()) {
 				Common.mvFileSet(tfis.getDstFileSet(), tfis.getDstDir());
 			}
 		}
@@ -120,7 +123,6 @@ public class DocFormatConverter {
 			}else {
 				Common.openFinishedWindows(tfis.getSrcDir());
 			}
-			
 		}
 		// 如果是调试或者自测模式，则不需要修改桌面快捷方式
 		if(!debug && (!selftest || Prop.getBool("selftest.simureal")) && Prop.getBool("bat.directtofinishedwindows.need")) {
@@ -130,6 +132,10 @@ public class DocFormatConverter {
 		if(Prop.getBool("deletehiddenfile")) {
 			// 删除隐藏文件
 			AsnycHiddenFileDeleter.delete(tfis.getSrcDir());
+		}
+		// 如果需要删除源文件夹
+		if(tfis.isNeedDelSrcDir()) {
+			FileUtils.deleteDirAndAllFiles(tfis.getSrcDir());
 		}
 		// 保存信息到数据库
 		AsyncDbSaver.saveDb(tfis);
@@ -455,6 +461,22 @@ public class DocFormatConverter {
 		logger.warn("完成下载QQ邮件...");
 	}
 	
+	private void caj2word_sendmail(MailDir md) throws TransformNodirException, TransformWaitTimeoutException, TransformNofileException, IOException, InterruptedException, MessagingException {
+		TransformInfoStater tfis = new TransformInfoStater("caj2word", md.getDir(), new File(Prop.get("dstdirpath")), robotMngr, new MailDateStrTransformDstDirGenerator());
+		tfis.setNeedDelSrcDir(true);
+		doBeforeTransform(tfis);
+		Caj2WordUtils.caj2word_batch(tfis);
+		doAfterTransform(tfis);
+	}
+	
+	private void caj2word_sendmail_batch() throws TransformNodirException, TransformWaitTimeoutException, TransformNofileException, IOException, InterruptedException, MessagingException {
+		Set<MailDir> set = MailDir.scanAndGetMailDir(new File(Prop.get("srcdirpath")));
+		for(MailDir md : set) {
+			caj2word_sendmail(md);
+		}
+	}
+	
+	
 	public void execTransform(String[] args) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException {
 		String method = Prop.get("caj2pdf.start");
 		if(method==null) {
@@ -463,7 +485,9 @@ public class DocFormatConverter {
 		if(args.length>=1) {
 			method = args[0].trim(); 
 		}
-		if("caj2word".equalsIgnoreCase(method)) {
+		if("caj2word&sendmail".equalsIgnoreCase(method)) {
+			caj2word_sendmail_batch();
+		}else if("caj2word".equalsIgnoreCase(method)) {
 			caj2word();
 		}else if("caj2word_test".equalsIgnoreCase(method)) {
 			caj2word_test();
@@ -517,12 +541,15 @@ public class DocFormatConverter {
 		}
 	}
 	
+	
+
 	public static void main(String[] args) throws AWTException, IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException {
 		DocFormatConverter dfc = new DocFormatConverter();
 		if(Prop.getBool("debug")) {		// 调试模式
 			//dfc.img2word();
 			//AbbyyUtils.openPdf(new RobotManager(), "C:\\Users\\qzfeng\\Desktop\\cajwait\\装配式建筑施工安全评价体系研究_杨爽.pdf");
-			dfc.download_qqmailfiles();
+			dfc.caj2word_sendmail_batch();
+			//dfc.selftest();
 		}else {
 			try {
 				dfc.execTransform(args);

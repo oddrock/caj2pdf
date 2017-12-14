@@ -15,6 +15,9 @@ import org.apache.log4j.Logger;
 import com.oddrock.caj2pdf.bean.TransformFileInfo;
 import com.oddrock.caj2pdf.bean.TransformInfo;
 import com.oddrock.caj2pdf.main.DocFormatConverter;
+import com.oddrock.caj2pdf.utils.DateStrTransformDstDirGenerator;
+import com.oddrock.caj2pdf.utils.Prop;
+import com.oddrock.caj2pdf.utils.TransformDstDirGenerator;
 import com.oddrock.caj2pdf.utils.TransformRuleUtils;
 import com.oddrock.common.awt.RobotManager;
 import com.oddrock.common.file.FileUtils;
@@ -26,6 +29,11 @@ import com.oddrock.common.file.FileUtils;
  */
 public class TransformInfoStater {
 	private static Logger logger = Logger.getLogger(TransformInfoStater.class);
+	private boolean needMoveSrcFile;
+	private boolean needMoveMidFile;
+	private boolean needMoveDstFile;
+	private boolean needDelMidFile;
+	private boolean testtransformNeedMoveSrcFile;
 	private TransformInfo info;
 	private RobotManager robotMngr;
 	private Set<File> qualifiedSrcFileSet;	// 初选的可被转换的源文件
@@ -33,7 +41,54 @@ public class TransformInfoStater {
 	private Set<File> dstFileSet;		// 目标文件集合（被成功转换的目标文件）
 	private Set<File> midFileSet;		// 中间文件集合（被成功转换的中间文件）
 	private File srcDir;
-	private File dstDir;
+	private File dstParentDir;			// 目标地址父路径
+	private TransformDstDirGenerator dstDirgenerator;		// 目标路径生成器
+	private boolean needDelSrcDir;
+	public void setNeedDelSrcDir(boolean needDelSrcDir) {
+		this.needDelSrcDir = needDelSrcDir;
+	}
+	public boolean isNeedDelSrcDir() {
+		return needDelSrcDir;
+	}
+	public void setDstDirgenerator(TransformDstDirGenerator dstDirgenerator) {
+		this.dstDirgenerator = dstDirgenerator;
+	}
+	public File getDstParentDir() {
+		return dstParentDir;
+	}
+	public void setDstParentDir(File dstParentDir) {
+		this.dstParentDir = dstParentDir;
+	}
+	public boolean isTesttransformNeedMoveSrcFile() {
+		return testtransformNeedMoveSrcFile;
+	}
+	public void setTesttransformNeedMoveSrcFile(boolean testtransformNeedMoveSrcFile) {
+		this.testtransformNeedMoveSrcFile = testtransformNeedMoveSrcFile;
+	}
+	public boolean isNeedMoveSrcFile() {
+		return needMoveSrcFile;
+	}
+	public void setNeedMoveSrcFile(boolean needMoveSrcFile) {
+		this.needMoveSrcFile = needMoveSrcFile;
+	}
+	public boolean isNeedMoveMidFile() {
+		return needMoveMidFile;
+	}
+	public void setNeedMoveMidFile(boolean needMoveMidFile) {
+		this.needMoveMidFile = needMoveMidFile;
+	}
+	public boolean isNeedMoveDstFile() {
+		return needMoveDstFile;
+	}
+	public void setNeedMoveDstFile(boolean needMoveDstFile) {
+		this.needMoveDstFile = needMoveDstFile;
+	}
+	public boolean isNeedDelMidFile() {
+		return needDelMidFile;
+	}
+	public void setNeedDelMidFile(boolean needDelMidFile) {
+		this.needDelMidFile = needDelMidFile;
+	}
 	// 检查是否有文件需要转换
 	public boolean hasFileToTransform() throws IOException {
 		Set<File> fileSet = getQualifiedSrcFileSet();
@@ -62,12 +117,8 @@ public class TransformInfoStater {
 	public File getSrcDir() {
 		return srcDir;
 	}
-	public File getDstDir() {
-		return dstDir;
-	}
-	
-	public void setDstDir(File dstDir) {
-		this.dstDir = dstDir;
+	public File getDstDir() throws IOException {
+		return dstDirgenerator.generate(this);
 	}
 	public TransformInfo getInfo() {
 		return info;
@@ -86,6 +137,13 @@ public class TransformInfoStater {
 
 	public TransformInfoStater() {
 		super();
+		needDelSrcDir = false;
+		dstDirgenerator = new DateStrTransformDstDirGenerator();
+		needMoveSrcFile = Prop.getBool("needmove.srcfile");
+		needMoveMidFile = Prop.getBool("needmove.midfile");
+		needMoveDstFile = Prop.getBool("needmove.dstfile");
+		needDelMidFile = Prop.getBool("needdel.midfile");
+		testtransformNeedMoveSrcFile = Prop.getBool("testtransform.needmove.srcfile");
 		srcFileSet = new HashSet<File>();
 		midFileSet = new HashSet<File>();
 		dstFileSet = new HashSet<File>();
@@ -94,20 +152,18 @@ public class TransformInfoStater {
 		info.setStart_time(new Date());
 	}
 	
-	public TransformInfoStater(String transformType) {
+
+	public TransformInfoStater(String transformType, File srcDir, File dstParentDir, RobotManager robotMngr) {
 		this();
 		info.setTransform_type(transformType);
-	}
-	
-	public TransformInfoStater(String transformType, File srcDir, File dstDir) {
-		this(transformType);
 		this.srcDir = srcDir;
-		this.dstDir = dstDir;
+		this.dstParentDir = dstParentDir;
+		this.robotMngr = robotMngr;
 	}
 	
-	public TransformInfoStater(String transformType, File srcDir, File dstDir, RobotManager robotMngr) {
-		this(transformType,srcDir,dstDir);
-		this.robotMngr = robotMngr;
+	public TransformInfoStater(String transformType, File srcDir, File dstParentDir, RobotManager robotMngr, TransformDstDirGenerator dstDirGenerator) {
+		this(transformType,srcDir,dstParentDir,robotMngr);
+		this.dstDirgenerator = dstDirGenerator;
 	}
 
 	public void addSrcFile(File file) throws IOException {
@@ -180,5 +236,14 @@ public class TransformInfoStater {
             session.close();
         }
         logger.warn("转换信息保存到数据库成功！！！");
+	}
+	
+	// 目标地址和源地址是否不一致
+	public boolean isDstDirDifferentWithSrcDir() throws IOException {
+		if(this.getDstDir().equals(this.getSrcDir())){
+			return true;
+		}else {
+			return false;
+		}
 	}
 }
