@@ -19,9 +19,7 @@ public class QQMailSendUtils {
 		String smtpPort = Prop.get("qqmail.smtpport");
 		String subjetct = "reply：" + tfis.getMaildir().getSubject();
 		String smtpHost = Prop.get("qqmail.smtpserver");
-		MailSenderExt.sendEmail(senderAccount, senderPasswd, recverAccounts, subjetct, subjetct, true, smtpHost, smtpPort, tfis.getDstFileSet());
-	}
-
-	public static void main(String[] args) {
+		MailSenderExt.sendEmail(senderAccount, senderPasswd, recverAccounts, 
+				subjetct, subjetct, true, smtpHost, smtpPort, tfis.getDstFileSet());
 	}
 }
