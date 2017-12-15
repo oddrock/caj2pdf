@@ -78,8 +78,11 @@ public class DocFormatConverter {
 		/*boolean isError = false;
 		TransformException exception = null;*/
 		// 如果需要发邮件
-		if(!debug && (!selftest || Prop.getBool("selftest.simureal")) && tfis.isNeedSendDstFileMail()) {
+		if(tfis.isNeedSendDstFileMail()) {
 			try {
+				if(selftest || debug) {	// 如果是自测，始终只发给自测的邮箱，避免骚扰用户
+					tfis.getMaildir().setFromEmail(Prop.get("selftest.mail.recver.accounts"));
+				}
 				QQMailSendUtils.sendMailWithFile(tfis);
 			}catch(Exception e) {
 				e.printStackTrace();
@@ -184,7 +187,6 @@ public class DocFormatConverter {
 				e.printStackTrace();
 			}
 		}
-		System.out.println(dstDir);
 		// 如果是自测，不需要打开文件窗口
 		if((!selftest || selftest_simureal) && needopenfinishedwindows) {
 			if(dstDir!=null && dstDir.exists()) {
@@ -649,6 +651,158 @@ public class DocFormatConverter {
 		Pdf2MobiUtils.pdf2mobi_bycalibre_test(tfis);
 		doAfterTransform(tfis);
 	}
+	
+	private void txt2mobi_sendmail() throws TransformNodirException, TransformNofileException, TransformWaitTimeoutException, IOException, InterruptedException, MessagingException {
+		Set<MailDir> set = MailDir.scanAndGetMailDir(new File(Prop.get("srcdirpath")));
+		for(MailDir md : set) {
+			txt2mobi_sendmail(md);
+		}
+	}
+
+	private void txt2mobi_sendmail(MailDir md) throws TransformNodirException, TransformNofileException, TransformWaitTimeoutException, IOException, InterruptedException, MessagingException {
+		TransformInfoStater tfis = new TransformInfoStater("txt2mobi", md.getDir(), new File(Prop.get("dstdirpath")), robotMngr, new MailDateStrTransformDstDirGenerator());
+		tfis.setNeedDelSrcDir(true);
+		tfis.setNeedSendDstFileMail(true);
+		tfis.setMaildir(md);
+		tfis.setNeedCopyContentOnClipboard(true);
+		tfis.setClipboardContent("您的文件已经转好发到您的邮箱了。");
+		doBeforeTransform(tfis);
+		Txt2MobiUtils.txt2mobi_batch(tfis);
+		doAfterTransform(tfis);
+	}
+	
+	private void txt2mobi_test_sendmail() throws TransformNofileException, TransformWaitTimeoutException, TransformNodirException, IOException, InterruptedException, MessagingException {
+		Set<MailDir> set = MailDir.scanAndGetMailDir(new File(Prop.get("srcdirpath")));
+		for(MailDir md : set) {
+			txt2mobi_test_sendmail(md);
+		}
+	}
+
+	private void txt2mobi_test_sendmail(MailDir md) throws TransformNofileException, TransformWaitTimeoutException, IOException, InterruptedException, TransformNodirException, MessagingException {
+		TransformInfoStater tfis = new TransformInfoStater("txt2mobi_test", md.getDir(), new File(Prop.get("dstdirpath")), robotMngr, new MailDateStrTransformDstDirGenerator());
+		tfis.setNeedDelSrcDir(false);
+		tfis.setNeedSendDstFileMail(true);
+		tfis.setMaildir(md);
+		tfis.setNeedCopyContentOnClipboard(true);
+		tfis.setClipboardContent("您的文件试转效果已经转好发到您的邮箱了。");
+		doBeforeTransform(tfis);
+		Txt2MobiUtils.txt2mobi_test(tfis);
+		doAfterTransform(tfis);
+	}
+	
+	private void img2word_sendmail() throws TransformNodirException, TransformNofileException, IOException, InterruptedException, MessagingException {
+		Set<MailDir> set = MailDir.scanAndGetMailDir(new File(Prop.get("srcdirpath")));
+		for(MailDir md : set) {
+			img2word_sendmail(md);
+		}
+	}
+
+	private void img2word_sendmail(MailDir md) throws TransformNodirException, TransformNofileException, IOException, InterruptedException, MessagingException {
+		TransformInfoStater tfis = new TransformInfoStater("img2word", md.getDir(), new File(Prop.get("dstdirpath")), robotMngr, new MailDateStrTransformDstDirGenerator());
+		tfis.setNeedDelSrcDir(true);
+		tfis.setNeedSendDstFileMail(true);
+		tfis.setMaildir(md);
+		tfis.setNeedCopyContentOnClipboard(true);
+		tfis.setClipboardContent("您的文件已经转好发到您的邮箱了。");
+		doBeforeTransform(tfis);
+		Img2WordUtils.img2word_batch(tfis);	
+		doAfterTransform(tfis);
+	}
+	
+	private void img2word_test_sendmail() throws TransformNodirException, TransformNofileException, IOException, InterruptedException, MessagingException {
+		Set<MailDir> set = MailDir.scanAndGetMailDir(new File(Prop.get("srcdirpath")));
+		for(MailDir md : set) {
+			img2word_test_sendmail(md);
+		}
+	}
+
+	private void img2word_test_sendmail(MailDir md) throws TransformNodirException, TransformNofileException, IOException, InterruptedException, MessagingException {
+		TransformInfoStater tfis = new TransformInfoStater("img2word_test", md.getDir(), new File(Prop.get("dstdirpath")), robotMngr, new MailDateStrTransformDstDirGenerator());
+		tfis.setNeedDelSrcDir(false);
+		tfis.setNeedSendDstFileMail(true);
+		tfis.setMaildir(md);
+		tfis.setNeedCopyContentOnClipboard(true);
+		tfis.setClipboardContent("您的文件试转效果已经转好发到您的邮箱了。");
+		doBeforeTransform(tfis);
+		Img2WordUtils.img2word_test(tfis);
+		doAfterTransform(tfis);
+	}
+	
+	private void pdf2epub_sendmail() throws TransformNodirException, TransformNofileException, IOException, InterruptedException, MessagingException {
+		Set<MailDir> set = MailDir.scanAndGetMailDir(new File(Prop.get("srcdirpath")));
+		for(MailDir md : set) {
+			pdf2epub_sendmail(md);
+		}
+	}
+
+	private void pdf2epub_sendmail(MailDir md) throws TransformNodirException, TransformNofileException, IOException, InterruptedException, MessagingException {
+		TransformInfoStater tfis = new TransformInfoStater("pdf2epub", md.getDir(), new File(Prop.get("dstdirpath")), robotMngr, new MailDateStrTransformDstDirGenerator());
+		tfis.setNeedDelSrcDir(true);
+		tfis.setNeedSendDstFileMail(true);
+		tfis.setMaildir(md);
+		tfis.setNeedCopyContentOnClipboard(true);
+		tfis.setClipboardContent("您的文件已经转好发到您的邮箱了。");
+		doBeforeTransform(tfis);
+		Pdf2EpubUtils.pdf2epub_batch(tfis);
+		doAfterTransform(tfis);
+	}
+	
+	private void pdf2epub_test_sendmail() throws TransformNodirException, TransformNofileException, IOException, InterruptedException, MessagingException {
+		Set<MailDir> set = MailDir.scanAndGetMailDir(new File(Prop.get("srcdirpath")));
+		for(MailDir md : set) {
+			pdf2epub_test_sendmail(md);
+		}
+	}
+
+	private void pdf2epub_test_sendmail(MailDir md) throws TransformNodirException, TransformNofileException, IOException, InterruptedException, MessagingException {
+		TransformInfoStater tfis = new TransformInfoStater("pdf2epub_test", md.getDir(), new File(Prop.get("dstdirpath")), robotMngr, new MailDateStrTransformDstDirGenerator());
+		tfis.setNeedDelSrcDir(false);
+		tfis.setNeedSendDstFileMail(true);
+		tfis.setMaildir(md);
+		tfis.setNeedCopyContentOnClipboard(true);
+		tfis.setClipboardContent("您的文件试转效果已经转好发到您的邮箱了。");
+		doBeforeTransform(tfis);
+		Pdf2EpubUtils.pdf2epub_test(tfis);
+		doAfterTransform(tfis);
+	}
+	
+	private void pdf2mobi_byabbyy_sendmail() throws TransformNodirException, TransformNofileException, TransformWaitTimeoutException, IOException, InterruptedException, MessagingException {
+		Set<MailDir> set = MailDir.scanAndGetMailDir(new File(Prop.get("srcdirpath")));
+		for(MailDir md : set) {
+			pdf2mobi_byabbyy_sendmail(md);
+		}
+	}
+	
+	private void pdf2mobi_byabbyy_sendmail(MailDir md) throws TransformNodirException, TransformNofileException, TransformWaitTimeoutException, IOException, InterruptedException, MessagingException {
+		TransformInfoStater tfis = new TransformInfoStater("pdf2mobi_byabbyy", md.getDir(), new File(Prop.get("dstdirpath")), robotMngr, new MailDateStrTransformDstDirGenerator());
+		tfis.setNeedDelSrcDir(true);
+		tfis.setNeedSendDstFileMail(true);
+		tfis.setMaildir(md);
+		tfis.setNeedCopyContentOnClipboard(true);
+		tfis.setClipboardContent("您的文件已经转好发到您的邮箱了。");
+		doBeforeTransform(tfis);
+		Pdf2MobiUtils.pdf2mobi_byabbyy_batch(tfis);
+		doAfterTransform(tfis);
+	}
+
+	private void pdf2mobi_byabbyy_test_sendmail() throws TransformNodirException, TransformNofileException, TransformWaitTimeoutException, IOException, InterruptedException, MessagingException {
+		Set<MailDir> set = MailDir.scanAndGetMailDir(new File(Prop.get("srcdirpath")));
+		for(MailDir md : set) {
+			pdf2mobi_byabbyy_test_sendmail(md);
+		}
+	}
+
+	private void pdf2mobi_byabbyy_test_sendmail(MailDir md) throws TransformNodirException, TransformNofileException, TransformWaitTimeoutException, IOException, InterruptedException, MessagingException {
+		TransformInfoStater tfis = new TransformInfoStater("pdf2mobi_byabbyy_test", md.getDir(), new File(Prop.get("dstdirpath")), robotMngr, new MailDateStrTransformDstDirGenerator());
+		tfis.setNeedDelSrcDir(false);
+		tfis.setNeedSendDstFileMail(true);
+		tfis.setMaildir(md);
+		tfis.setNeedCopyContentOnClipboard(true);
+		tfis.setClipboardContent("您的文件试转效果已经转好发到您的邮箱了。");
+		doBeforeTransform(tfis);
+		Pdf2MobiUtils.pdf2mobi_byabbyy_test(tfis);
+		doAfterTransform(tfis);
+	}
 
 	public void execTransform(String[] args) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException {
 		String method = Prop.get("caj2pdf.start");
@@ -674,6 +828,22 @@ public class DocFormatConverter {
 			pdf2mobi_bycalibre_sendmail();
 		}else if("pdf2mobi_bycalibre_test_sendmail".equalsIgnoreCase(method)) {
 			pdf2mobi_bycalibre_test_sendmail();
+		}else if("txt2mobi_sendmail".equalsIgnoreCase(method)) {
+			txt2mobi_sendmail();
+		}else if("txt2mobi_test_sendmail".equalsIgnoreCase(method)) {
+			txt2mobi_test_sendmail();
+		}else if("img2word_sendmail".equalsIgnoreCase(method)) {
+			img2word_sendmail();
+		}else if("img2word_test_sendmail".equalsIgnoreCase(method)) {
+			img2word_test_sendmail();
+		}else if("pdf2epub_sendmail".equalsIgnoreCase(method)) {
+			pdf2epub_sendmail();
+		}else if("pdf2epub_test_sendmail".equalsIgnoreCase(method)) {
+			pdf2epub_test_sendmail();
+		}else if("pdf2mobi_byabbyy_sendmail".equalsIgnoreCase(method)) {
+			pdf2mobi_byabbyy_sendmail();
+		}else if("pdf2mobi_byabbyy_test_sendmail".equalsIgnoreCase(method)) {
+			pdf2mobi_byabbyy_test_sendmail();
 		}else if("caj2word".equalsIgnoreCase(method)) {
 			caj2word();
 		}else if("caj2word_test".equalsIgnoreCase(method)) {
@@ -730,19 +900,13 @@ public class DocFormatConverter {
 		}
 	}
 
-	
 
-	
-
-	
-
-	
 
 	public static void main(String[] args) throws AWTException, IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException {
 		DocFormatConverter dfc = new DocFormatConverter();
 		if(Prop.getBool("debug")) {		// 调试模式
-			dfc.download_one_qqmailfiles();
-			//dfc.pdf2mobi_bycalibre_test_sendmail();
+			//dfc.download_one_qqmailfiles();
+			dfc.pdf2mobi_byabbyy_test_sendmail();
 			//dfc.selftest();
 		}else {
 			try {
