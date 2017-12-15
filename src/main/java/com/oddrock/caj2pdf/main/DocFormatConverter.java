@@ -78,7 +78,7 @@ public class DocFormatConverter {
 		/*boolean isError = false;
 		TransformException exception = null;*/
 		// 如果需要发邮件
-		if(tfis.isNeedSendDstFileMail()) {
+		if(!debug && (!selftest || Prop.getBool("selftest.simureal")) && tfis.isNeedSendDstFileMail()) {
 			try {
 				QQMailSendUtils.sendMailWithFile(tfis);
 			}catch(Exception e) {
@@ -184,6 +184,7 @@ public class DocFormatConverter {
 				e.printStackTrace();
 			}
 		}
+		System.out.println(dstDir);
 		// 如果是自测，不需要打开文件窗口
 		if((!selftest || selftest_simureal) && needopenfinishedwindows) {
 			if(dstDir!=null && dstDir.exists()) {
@@ -740,8 +741,8 @@ public class DocFormatConverter {
 	public static void main(String[] args) throws AWTException, IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException {
 		DocFormatConverter dfc = new DocFormatConverter();
 		if(Prop.getBool("debug")) {		// 调试模式
-			//dfc.download_one_qqmailfiles();
-			dfc.pdf2mobi_bycalibre_test_sendmail();
+			dfc.download_one_qqmailfiles();
+			//dfc.pdf2mobi_bycalibre_test_sendmail();
 			//dfc.selftest();
 		}else {
 			try {

@@ -69,7 +69,7 @@ public class QQMailRcvUtils {
 			}else {
 				FileUtils.clearDir(srcDir);
 			}
-			FileUtils.copyDirToParentDir(mailDir, srcDir);
+			maildirInSrcDir = FileUtils.copyDirToParentDir(mailDir, srcDir);
 		}
 		return maildirInSrcDir;
 	}
@@ -94,7 +94,7 @@ public class QQMailRcvUtils {
 			if(mail!=null) {
 				PopMailReadRecordManager.instance.setUnRead(account, mail.getUID());
 				if(mail.getAttachments()!=null) {
-					System.out.println(new File(mail.getAttachments().get(0).getLocalFilePath()).getParentFile().getCanonicalPath());
+					//System.out.println(new File(mail.getAttachments().get(0).getLocalFilePath()).getParentFile().getCanonicalPath());
 					FileUtils.deleteDirAndAllFiles(new File(mail.getAttachments().get(0).getLocalFilePath()).getParentFile());
 				}
 			}
