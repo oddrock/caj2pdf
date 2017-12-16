@@ -20,7 +20,15 @@ public class Caj2WordUtils {
 		// 先全部caj转pdf
 		for(File file : tfis.getQualifiedSrcFileSet()){
 			if(file==null) continue;
-			fileSet = Caj2PdfUtils.caj2pdf(robotMngr, file.getCanonicalPath());
+			File pdfFile = new File(file.getParent(), file.getName().replaceAll(".caj$", ".pdf"));
+			// 如果pdf文件已经存在，则不必再转换，跳过这一步
+			if(pdfFile.exists()) {
+				fileSet = new TransformFileSet();
+				fileSet.setSrcFile(file);
+				fileSet.setDstFile(pdfFile);
+			}else {
+				fileSet = Caj2PdfUtils.caj2pdf(robotMngr, file.getCanonicalPath());
+			}
 			if(fileSet.getSrcFile()!=null) {
 				tfis.addSrcFile(file);
 			}

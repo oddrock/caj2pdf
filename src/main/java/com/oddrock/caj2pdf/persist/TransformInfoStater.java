@@ -186,6 +186,9 @@ public class TransformInfoStater {
 
 	public TransformInfoStater(String transformType, File srcDir, File dstParentDir, RobotManager robotMngr) {
 		this();
+		/*if(transformType.contains("caj2word_test") || transformType.contains("caj2pdf_test")) {
+			this.needDelMidFile = false;
+		}*/
 		info.setTransform_type(transformType);
 		this.srcDir = srcDir;
 		this.dstParentDir = dstParentDir;

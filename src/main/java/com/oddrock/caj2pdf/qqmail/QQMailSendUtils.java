@@ -27,19 +27,27 @@ public class QQMailSendUtils {
 		String smtpHost = Prop.get("qqmail.smtpserver");
 		if(tfis.getInfo().getTransform_type().contains("test")) {
 			subjetct = "试转效果：" + tfis.getMaildir().getSubject();
-			content = "您好，这是您的试转效果，这是我们能转换的最好效果，如果您对此满意，可以下单，我们给您全部转换。\r\n\r\n";
-			content += "一、价格：\r\n" + 
-					"1、转word或mobi每个文件（100页以内）起价2元，每增加100页加2元。有的比较复杂的转换要看具体情况开价。\r\n" + 
-					"2、其他种类转换每个文件（100页以内）起价1元，每增加100页加1元。\r\n" + 
-					"二、如果您转换的量大（5个文件以上），我们也可以给您提供试转服务，您看到效果满意再足额拍下宝贝付款再转剩下的部分。\r\n" + 
-					"三、转换耗时耗人工，小店纯粹赚吆喝，谢绝还价。\r\n" + 
-					"四、下单链接\r\n" + 
-					"1、转word/mobi（2元1个）的下单链接：\r\n" + 
-					"https://item.taobao.com/item.htm?spm=a1z38n.10677092.0.0.1ac3f133jzyjzD&amp;id=561901256897\r\n" + 
-					"2、其他转换（1元1个）下单链接是：https://item.taobao.com/item.htm?spm=a1z38n.10677092.0.0.e6eb7bvZKjYT&amp;id=554002751556";
+			content = "您好，这是您的试转效果，这是我们能转换的最好效果，如果您对此满意，可以下单，我们给您全部转换。<br/><br/>" +
+					"一、价格：<br/>" + 
+					"1、转word或mobi每个文件（100页以内）起价2元，每增加100页加2元。有的比较复杂的转换要看具体情况开价。<br/>" + 
+					"2、其他种类转换每个文件（100页以内）起价1元，每增加100页加1元。<br/>" + 
+					"二、转换耗时耗人工，小店纯粹赚吆喝，谢绝还价。<br/>" + 
+					"三、下单链接<br/>" + 
+					"1、转word/mobi（2元1个）的下单链接：<a href=\""+Prop.get("taobao.url.baobei.caj2word")+"\">"+Prop.get("taobao.url.baobei.caj2word")+"</a><br/>" + 
+					"2、其他转换（1元1个）下单链接：<a href=\""+Prop.get("taobao.url.baobei.qita")+"\">"+Prop.get("taobao.url.baobei.qita")+"</a><br/><br/><br/>" + 
+					"=======================================================<br/>"+
+					//"20页（每页平均1500字）的文档需要普通人敲上1天键盘，而如果您有源文件交给我们转换，则只需要5分钟，然后您只需要稍加修改和调整格式即可。<br/>"+
+					"<b>时间就该用在刀刃上，PDF快转直通车的理念是：用我们的服务，让您免去敲击键盘和鼠标的辛苦，帮您节省大量的宝贵时间。</b><br/>" +
+					"淘宝店铺地址：<a href=\""+Prop.get("taobao.url.dianpu")+"\">"+Prop.get("taobao.url.dianpu")+"</a>";
 		}else {
 			subjetct = "转换完成：" + tfis.getMaildir().getSubject();
-			content = "您好，您要的文件全部转换好放在邮件附件中了。\r\n";
+			content = "您好：<br/>"+ 
+					"您要的文件全部转换好放在邮件附件中了。<br/>" + 
+					"文档转换主要是为了提取文字，因为毕竟是转换，格式很难和原来完全一致。如果需要调整格式，建议您重一个新文档，把原文档中的文字无格式拷贝到新文档中再编辑格式即可。<br/><br/><br/>"+
+					"=======================================================<br/>"+
+					//"1个20页（每页平均1500字）的文档需要普通人敲上1天键盘，而如果您有源文件交给我们转换，则只需要几分钟，然后您只需要稍加修改和调整格式即可。<br/>"+
+					"<b>时间就该用在刀刃上，PDF快转直通车的理念是：用我们的服务，让您免去敲击键盘和鼠标的辛苦，帮您节省大量的宝贵时间。</b><br/>" +
+					"PDF快转直通车淘宝店铺地址：<a href=\""+Prop.get("taobao.url.dianpu")+"\">"+Prop.get("taobao.url.dianpu")+"</a>";
 		}
 		logger.warn("开始将以下文件发送邮件给："+recverAccounts);
 		for(File file : tfis.getDstFileSet()) {

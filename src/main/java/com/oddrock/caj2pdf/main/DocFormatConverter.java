@@ -115,7 +115,7 @@ public class DocFormatConverter {
 						|| tfis.isTesttransformNeedMoveSrcFile())) {
 				Common.mvFileSet(tfis.getSrcFileSet(), tfis.getDstDir());	
 			}
-			if(tfis.isNeedMoveMidFile()) {
+			if(tfis.isNeedMoveMidFile() && !tfis.getInfo().getTransform_type().contains("test")) {
 				Common.mvFileSet(tfis.getMidFileSet(), tfis.getDstDir());
 			}
 			if(tfis.isNeedMoveDstFile()) {
@@ -914,7 +914,7 @@ public class DocFormatConverter {
 		if(Prop.getBool("debug")) {		// 调试模式
 			//dfc.download_one_qqmailfiles();
 			//dfc.caj2word_sendmail();
-			dfc.selftest();
+			dfc.caj2word_sendmail();
 		}else {
 			try {
 				dfc.execTransform(args);
