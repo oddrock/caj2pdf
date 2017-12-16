@@ -3,6 +3,7 @@ package com.oddrock.caj2pdf.main;
 import java.awt.AWTException;
 import java.io.File;
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.List;
 import java.util.Set;
 
@@ -21,6 +22,7 @@ import com.oddrock.caj2pdf.exception.TransformWaitTimeoutException;
 import com.oddrock.caj2pdf.persist.DocBakUtils;
 import com.oddrock.caj2pdf.persist.TransformInfoStater;
 import com.oddrock.caj2pdf.qqmail.MailDir;
+import com.oddrock.caj2pdf.qqmail.QQMailArchiveUtils;
 import com.oddrock.caj2pdf.qqmail.QQMailRcvUtils;
 import com.oddrock.caj2pdf.qqmail.QQMailSendUtils;
 import com.oddrock.caj2pdf.selftest.SelftestFilesPool;
@@ -459,8 +461,9 @@ public class DocFormatConverter {
 	}
 	
 	// 下载QQ邮件中的附件
-	public void download_qqmailfiles() throws IOException {
+	public void download_qqmailfiles() throws IOException, ParseException {
 		logger.warn("开始下载QQ邮件...");
+		QQMailArchiveUtils.archive();
 		String noticeContent = "下载QQ邮件成功，请回到电脑继续操作！";
 		File dstDir = null;
 		boolean exception = false;
@@ -483,8 +486,9 @@ public class DocFormatConverter {
 		logger.warn("完成下载QQ邮件...");
 	}
 	
-	private void download_one_qqmailfiles() throws IOException {
+	private void download_one_qqmailfiles() throws IOException, ParseException {
 		logger.warn("开始下载一封含附件的QQ未读邮件...");
+		QQMailArchiveUtils.archive();
 		String noticeContent = "下载QQ邮件成功，请回到电脑继续操作！！！";
 		File dstDir = null;
 		boolean exception = false;
@@ -804,7 +808,7 @@ public class DocFormatConverter {
 		doAfterTransform(tfis);
 	}
 
-	public void execTransform(String[] args) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException {
+	public void execTransform(String[] args) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException, ParseException {
 		String method = Prop.get("caj2pdf.start");
 		if(method==null) {
 			method = "caj2word";
@@ -902,10 +906,10 @@ public class DocFormatConverter {
 
 
 
-	public static void main(String[] args) throws AWTException, IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException {
+	public static void main(String[] args) throws AWTException, IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException, ParseException {
 		DocFormatConverter dfc = new DocFormatConverter();
 		if(Prop.getBool("debug")) {		// 调试模式
-			dfc.download_qqmailfiles();
+			dfc.download_one_qqmailfiles();
 			//dfc.pdf2mobi_byabbyy_test_sendmail();
 			//dfc.selftest();
 		}else {
