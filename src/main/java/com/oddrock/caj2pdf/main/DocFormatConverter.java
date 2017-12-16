@@ -157,6 +157,9 @@ public class DocFormatConverter {
 		if(tfis.isNeedDelSrcDir()) {
 			FileUtils.deleteDirAndAllFiles(tfis.getSrcDir());
 		}
+		if(debug) {
+			tfis.getInfo().setSelftest(1); 		// debug也算测试，避免误导数据
+		}
 		// 保存信息到数据库
 		AsyncDbSaver.saveDb(tfis);
 		if(tfis.isNeedCopyContentOnClipboard()) {
@@ -910,7 +913,7 @@ public class DocFormatConverter {
 		DocFormatConverter dfc = new DocFormatConverter();
 		if(Prop.getBool("debug")) {		// 调试模式
 			//dfc.download_one_qqmailfiles();
-			//dfc.pdf2mobi_byabbyy_test_sendmail();
+			//dfc.caj2word_sendmail();
 			dfc.selftest();
 		}else {
 			try {
