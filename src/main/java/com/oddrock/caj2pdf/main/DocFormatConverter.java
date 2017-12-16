@@ -905,9 +905,9 @@ public class DocFormatConverter {
 	public static void main(String[] args) throws AWTException, IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException {
 		DocFormatConverter dfc = new DocFormatConverter();
 		if(Prop.getBool("debug")) {		// 调试模式
-			//dfc.download_qqmailfiles();
+			dfc.download_qqmailfiles();
 			//dfc.pdf2mobi_byabbyy_test_sendmail();
-			dfc.selftest();
+			//dfc.selftest();
 		}else {
 			try {
 				dfc.execTransform(args);
