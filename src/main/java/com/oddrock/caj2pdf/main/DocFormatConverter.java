@@ -77,6 +77,7 @@ public class DocFormatConverter {
 	private void doAfterTransform(TransformInfoStater tfis) throws IOException, MessagingException {
 		String noticeContent = tfis.getInfo().getTransform_type().replace("2", "转") + "已完成";
 		boolean debug = Prop.getBool("debug");
+		boolean simureal = Prop.getBool("simureal");
 		/*boolean isError = false;
 		TransformException exception = null;*/
 		// 如果需要发邮件
@@ -93,8 +94,8 @@ public class DocFormatConverter {
 				noticeContent += "但发送邮件失败，请手动发送邮件！";
 			}
 		}
-		// 如果不是调试或者自测模式，则需要备份
-		if(!debug && (!selftest || Prop.getBool("selftest.simureal")) && Prop.getBool("docbak.need")) {
+		// 如果在调试或者自测,且不需要仿真，就不需要备份
+		if(((!debug && !selftest) || simureal) && Prop.getBool("docbak.need")) {
 			// 备份不是必须步骤，任何异常不要影响正常流程
 			try {
 				// 备份文件，以便未来测试
@@ -108,23 +109,27 @@ public class DocFormatConverter {
 				file.delete();
 			}
 		}
-		// 将需要移动的文件移动到目标文件夹
-		if(tfis.isNeedMoveSrcFile() || tfis.isNeedMoveMidFile() || tfis.isNeedMoveDstFile()) {
-			if(tfis.isNeedMoveSrcFile() && 
-						(!tfis.getInfo().getTransform_type().contains("test") 
-						|| tfis.isTesttransformNeedMoveSrcFile())) {
-				Common.mvFileSet(tfis.getSrcFileSet(), tfis.getDstDir());	
-			}
-			if(tfis.isNeedMoveMidFile() && !tfis.getInfo().getTransform_type().contains("test")) {
-				Common.mvFileSet(tfis.getMidFileSet(), tfis.getDstDir());
-			}
-			if(tfis.isNeedMoveDstFile()) {
-				Common.mvFileSet(tfis.getDstFileSet(), tfis.getDstDir());
+		// 不是自测或者是在仿真，才需要复制文件
+		if(!selftest || simureal) {
+			// 将需要移动的文件移动到目标文件夹
+			if(tfis.isNeedMoveSrcFile() || tfis.isNeedMoveMidFile() || tfis.isNeedMoveDstFile()) {
+				if(tfis.isNeedMoveSrcFile() && 
+							(!tfis.getInfo().getTransform_type().contains("test") 
+							|| tfis.isTesttransformNeedMoveSrcFile())) {
+					Common.mvFileSet(tfis.getSrcFileSet(), tfis.getDstDir());	
+				}
+				if(tfis.isNeedMoveMidFile() && !tfis.getInfo().getTransform_type().contains("test")) {
+					Common.mvFileSet(tfis.getMidFileSet(), tfis.getDstDir());
+				}
+				if(tfis.isNeedMoveDstFile()) {
+					Common.mvFileSet(tfis.getDstFileSet(), tfis.getDstDir());
+				}
 			}
 		}
 		
-		// 如果是调试或者自测模式，不需要通知
-		if(!debug && (!selftest || Prop.getBool("selftest.simureal"))) {
+		
+		// 如果在调试或者自测,且不需要仿真，就不需要通知
+		if((!debug && !selftest) || simureal) {
 			// 通知不是必须步骤，任何异常不要影响正常流程
 			try {
 				// 完成后声音通知
@@ -135,8 +140,8 @@ public class DocFormatConverter {
 				e.printStackTrace();
 			}
 		}
-		// 如果是自测，不需要打开文件窗口
-		if((!selftest || Prop.getBool("selftest.simureal")) && Prop.getBool("needopenfinishedwindows")) {
+		// 如果在自测,且不需要仿真，就不需要打开文件窗口
+		if((!selftest || simureal) && Prop.getBool("needopenfinishedwindows")) {
 			// 打开完成后的文件夹窗口
 			if(Prop.getBool("needmove.dstfile")) {		
 				Common.openFinishedWindows(tfis.getDstDir());
@@ -144,8 +149,8 @@ public class DocFormatConverter {
 				Common.openFinishedWindows(tfis.getSrcDir());
 			}
 		}
-		// 如果是调试或者自测模式，则不需要修改桌面快捷方式
-		if(!debug && (!selftest || Prop.getBool("selftest.simureal")) && Prop.getBool("bat.directtofinishedwindows.need")) {
+		// 如果在调试或者自测,且不需要仿真，就不需要修改桌面快捷方式
+		if(((!debug && !selftest) || simureal) && Prop.getBool("bat.directtofinishedwindows.need")) {
 			// 在桌面生成一个已完成文件夹的bat文件，可以一运行立刻打开文件夹
 			Common.createBatDirectToFinishedWindows(tfis.getDstDir());
 		}
@@ -153,8 +158,8 @@ public class DocFormatConverter {
 			// 删除隐藏文件
 			AsnycHiddenFileDeleter.delete(tfis.getSrcDir());
 		}
-		// 如果需要删除源文件夹
-		if(tfis.isNeedDelSrcDir()) {
+		// 如果是自测且不仿真，或者指定要删除源文件夹，就删除源文件夹
+		if((selftest && !simureal)  || tfis.isNeedDelSrcDir()) {
 			FileUtils.deleteDirAndAllFiles(tfis.getSrcDir());
 		}
 		if(debug) {
@@ -171,10 +176,10 @@ public class DocFormatConverter {
 	
 	private void doAfter(String noticeContent, File dstDir, boolean exception) throws IOException {
 		boolean debug = Prop.getBool("debug");
-		boolean selftest_simureal = Prop.getBool("selftest.simureal");
 		boolean needopenfinishedwindows = Prop.getBool("needopenfinishedwindows");
-		// 如果是调试或者自测模式，不需要通知
-		if(!debug && (!selftest || selftest_simureal)) {
+		boolean simureal = Prop.getBool("simureal");
+		// 如果在调试或者自测,且不需要仿真，就不需要通知
+		if((!debug && !selftest) || simureal) {
 			// 通知不是必须步骤，任何异常不要影响正常流程
 			try {
 				if(!exception) {
@@ -192,8 +197,8 @@ public class DocFormatConverter {
 				e.printStackTrace();
 			}
 		}
-		// 如果是自测，不需要打开文件窗口
-		if(!debug && (!selftest || selftest_simureal) && needopenfinishedwindows) {
+		// 如果在自测,且不需要仿真，就不需要打开文件窗口
+		if((!selftest || simureal) && needopenfinishedwindows) {
 			if(dstDir!=null && dstDir.exists()) {
 				Common.openFinishedWindows(dstDir);
 			}
