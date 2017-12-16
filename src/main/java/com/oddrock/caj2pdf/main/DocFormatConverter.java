@@ -158,8 +158,8 @@ public class DocFormatConverter {
 			// 删除隐藏文件
 			AsnycHiddenFileDeleter.delete(tfis.getSrcDir());
 		}
-		// 如果是自测且不仿真，或者指定要删除源文件夹，就删除源文件夹
-		if((selftest && !simureal)  || tfis.isNeedDelSrcDir()) {
+		// 如果要删除源文件夹，就删除源文件夹
+		if(tfis.isNeedDelSrcDir()) {
 			FileUtils.deleteDirAndAllFiles(tfis.getSrcDir());
 		}
 		if(debug) {
@@ -919,7 +919,7 @@ public class DocFormatConverter {
 		if(Prop.getBool("debug")) {		// 调试模式
 			//dfc.download_one_qqmailfiles();
 			//dfc.caj2word_sendmail();
-			dfc.caj2word_test_sendmail();
+			dfc.selftest();
 		}else {
 			try {
 				dfc.execTransform(args);

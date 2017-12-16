@@ -11,8 +11,10 @@ public class Prop {
 	private static void load(){
 		PR.addFilePath("caj2pdf.properties");
 		PR.loadProperties();
-		PR.addFilePath(PR.getValue("properties.filepath"));
-		PR.loadProperties();
+		for(String filePath : PR.getValue("properties.filepath").split(",")) {
+			PR.addFilePath(filePath);
+			PR.loadProperties();
+		}
 	}
 	
 	public static String get(String key){
