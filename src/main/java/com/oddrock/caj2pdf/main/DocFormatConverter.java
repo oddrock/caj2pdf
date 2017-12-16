@@ -919,7 +919,7 @@ public class DocFormatConverter {
 		if(Prop.getBool("debug")) {		// 调试模式
 			//dfc.download_one_qqmailfiles();
 			//dfc.caj2word_sendmail();
-			dfc.caj2word_sendmail();
+			dfc.caj2word_test_sendmail();
 		}else {
 			try {
 				dfc.execTransform(args);
