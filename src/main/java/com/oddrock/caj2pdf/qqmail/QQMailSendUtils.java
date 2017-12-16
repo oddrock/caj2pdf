@@ -25,6 +25,7 @@ public class QQMailSendUtils {
 		String subjetct = null;
 		String content = null;
 		String smtpHost = Prop.get("qqmail.smtpserver");
+		String senderName = "PDF快转直通车";
 		if(tfis.getInfo().getTransform_type().contains("test")) {
 			subjetct = "试转效果：" + tfis.getMaildir().getSubject();
 			content = "您好，这是您的试转效果，这是我们能转换的最好效果，如果您对此满意，可以下单，我们给您全部转换。<br/><br/>" +
@@ -53,7 +54,7 @@ public class QQMailSendUtils {
 		for(File file : tfis.getDstFileSet()) {
 			logger.warn(file.getName());
 		}
-		MailSenderExt.sendEmail(senderAccount, senderPasswd, recverAccounts, 
+		MailSenderExt.sendEmail(senderAccount, senderName, senderPasswd, recverAccounts, 
 				subjetct, content, true, smtpHost, smtpPort, tfis.getDstFileSet());
 		logger.warn("结束将以上文件发送邮件给："+recverAccounts);
 	}
