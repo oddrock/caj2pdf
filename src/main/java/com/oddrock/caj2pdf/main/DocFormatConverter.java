@@ -188,7 +188,7 @@ public class DocFormatConverter {
 			}
 		}
 		// 如果是自测，不需要打开文件窗口
-		if((!selftest || selftest_simureal) && needopenfinishedwindows) {
+		if(!debug && (!selftest || selftest_simureal) && needopenfinishedwindows) {
 			if(dstDir!=null && dstDir.exists()) {
 				Common.openFinishedWindows(dstDir);
 			}
@@ -905,9 +905,9 @@ public class DocFormatConverter {
 	public static void main(String[] args) throws AWTException, IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException {
 		DocFormatConverter dfc = new DocFormatConverter();
 		if(Prop.getBool("debug")) {		// 调试模式
-			//dfc.download_one_qqmailfiles();
-			dfc.pdf2mobi_byabbyy_test_sendmail();
-			//dfc.selftest();
+			//dfc.download_qqmailfiles();
+			//dfc.pdf2mobi_byabbyy_test_sendmail();
+			dfc.selftest();
 		}else {
 			try {
 				dfc.execTransform(args);

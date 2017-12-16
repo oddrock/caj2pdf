@@ -24,13 +24,12 @@ public class QQMailRcvUtils {
 			String folderName, boolean readwriteFlag, boolean downloadAttachToLocal, 
 			String localBaseDirPath) throws Exception{
 		List<MailRecv> mails = null;
-		File dstDir = null;
 		try {
 			PopMailRcvr pmr = new PopMailRcvr();
 			AttachDownloadDirGenerator generator = new GeneralAttachDownloadDirGenerator();
 			mails = pmr.rcvMail(server, account, passwd, folderName, readwriteFlag, downloadAttachToLocal, localBaseDirPath, generator);
 			for(MailRecv mail : mails){
-				dstDir = downloadQQFileInMail(mail, localBaseDirPath, generator);
+				downloadQQFileInMail(mail, localBaseDirPath, generator);
 			}
 		}catch(Exception e) {
 			// 如果出现异常，则回滚已记录的邮件UID，便于重新下载。
@@ -41,12 +40,11 @@ public class QQMailRcvUtils {
 						//System.out.println(new File(mail.getAttachments().get(0).getLocalFilePath()).getParentFile().getCanonicalPath());
 						FileUtils.deleteDirAndAllFiles(new File(mail.getAttachments().get(0).getLocalFilePath()).getParentFile());
 					}
-					
 				}
 			}
 			throw e;
 		}
-		return dstDir;
+		return new File(localBaseDirPath);
 	}
 	
 	public static File rcvOneUnreadMail() throws Exception {
