@@ -479,10 +479,9 @@ public class DocFormatConverter {
 		String account = Prop.get("qqmail.account"); 
 		String passwd = Prop.get("qqmail.passwd"); 
 		String foldername = Prop.get("qqmail.foldername"); 
-		boolean readwrite = Prop.getBool("qqmail.readwrite");
 		String savefolder = Prop.get("qqmail.savefolder");
 		try {
-			dstDir = QQMailRcvUtils.rcvAllUnreadMails(imapserver, account, passwd, foldername, readwrite, true, savefolder);
+			dstDir = QQMailRcvUtils.rcvAllUnreadMails(imapserver, account, passwd, foldername, true, savefolder);
 		} catch (Exception e) {
 			e.printStackTrace();
 			noticeContent = "下载QQ邮件失败，请自行手动下载QQ邮件！！！";

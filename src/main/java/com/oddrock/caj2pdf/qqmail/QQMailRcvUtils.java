@@ -21,13 +21,13 @@ public class QQMailRcvUtils {
 	private static Logger logger = Logger.getLogger(QQMailRcvUtils.class);
 	
 	public static File rcvAllUnreadMails(String server, String account, String passwd, 
-			String folderName, boolean readwriteFlag, boolean downloadAttachToLocal, 
+			String folderName, boolean downloadAttachToLocal, 
 			String localBaseDirPath) throws Exception{
 		List<MailRecv> mails = null;
 		try {
 			PopMailRcvr pmr = new PopMailRcvr();
 			AttachDownloadDirGenerator generator = new GeneralAttachDownloadDirGenerator();
-			mails = pmr.rcvMail(server, account, passwd, folderName, readwriteFlag, downloadAttachToLocal, localBaseDirPath, generator);
+			mails = pmr.rcvMail(server, account, passwd, folderName, downloadAttachToLocal, localBaseDirPath, generator);
 			for(MailRecv mail : mails){
 				downloadQQFileInMail(mail, localBaseDirPath, generator);
 			}
@@ -52,9 +52,8 @@ public class QQMailRcvUtils {
 		String account = Prop.get("qqmail.account"); 
 		String passwd = Prop.get("qqmail.passwd"); 
 		String foldername = Prop.get("qqmail.foldername"); 
-		boolean readwrite = Prop.getBool("qqmail.readwrite");
 		String savefolder = Prop.get("qqmail.savefolder");
-		return rcvOneUnreadMail(server, account, passwd, foldername, readwrite, true, savefolder);
+		return rcvOneUnreadMail(server, account, passwd, foldername, true, savefolder);
 	}
 	
 	public static File rcvOneUnreadMailToSrcDir() throws Exception {
@@ -74,14 +73,14 @@ public class QQMailRcvUtils {
 	
 	// 读取一封邮件
 	public static File rcvOneUnreadMail(String server, String account, String passwd, 
-			String folderName, boolean readwriteFlag, boolean downloadAttachToLocal, 
+			String folderName, boolean downloadAttachToLocal, 
 			String localBaseDirPath) throws Exception{
 		MailRecv mail = null;
 		File dstDir = null;
 		try {
 			PopMailRcvr imr = new PopMailRcvr();
 			AttachDownloadDirGenerator generator = new GeneralAttachDownloadDirGenerator();
-			mail = imr.rcvOneUnreadMail(server, account, passwd, folderName, readwriteFlag, downloadAttachToLocal, localBaseDirPath, generator);
+			mail = imr.rcvOneUnreadMail(server, account, passwd, folderName, downloadAttachToLocal, localBaseDirPath, generator);
 			if(mail!=null) {
 				downloadQQFileInMail(mail, localBaseDirPath, generator);
 				dstDir = generator.generateDir(new File(localBaseDirPath), mail);
@@ -103,7 +102,7 @@ public class QQMailRcvUtils {
 			try {
 				PopMailRcvr imr = new PopMailRcvr();
 				AttachDownloadDirGenerator generator = new GeneralAttachDownloadDirGenerator();
-				mail = imr.rcvOneUnreadMail(server, account, passwd, folderName, readwriteFlag, downloadAttachToLocal, localBaseDirPath, generator);
+				mail = imr.rcvOneUnreadMail(server, account, passwd, folderName, downloadAttachToLocal, localBaseDirPath, generator);
 				if(mail!=null) {
 					downloadQQFileInMail(mail, localBaseDirPath, generator);
 					dstDir = generator.generateDir(new File(localBaseDirPath), mail);
@@ -145,8 +144,7 @@ public class QQMailRcvUtils {
 		String account = Prop.get("qqmail.account"); 
 		String passwd = Prop.get("qqmail.passwd"); 
 		String foldername = Prop.get("qqmail.foldername"); 
-		boolean readwrite = Prop.getBool("qqmail.readwrite");
 		String savefolder = Prop.get("qqmail.savefolder"); 
-		rcvAllUnreadMails(imapserver, account, passwd, foldername, readwrite, true, savefolder);
+		rcvAllUnreadMails(imapserver, account, passwd, foldername, true, savefolder);
 	}
 }
