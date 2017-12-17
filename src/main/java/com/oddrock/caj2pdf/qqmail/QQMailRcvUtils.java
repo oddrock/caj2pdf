@@ -53,7 +53,8 @@ public class QQMailRcvUtils {
 		String passwd = Prop.get("qqmail.passwd"); 
 		String foldername = Prop.get("qqmail.foldername"); 
 		String savefolder = Prop.get("qqmail.savefolder");
-		return rcvOneUnreadMail(server, account, passwd, foldername, true, savefolder);
+		int recentDays = Prop.getInt("qqmail.recentdays");
+		return rcvOneUnreadMail(server, account, passwd, foldername, true, savefolder, recentDays);
 	}
 	
 	public static File rcvOneUnreadMailToSrcDir() throws Exception {
@@ -74,13 +75,13 @@ public class QQMailRcvUtils {
 	// 读取一封邮件
 	public static File rcvOneUnreadMail(String server, String account, String passwd, 
 			String folderName, boolean downloadAttachToLocal, 
-			String localBaseDirPath) throws Exception{
+			String localBaseDirPath, int recentDays) throws Exception{
 		MailRecv mail = null;
 		File dstDir = null;
 		try {
 			PopMailRcvr imr = new PopMailRcvr();
 			AttachDownloadDirGenerator generator = new GeneralAttachDownloadDirGenerator();
-			mail = imr.rcvOneUnreadMail(server, account, passwd, folderName, downloadAttachToLocal, localBaseDirPath, generator);
+			mail = imr.rcvOneMailCylclyInSpecDays(server, account, passwd, folderName, downloadAttachToLocal, localBaseDirPath, generator, recentDays);
 			if(mail!=null) {
 				downloadQQFileInMail(mail, localBaseDirPath, generator);
 				dstDir = generator.generateDir(new File(localBaseDirPath), mail);
