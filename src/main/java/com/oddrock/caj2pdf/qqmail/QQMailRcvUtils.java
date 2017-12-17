@@ -46,16 +46,7 @@ public class QQMailRcvUtils {
 		}
 		return new File(localBaseDirPath);
 	}
-	
-	private static File rcvOneUnreadMail() throws Exception {
-		String server = Prop.get("qqmail.popserver");
-		String account = Prop.get("qqmail.account"); 
-		String passwd = Prop.get("qqmail.passwd"); 
-		String foldername = Prop.get("qqmail.foldername"); 
-		String savefolder = Prop.get("qqmail.savefolder");
-		int recentDays = Prop.getInt("qqmail.recentdays");
-		return rcvOneUnreadMail(server, account, passwd, foldername, true, savefolder, recentDays);
-	}
+
 	
 	public static File rcvOneUnreadMailToSrcDir() throws Exception {
 		File mailDir = rcvOneUnreadMail();
@@ -73,18 +64,22 @@ public class QQMailRcvUtils {
 	}
 	
 	// 读取一封邮件
-	public static File rcvOneUnreadMail(String server, String account, String passwd, 
-			String folderName, boolean downloadAttachToLocal, 
-			String localBaseDirPath, int recentDays) throws Exception{
+	public static File rcvOneUnreadMail() throws Exception{
+		String server = Prop.get("qqmail.popserver");
+		String account = Prop.get("qqmail.account"); 
+		String passwd = Prop.get("qqmail.passwd"); 
+		String foldername = Prop.get("qqmail.foldername"); 
+		String savefolder = Prop.get("qqmail.savefolder");
+		int recentDays = Prop.getInt("qqmail.recentdays");
 		MailRecv mail = null;
 		File dstDir = null;
 		try {
 			PopMailRcvr imr = new PopMailRcvr();
 			AttachDownloadDirGenerator generator = new GeneralAttachDownloadDirGenerator();
-			mail = imr.rcvOneMailCylclyInSpecDays(server, account, passwd, folderName, downloadAttachToLocal, localBaseDirPath, generator, recentDays);
+			mail = imr.rcvOneMailCylclyInSpecDays(server, account, passwd, foldername, true, savefolder, generator, recentDays);
 			if(mail!=null) {
-				downloadQQFileInMail(mail, localBaseDirPath, generator);
-				dstDir = generator.generateDir(new File(localBaseDirPath), mail);
+				downloadQQFileInMail(mail, savefolder, generator);
+				dstDir = generator.generateDir(new File(savefolder), mail);
 			}
 			
 		}catch(Exception e) {
@@ -103,10 +98,10 @@ public class QQMailRcvUtils {
 			try {
 				PopMailRcvr imr = new PopMailRcvr();
 				AttachDownloadDirGenerator generator = new GeneralAttachDownloadDirGenerator();
-				mail = imr.rcvOneUnreadMail(server, account, passwd, folderName, downloadAttachToLocal, localBaseDirPath, generator);
+				mail = imr.rcvOneUnreadMail(server, account, passwd, foldername, true, savefolder, generator);
 				if(mail!=null) {
-					downloadQQFileInMail(mail, localBaseDirPath, generator);
-					dstDir = generator.generateDir(new File(localBaseDirPath), mail);
+					downloadQQFileInMail(mail, savefolder, generator);
+					dstDir = generator.generateDir(new File(savefolder), mail);
 				}
 			}catch(Exception e) {
 				// 如果出现异常，则回滚已记录的邮件UID，便于重新下载。
