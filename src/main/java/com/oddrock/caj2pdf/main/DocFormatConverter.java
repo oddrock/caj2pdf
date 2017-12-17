@@ -507,7 +507,12 @@ public class DocFormatConverter {
 			noticeContent = "下载QQ邮件失败，请自行手动下载QQ邮件！！！";
 			exception = true;
 		}finally {
-			doAfter(noticeContent,dstDir,exception);
+			if(dstDir!=null) {
+				doAfter(noticeContent,dstDir.getParentFile(),exception);
+			}else {
+				doAfter(noticeContent,null,exception);
+			}
+			
 		}
 		logger.warn("结束下载一封含附件的QQ未读邮件...");
 	}
@@ -917,9 +922,9 @@ public class DocFormatConverter {
 	public static void main(String[] args) throws AWTException, IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException, ParseException {
 		DocFormatConverter dfc = new DocFormatConverter();
 		if(Prop.getBool("debug")) {		// 调试模式
-			//dfc.download_one_qqmailfiles();
+			dfc.download_one_qqmailfiles();
 			//dfc.caj2word_sendmail();
-			dfc.selftest();
+			//dfc.selftest();
 		}else {
 			try {
 				dfc.execTransform(args);

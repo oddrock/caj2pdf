@@ -35,7 +35,7 @@ public class QQMailRcvUtils {
 			// 如果出现异常，则回滚已记录的邮件UID，便于重新下载。
 			if(mails!=null) {
 				for(MailRecv mail: mails) {
-					PopMailReadRecordManager.instance.setUnRead(account, mail.getUID());
+					PopMailReadRecordManager.instance.setUnReadInAllDays(account, mail.getUID());
 					if(mail.getAttachments()!=null) {
 						//System.out.println(new File(mail.getAttachments().get(0).getLocalFilePath()).getParentFile().getCanonicalPath());
 						FileUtils.deleteDirAndAllFiles(new File(mail.getAttachments().get(0).getLocalFilePath()).getParentFile());
@@ -47,7 +47,7 @@ public class QQMailRcvUtils {
 		return new File(localBaseDirPath);
 	}
 	
-	public static File rcvOneUnreadMail() throws Exception {
+	private static File rcvOneUnreadMail() throws Exception {
 		String server = Prop.get("qqmail.popserver");
 		String account = Prop.get("qqmail.account"); 
 		String passwd = Prop.get("qqmail.passwd"); 
@@ -90,7 +90,7 @@ public class QQMailRcvUtils {
 		}catch(Exception e) {
 			// 如果出现异常，则回滚已记录的邮件UID，便于重新下载。
 			if(mail!=null) {
-				PopMailReadRecordManager.instance.setUnRead(account, mail.getUID());
+				PopMailReadRecordManager.instance.setUnReadInAllDays(account, mail.getUID());
 				if(mail.getAttachments()!=null) {
 					//System.out.println(new File(mail.getAttachments().get(0).getLocalFilePath()).getParentFile().getCanonicalPath());
 					FileUtils.deleteDirAndAllFiles(new File(mail.getAttachments().get(0).getLocalFilePath()).getParentFile());
@@ -111,7 +111,7 @@ public class QQMailRcvUtils {
 			}catch(Exception e) {
 				// 如果出现异常，则回滚已记录的邮件UID，便于重新下载。
 				if(mail!=null) {
-					PopMailReadRecordManager.instance.setUnRead(account, mail.getUID());
+					PopMailReadRecordManager.instance.setUnReadInAllDays(account, mail.getUID());
 					if(mail.getAttachments()!=null) {
 						//System.out.println(new File(mail.getAttachments().get(0).getLocalFilePath()).getParentFile().getCanonicalPath());
 						FileUtils.deleteDirAndAllFiles(new File(mail.getAttachments().get(0).getLocalFilePath()).getParentFile());
