@@ -511,6 +511,7 @@ public class DocFormatConverter {
 		}finally {
 			if(dstDir!=null) {
 				doAfter(noticeContent,dstDir.getParentFile(),exception);
+				FileUtils.copyFileInSrcDirToDstDir(new File(Prop.get("bat.openfinishedwindows.dirpath")), dstDir);
 				FileUtils.copyFileInSrcDirToDstDir(new File(Prop.get("bat.dirpath")), dstDir.getParentFile());
 			}else {
 				doAfter(noticeContent,null,exception);
@@ -925,8 +926,8 @@ public class DocFormatConverter {
 	public static void main(String[] args) throws AWTException, IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException, ParseException {
 		DocFormatConverter dfc = new DocFormatConverter();
 		if(Prop.getBool("debug")) {		// 调试模式
-			//dfc.download_one_qqmailfiles();
-			dfc.caj2word_test_sendmail();
+			dfc.download_one_qqmailfiles();
+			//dfc.caj2word_test_sendmail();
 			//dfc.selftest();
 		}else {
 			try {
