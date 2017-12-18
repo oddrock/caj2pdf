@@ -187,8 +187,8 @@ public class DocFormatConverter {
 				if(!exception) {
 					// 完成后声音通知
 					Common.noticeSound();
-					// 完成后短信通知
-					Common.noticeMail(noticeContent);
+					// 完成后不再短信通知
+					//Common.noticeMail(noticeContent);
 				}else {
 					// 声音告警
 					Common.noticeAlertSound();
