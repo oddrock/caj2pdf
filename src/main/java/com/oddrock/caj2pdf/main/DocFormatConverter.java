@@ -145,9 +145,11 @@ public class DocFormatConverter {
 			// 打开完成后的文件夹窗口
 			if(Prop.getBool("needmove.dstfile")) {		
 				Common.openFinishedWindows(tfis.getDstDir());
+				FileUtils.copyFileInSrcDirToDstDir(new File(Prop.get("bat.openfinishedwindows.dirpath")), tfis.getDstDir());
 			}else {
 				Common.openFinishedWindows(tfis.getSrcDir());
-			}
+				FileUtils.copyFileInSrcDirToDstDir(new File(Prop.get("bat.openfinishedwindows.dirpath")), tfis.getDstDir());
+			}	
 		}
 		// 如果在调试或者自测,且不需要仿真，就不需要修改桌面快捷方式
 		if(((!debug && !selftest) || simureal) && Prop.getBool("bat.directtofinishedwindows.need")) {
