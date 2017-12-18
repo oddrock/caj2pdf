@@ -46,6 +46,7 @@ public class TransformInfoStater {
 	private Set<File> dstFileSet;		// 目标文件集合（被成功转换的目标文件）
 	private Set<File> midFileSet;		// 中间文件集合（被成功转换的中间文件）
 	private File srcDir;
+	private File dstDir;
 	private File dstParentDir;			// 目标地址父路径
 	private TransformDstDirGenerator dstDirgenerator;		// 目标路径生成器
 	private boolean needDelSrcDir;
@@ -147,7 +148,10 @@ public class TransformInfoStater {
 		return srcDir;
 	}
 	public File getDstDir() throws IOException {
-		return dstDirgenerator.generate(this);
+		if(dstDir==null) {
+			dstDir = dstDirgenerator.generate(this);
+		}
+		return dstDir;
 	}
 	public TransformInfo getInfo() {
 		return info;
