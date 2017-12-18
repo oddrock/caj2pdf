@@ -630,6 +630,7 @@ public class DocFormatConverter {
 		tfis.setNeedSendDstFileMail(true);
 		tfis.setMaildir(md);
 		tfis.setNeedCopyContentOnClipboard(true);
+		tfis.setNeedDelMidFile(true);
 		tfis.setClipboardContent("您的文件试转效果已经转好发到您的邮箱了。");
 		doBeforeTransform(tfis);
 		Pdf2WordUtils.pdf2word_test(tfis);
@@ -668,6 +669,7 @@ public class DocFormatConverter {
 		tfis.setNeedSendDstFileMail(true);
 		tfis.setMaildir(md);
 		tfis.setNeedCopyContentOnClipboard(true);
+		tfis.setNeedDelMidFile(true);
 		tfis.setClipboardContent("您的文件试转效果已经转好发到您的邮箱了。");
 		doBeforeTransform(tfis);
 		Pdf2MobiUtils.pdf2mobi_bycalibre_test(tfis);
@@ -706,6 +708,7 @@ public class DocFormatConverter {
 		tfis.setNeedSendDstFileMail(true);
 		tfis.setMaildir(md);
 		tfis.setNeedCopyContentOnClipboard(true);
+		tfis.setNeedDelMidFile(true);
 		tfis.setClipboardContent("您的文件试转效果已经转好发到您的邮箱了。");
 		doBeforeTransform(tfis);
 		Txt2MobiUtils.txt2mobi_test(tfis);
@@ -782,6 +785,7 @@ public class DocFormatConverter {
 		tfis.setNeedSendDstFileMail(true);
 		tfis.setMaildir(md);
 		tfis.setNeedCopyContentOnClipboard(true);
+		tfis.setNeedDelMidFile(true);
 		tfis.setClipboardContent("您的文件试转效果已经转好发到您的邮箱了。");
 		doBeforeTransform(tfis);
 		Pdf2EpubUtils.pdf2epub_test(tfis);
@@ -820,6 +824,7 @@ public class DocFormatConverter {
 		tfis.setNeedSendDstFileMail(true);
 		tfis.setMaildir(md);
 		tfis.setNeedCopyContentOnClipboard(true);
+		tfis.setNeedDelMidFile(true);
 		tfis.setClipboardContent("您的文件试转效果已经转好发到您的邮箱了。");
 		doBeforeTransform(tfis);
 		Pdf2MobiUtils.pdf2mobi_byabbyy_test(tfis);
