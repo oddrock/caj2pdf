@@ -37,6 +37,7 @@ import com.oddrock.common.awt.RobotManager;
 import com.oddrock.common.file.FileUtils;
 import com.oddrock.common.windows.ClipboardUtils;
 import com.oddrock.common.windows.CmdExecutor;
+import com.oddrock.common.zip.UnZipUtils;
 
 public class DocFormatConverter {
 	public static boolean selftest = false;
@@ -505,6 +506,16 @@ public class DocFormatConverter {
 		boolean exception = false;
 		try {
 			dstDir = QQMailRcvUtils.rcvOneUnreadMailToSrcDir();
+			if(dstDir!=null) {
+				// 检查是否有压缩文件，如果有，解压缩
+				for(File file:dstDir.listFiles()) {
+					if(UnZipUtils.canDeCompress(file.getCanonicalPath())) {
+						UnZipUtils.deCompress(file.getCanonicalPath(), dstDir.getCanonicalPath());
+					}
+				}
+				// 将目录下所有文件都集中到当前目录下
+				FileUtils.gatherAllFiles(dstDir.getCanonicalPath());
+			}
 		}catch (Exception e) {
 			e.printStackTrace();
 			noticeContent = "下载QQ邮件失败，请自行手动下载QQ邮件！！！";
@@ -932,9 +943,9 @@ public class DocFormatConverter {
 	public static void main(String[] args) throws AWTException, IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException, ParseException {
 		DocFormatConverter dfc = new DocFormatConverter();
 		if(Prop.getBool("debug")) {		// 调试模式
-			dfc.download_one_qqmailfiles();
+			//dfc.download_one_qqmailfiles();
 			//dfc.caj2word_test_sendmail();
-			//dfc.selftest();
+			dfc.selftest();
 		}else {
 			try {
 				dfc.execTransform(args);
