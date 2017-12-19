@@ -90,7 +90,8 @@ public class Caj2PdfUtils {
 	public static void caj2pdf_batch(TransformInfoStater tfis) throws TransformWaitTimeoutException, IOException, InterruptedException, TransformNofileException {
 		TransformFileSet fileSet;
 		if(!tfis.hasFileToTransform()) {
-			throw new TransformNofileException();
+			tfis.setErrorMsg("目录里没有caj文件");
+			throw new TransformNofileException("目录里没有caj文件");
 		}
 		for(File file : tfis.getQualifiedSrcFileSet()){
 			File pdfFile = new File(file.getParent(), file.getName().replaceAll(".caj$", ".pdf"));
@@ -115,7 +116,8 @@ public class Caj2PdfUtils {
 		RobotManager robotMngr = tfis.getRobotMngr();
 		TransformFileSet fileSet = null;
 		if(!tfis.hasFileToTransform()) {
-			throw new TransformNofileException();
+			tfis.setErrorMsg("目录里没有caj文件");
+			throw new TransformNofileException("目录里没有caj文件");
 		}
 		// 找到目录下第一个caj，并转换为pdf
 		for(File file : tfis.getQualifiedSrcFileSet()){

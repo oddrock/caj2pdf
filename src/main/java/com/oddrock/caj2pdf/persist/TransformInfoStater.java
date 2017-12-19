@@ -30,6 +30,7 @@ import com.oddrock.common.file.FileUtils;
  */
 public class TransformInfoStater {
 	private static Logger logger = Logger.getLogger(TransformInfoStater.class);
+	private String errorMsg;
 	private MailDir maildir;
 	private boolean needCopyContentOnClipboard;
 	private String clipboardContent;
@@ -50,6 +51,12 @@ public class TransformInfoStater {
 	private File dstParentDir;			// 目标地址父路径
 	private TransformDstDirGenerator dstDirgenerator;		// 目标路径生成器
 	private boolean needDelSrcDir;
+	public String getErrorMsg() {
+		return errorMsg;
+	}
+	public void setErrorMsg(String errorMsg) {
+		this.errorMsg = errorMsg;
+	}
 	public boolean isNeedCopyContentOnClipboard() {
 		return needCopyContentOnClipboard;
 	}

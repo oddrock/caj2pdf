@@ -948,8 +948,12 @@ public class DocFormatConverter {
 				e.printStackTrace();
 				// 声音告警
 				Common.noticeAlertSound();
+				String content = "转换错误：文件夹里没有要转换的文件！！！";
+				if(e.getMessage()!=null) {
+					content = "转换错误："+e.getMessage();
+				}
 				// 邮件告警
-				Common.noticeAlertMail("转换错误：文件夹里没有要转换的文件！！！");
+				Common.noticeAlertMail(content);
 			} catch (TransformNodirException e) {
 				e.printStackTrace();
 				// 声音告警

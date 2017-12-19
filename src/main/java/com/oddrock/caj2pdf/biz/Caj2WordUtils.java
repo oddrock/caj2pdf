@@ -15,7 +15,8 @@ public class Caj2WordUtils {
 		TransformFileSet fileSet;
 		RobotManager robotMngr = tfis.getRobotMngr();
 		if(!tfis.hasFileToTransform()) {
-			throw new TransformNofileException();
+			tfis.setErrorMsg("目录里没有caj文件");
+			throw new TransformNofileException("目录里没有caj文件");
 		}
 		// 先全部caj转pdf
 		for(File file : tfis.getQualifiedSrcFileSet()){
@@ -51,7 +52,8 @@ public class Caj2WordUtils {
 	
 	public static void caj2word_test(TransformInfoStater tfis) throws TransformNofileException, IOException, TransformWaitTimeoutException, InterruptedException {
 		if(!tfis.hasFileToTransform()) {
-			throw new TransformNofileException();
+			tfis.setErrorMsg("目录里没有caj文件");
+			throw new TransformNofileException("目录里没有caj文件");
 		}
 		RobotManager robotMngr = tfis.getRobotMngr();
 		TransformFileSet fileSet = null;

@@ -186,7 +186,8 @@ public class Txt2MobiUtils {
 	
 	public static void txt2mobi_batch(TransformInfoStater tfis) throws TransformNofileException, IOException, InterruptedException, TransformWaitTimeoutException {
 		if(!tfis.hasFileToTransform()) {
-			throw new TransformNofileException();
+			tfis.setErrorMsg("目录里没有txt文件");
+			throw new TransformNofileException("目录里没有txt文件");
 		}
 		RobotManager robotMngr = tfis.getRobotMngr();
 		// 将srcDir目录下的txt文件全部切割为不超过500KB大小，并且删除超过500KB大小的源文件。
@@ -202,7 +203,8 @@ public class Txt2MobiUtils {
 	
 	public static void txt2mobi_test(TransformInfoStater tfis) throws TransformNofileException, IOException, TransformWaitTimeoutException, InterruptedException {
 		if(!tfis.hasFileToTransform()) {
-			throw new TransformNofileException();
+			tfis.setErrorMsg("目录里没有txt文件");
+			throw new TransformNofileException("目录里没有txt文件");
 		}
 		RobotManager robotMngr = tfis.getRobotMngr();
 		File firstTxtFile = TxtUtils.getFirstTxtFile();

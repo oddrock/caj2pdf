@@ -78,7 +78,10 @@ public class Pdf2EpubUtils {
 	}
 	
 	public static void pdf2epub_batch(TransformInfoStater tfis) throws TransformNofileException, IOException, InterruptedException {
-		if(!tfis.hasFileToTransform()) throw new TransformNofileException();
+		if(!tfis.hasFileToTransform()) {
+			tfis.setErrorMsg("目录里没有pdf文件");
+			throw new TransformNofileException("目录里没有pdf文件");
+		}
 		RobotManager robotMngr = tfis.getRobotMngr();
 		TransformFileSet fileSet;
 		for(File file : tfis.getQualifiedSrcFileSet()){
@@ -90,7 +93,10 @@ public class Pdf2EpubUtils {
 	}
 	
 	public static void pdf2epub_test(TransformInfoStater tfis) throws IOException, TransformNofileException, InterruptedException {
-		if(!tfis.hasFileToTransform()) throw new TransformNofileException();
+		if(!tfis.hasFileToTransform()) {
+			tfis.setErrorMsg("目录里没有pdf文件");
+			throw new TransformNofileException("目录里没有pdf文件");
+		}
 		RobotManager robotMngr = tfis.getRobotMngr();
 		// 存放每次单次转换后的源文件和目标文件
 		TransformFileSet fileSet = null;

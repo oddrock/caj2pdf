@@ -167,7 +167,8 @@ public class Pdf2MobiUtils {
 	
 	public static void pdf2mobi_bycalibre_batch(TransformInfoStater tfis) throws TransformNofileException, IOException, TransformWaitTimeoutException, InterruptedException {
 		if(!tfis.hasFileToTransform()) {
-			throw new TransformNofileException();
+			tfis.setErrorMsg("目录里没有pdf文件");
+			throw new TransformNofileException("目录里没有pdf文件");
 		}
 		TransformFileSet fileSet;
 		RobotManager robotMngr = tfis.getRobotMngr();
@@ -180,7 +181,10 @@ public class Pdf2MobiUtils {
 	}
 	
 	public static void pdf2mobi_bycalibre_test(TransformInfoStater tfis) throws IOException, TransformNofileException, InterruptedException, TransformWaitTimeoutException {
-		if(!tfis.hasFileToTransform()) throw new TransformNofileException();
+		if(!tfis.hasFileToTransform()) {
+			tfis.setErrorMsg("目录里没有pdf文件");
+			throw new TransformNofileException("目录里没有pdf文件");
+		}
 		RobotManager robotMngr = tfis.getRobotMngr();
 		// 存放每次单次转换后的源文件和目标文件
 		TransformFileSet fileSet = null;
@@ -211,7 +215,10 @@ public class Pdf2MobiUtils {
 	}
 	
 	public static void pdf2mobi_byabbyy_batch(TransformInfoStater tfis) throws IOException, InterruptedException, TransformNofileException, TransformWaitTimeoutException {
-		if(!tfis.hasFileToTransform()) throw new TransformNofileException();
+		if(!tfis.hasFileToTransform()) {
+			tfis.setErrorMsg("目录里没有pdf文件");
+			throw new TransformNofileException();
+		}
 		RobotManager robotMngr = tfis.getRobotMngr();
 		TransformFileSet fileSet;
 		// 先全部pdf转epub
@@ -230,7 +237,10 @@ public class Pdf2MobiUtils {
 	}
 	
 	public static void pdf2mobi_byabbyy_test(TransformInfoStater tfis) throws IOException, TransformNofileException, InterruptedException, TransformWaitTimeoutException {
-		if(!tfis.hasFileToTransform()) throw new TransformNofileException();
+		if(!tfis.hasFileToTransform()) {
+			tfis.setErrorMsg("目录里没有pdf文件");
+			throw new TransformNofileException();
+		}
 		RobotManager robotMngr = tfis.getRobotMngr();
 		// 存放每次单次转换后的源文件和目标文件
 		TransformFileSet fileSet = null;

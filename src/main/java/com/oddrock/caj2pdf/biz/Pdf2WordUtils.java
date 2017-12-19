@@ -89,7 +89,10 @@ public class Pdf2WordUtils {
 	}
 	
 	public static void pdf2word_batch(TransformInfoStater tfis) throws TransformNofileException, IOException, InterruptedException {
-		if(!tfis.hasFileToTransform())  throw new TransformNofileException();
+		if(!tfis.hasFileToTransform())  {
+			tfis.setErrorMsg("目录里没有pdf文件");
+			throw new TransformNofileException("目录里没有pdf文件");
+		}
 		RobotManager robotMngr = tfis.getRobotMngr();
 		// 存放每次单次转换后的源文件和目标文件
 		TransformFileSet fileSet;
@@ -104,7 +107,8 @@ public class Pdf2WordUtils {
 	
 	public static void pdf2word_test(TransformInfoStater tfis) throws TransformNofileException, IOException, InterruptedException {
 		if(!tfis.hasFileToTransform()) {
-			throw new TransformNofileException();
+			tfis.setErrorMsg("目录里没有pdf文件");
+			throw new TransformNofileException("目录里没有pdf文件");
 		}
 		RobotManager robotMngr = tfis.getRobotMngr();
 		// 存放每次单次转换后的源文件和目标文件
