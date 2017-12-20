@@ -9,6 +9,8 @@ import java.util.Set;
 
 import javax.mail.MessagingException;
 import org.apache.log4j.Logger;
+import org.codehaus.plexus.util.ExceptionUtils;
+
 import com.oddrock.caj2pdf.biz.Caj2PdfUtils;
 import com.oddrock.caj2pdf.biz.Caj2WordUtils;
 import com.oddrock.caj2pdf.biz.Img2WordUtils;
@@ -517,7 +519,7 @@ public class DocFormatConverter {
 				FileUtils.gatherAllFiles(dstDir.getCanonicalPath());
 			}
 		}catch (Exception e) {
-			e.printStackTrace();
+			logger.warn(ExceptionUtils.getStackTrace(e));
 			noticeContent = "下载QQ邮件失败，请自行手动下载QQ邮件！！！";
 			exception = true;
 		}finally {
@@ -943,9 +945,9 @@ public class DocFormatConverter {
 	public static void main(String[] args) throws AWTException, IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException, ParseException {
 		DocFormatConverter dfc = new DocFormatConverter();
 		if(Prop.getBool("debug")) {		// 调试模式
-			//dfc.download_one_qqmailfiles();
+			dfc.download_one_qqmailfiles();
 			//dfc.caj2word_test_sendmail();
-			dfc.selftest();
+			//dfc.selftest();
 		}else {
 			try {
 				dfc.execTransform(args);

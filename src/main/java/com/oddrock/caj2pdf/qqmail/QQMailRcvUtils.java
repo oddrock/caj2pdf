@@ -94,7 +94,7 @@ public class QQMailRcvUtils {
 			throw e;
 		}
 		// 如果收了一封没有附件的邮件，就继续收下一封
-		while(mail!=null && dstDir!=null && dstDir.listFiles().length==0) {
+		while(mail!=null && dstDir!=null && dstDir.listFiles()!=null && dstDir.listFiles().length==0) {
 			try {
 				PopMailRcvr imr = new PopMailRcvr();
 				AttachDownloadDirGenerator generator = new GeneralAttachDownloadDirGenerator();
