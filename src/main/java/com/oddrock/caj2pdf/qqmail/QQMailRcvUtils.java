@@ -73,15 +73,14 @@ public class QQMailRcvUtils {
 		int recentDays = Prop.getInt("qqmail.recentdays");
 		MailRecv mail = null;
 		File dstDir = null;
+		PopMailRcvr imr = new PopMailRcvr();
+		AttachDownloadDirGenerator generator = new GeneralAttachDownloadDirGenerator();
 		try {
-			PopMailRcvr imr = new PopMailRcvr();
-			AttachDownloadDirGenerator generator = new GeneralAttachDownloadDirGenerator();
 			mail = imr.rcvOneMailCylclyInSpecDays(server, account, passwd, foldername, true, savefolder, generator, recentDays);
 			if(mail!=null) {
 				downloadQQFileInMail(mail, savefolder, generator);
 				dstDir = generator.generateDir(new File(savefolder), mail);
 			}
-			
 		}catch(Exception e) {
 			// 如果出现异常，则回滚已记录的邮件UID，便于重新下载。
 			if(mail!=null) {
@@ -96,8 +95,6 @@ public class QQMailRcvUtils {
 		// 如果收了一封没有附件的邮件，就继续收下一封
 		while(mail!=null && dstDir!=null && dstDir.listFiles()!=null && dstDir.listFiles().length==0) {
 			try {
-				PopMailRcvr imr = new PopMailRcvr();
-				AttachDownloadDirGenerator generator = new GeneralAttachDownloadDirGenerator();
 				mail = imr.rcvOneUnreadMail(server, account, passwd, foldername, true, savefolder, generator);
 				if(mail!=null) {
 					downloadQQFileInMail(mail, savefolder, generator);

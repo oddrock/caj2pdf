@@ -12,6 +12,7 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.apache.log4j.Logger;
 
+import com.oddrock.caj2pdf.bean.DiffernetBatchDocCount;
 import com.oddrock.caj2pdf.bean.TransformFileInfo;
 import com.oddrock.caj2pdf.bean.TransformInfo;
 import com.oddrock.caj2pdf.main.DocFormatConverter;
@@ -30,6 +31,7 @@ import com.oddrock.common.file.FileUtils;
  */
 public class TransformInfoStater {
 	private static Logger logger = Logger.getLogger(TransformInfoStater.class);
+	private DiffernetBatchDocCount docCount;
 	private String errorMsg;
 	private MailDir maildir;
 	private boolean needCopyContentOnClipboard;
@@ -51,6 +53,12 @@ public class TransformInfoStater {
 	private File dstParentDir;			// 目标地址父路径
 	private TransformDstDirGenerator dstDirgenerator;		// 目标路径生成器
 	private boolean needDelSrcDir;
+	public DiffernetBatchDocCount getDocCount() {
+		return docCount;
+	}
+	public void setDocCount(DiffernetBatchDocCount docCount) {
+		this.docCount = docCount;
+	}
 	public String getErrorMsg() {
 		return errorMsg;
 	}
@@ -192,6 +200,7 @@ public class TransformInfoStater {
 		qualifiedSrcFileSet = new HashSet<File>();
 		info = new TransformInfo();
 		info.setStart_time(new Date());
+		docCount = new DiffernetBatchDocCount();
 	}
 	
 

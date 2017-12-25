@@ -23,7 +23,8 @@ public class Browser360Utils {
 				,Prop.getInt("browser360.mark.qqfiledownloadbutton.y")
 				,Prop.getInt("browser360.mark.qqfiledownloadbutton.width")
 				,Prop.getInt("browser360.mark.qqfiledownloadbutton.height"));
-		if(PictureComparator.compare(image, BufferedImageUtils.read(Prop.get("browser360.mark.qqfiledownloadbutton.picfilepath")))>=0.9){
+		if(PictureComparator.compare(image, BufferedImageUtils.read(Prop.get("browser360.mark.qqfiledownloadbutton.picfilepath")))>=0.9
+				|| PictureComparator.compare(image, BufferedImageUtils.read(Prop.get("browser360.mark.qqfiledownloadbutton2.picfilepath")))>=0.9){
 			flag = true;
 		}
 		return flag;

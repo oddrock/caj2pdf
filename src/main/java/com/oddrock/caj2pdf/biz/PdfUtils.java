@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.IOException;
 import org.apache.log4j.Logger;
 
+import com.itextpdf.text.pdf.PdfReader;
+import com.oddrock.caj2pdf.bean.SingleDocCount;
 import com.oddrock.caj2pdf.bean.TransformFileSet;
 import com.oddrock.caj2pdf.utils.Common;
 import com.oddrock.caj2pdf.utils.FoxitUtils;
@@ -84,9 +86,24 @@ public class PdfUtils {
 		Common.wait(Prop.getInt("interval.waitlongmillis"));
 		FoxitUtils.close();
 		Common.wait(Prop.getInt("interval.waitminmillis"));
-		return result;
-				 
+		return result;		 
 	}
+	
+	public static int pageCount(File file) throws IOException {
+		PdfReader reader = new PdfReader(file.getCanonicalPath());
+		int pageCount = reader.getNumberOfPages();
+		reader.close();
+		return pageCount;
+	}
+	
+	public static SingleDocCount countDoc(File file) throws IOException {
+		SingleDocCount singleDocCount = new SingleDocCount("pdf");
+		singleDocCount.setPageCount(pageCount(file));
+		singleDocCount.setFileSize(file.length());
+		return singleDocCount;
+	}
+	
+	
 	public static void main(String[] args) throws IOException, InterruptedException, AWTException {
 		extractPage(new RobotManager(), "C:\\Users\\qzfeng\\Desktop\\cajwait\\ZX粮油食品有限公司人力资源管理研究_何微.pdf", 10);
 	}
