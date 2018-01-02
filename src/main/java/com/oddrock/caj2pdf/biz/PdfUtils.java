@@ -26,7 +26,7 @@ public class PdfUtils {
 		Common.moveMouseAvoidHandicap(robotMngr);
 		TransformFileSet result = new TransformFileSet();
 		File pdfFile = new File(pdfFilePath);
-		if(!pdfFile.exists() || !pdfFile.isFile() || !pdfFile.getCanonicalPath().endsWith(".pdf")) {
+		if(!pdfFile.exists() || !pdfFile.isFile() || !pdfFile.getCanonicalPath().toLowerCase().endsWith(".pdf")) {
 			return result;
 		}
 		result.setSrcFile(pdfFile);

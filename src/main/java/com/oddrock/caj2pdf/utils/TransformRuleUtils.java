@@ -55,16 +55,18 @@ public class TransformRuleUtils {
 	}
 	
 	// 检查是否是合格的输入文件
-	public static boolean isQualifiedSrcFile(File file, String transformType) throws IOException {
-		if(file==null || !file.exists() || !file.isFile()) return false;
-		if(transformType==null) return false;
+	public static File isQualifiedSrcFile(File file, String transformType) throws IOException {
+		if(file==null || !file.exists() || !file.isFile()) return null;
+		if(transformType==null) return null;
 		transformType = transformType.trim();
+		// 要转换为小写，否则有可能后缀大小写不一造成找不到
+		String filePathInLowerCase = file.getCanonicalPath().toLowerCase();
 		if(transformType.equalsIgnoreCase("caj2pdf") 
 				|| transformType.equalsIgnoreCase("caj2pdf_test")
 				|| transformType.equalsIgnoreCase("caj2word")
 				|| transformType.equalsIgnoreCase("caj2word_test")) {
-			if(file.getCanonicalPath().endsWith(".caj") || file.getCanonicalPath().endsWith(".nh")) {
-				return true;
+			if(filePathInLowerCase.endsWith(".caj") || filePathInLowerCase.endsWith(".nh")) {
+				return file;
 			}
 		}
 		if(transformType.equalsIgnoreCase("pdf2word") 
@@ -75,21 +77,30 @@ public class TransformRuleUtils {
 				|| transformType.equalsIgnoreCase("pdf2mobi_byabbyy_test")
 				|| transformType.equalsIgnoreCase("pdf2mobi_bycalibre")
 				|| transformType.equalsIgnoreCase("pdf2mobi_bycalibre_test")) {
-			if(file.getCanonicalPath().endsWith(".pdf")) {
-				return true;
+			if(filePathInLowerCase.endsWith(".pdf")) {
+				// 如果不是以小写pdf结尾，就替换为小写，否则用ABBYY转换会有问题
+				if(!file.getCanonicalPath().endsWith("pdf")) {
+					int length = file.getCanonicalPath().length();
+					String newName = file.getCanonicalPath().substring(0, length-3);
+					newName = newName+"pdf";
+					file.renameTo(new File(newName));
+				}
+				return file;
 			}
 		}
 		if(transformType.equalsIgnoreCase("txt2mobi") 
 				|| transformType.equalsIgnoreCase("txt2mobi_test")) {
-			if(file.getCanonicalPath().endsWith(".txt")) {
-				return true;
+			if(filePathInLowerCase.endsWith(".txt")) {
+				return file;
 			}
 		}
 		if(transformType.equalsIgnoreCase("img2word") 
 				|| transformType.equalsIgnoreCase("img2word_test")) {
-			return Common.isImgFile(file);
+			if(Common.isImgFile(file)) {
+				return file;
+			}
 		}
-		return false;
+		return null;
 	}
 	
 	// 从目录里找出符合需要转换要求的源文件
@@ -97,8 +108,9 @@ public class TransformRuleUtils {
 		Set<File> fileSet = new HashSet<File>();
 		if(srcDir==null || !srcDir.exists() || !srcDir.isDirectory()) return fileSet;
 		for(File file : srcDir.listFiles()) {
-			if(isQualifiedSrcFile(file, transformType)) {
-				fileSet.add(file);
+			File qualifiedSrcFile = isQualifiedSrcFile(file, transformType);
+			if(qualifiedSrcFile!=null) {
+				fileSet.add(qualifiedSrcFile);
 			}
 		}
 		return fileSet;

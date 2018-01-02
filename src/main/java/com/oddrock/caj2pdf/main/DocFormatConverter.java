@@ -149,7 +149,7 @@ public class DocFormatConverter {
 			// 打开完成后的文件夹窗口
 			if(Prop.getBool("needmove.dstfile")) {		
 				Common.openFinishedWindows(tfis.getDstDir());
-				System.out.println(tfis.getDstDir().getCanonicalPath());
+				//System.out.println(tfis.getDstDir().getCanonicalPath());
 				FileUtils.copyFileInSrcDirToDstDir(new File(Prop.get("bat.openfinishedwindows.dirpath")), tfis.getDstDir());
 			}else {
 				Common.openFinishedWindows(tfis.getSrcDir());
@@ -943,12 +943,13 @@ public class DocFormatConverter {
 
 
 
-	public static void main(String[] args) throws AWTException, IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException, ParseException {
+	public static void main(String[] args) throws AWTException, IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException, ParseException, TransformPdfEncryptException {
 		DocFormatConverter dfc = new DocFormatConverter();
 		if(Prop.getBool("debug")) {		// 调试模式
 			//dfc.download_one_qqmailfiles();
 			//dfc.caj2word_test_sendmail();
 			dfc.selftest();
+			//dfc.pdf2word_test();
 		}else {
 			try {
 				dfc.execTransform(args);

@@ -48,7 +48,7 @@ public class Caj2PdfUtils {
 		Common.moveMouseAvoidHandicap(robotMngr);
 		TransformFileSet result = new TransformFileSet();
 		File cajFile = new File(cajFilePath);
-		if(!cajFile.exists() || !cajFile.isFile() || !cajFile.getCanonicalPath().endsWith(".caj")) {
+		if(!cajFile.exists() || !cajFile.isFile() || !cajFile.getCanonicalPath().toLowerCase().endsWith(".caj")) {
 			return result;
 		}
 		result.setSrcFile(cajFile);
