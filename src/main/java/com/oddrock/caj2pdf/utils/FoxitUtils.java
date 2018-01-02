@@ -1,11 +1,13 @@
 package com.oddrock.caj2pdf.utils;
 
 import java.awt.AWTException;
+import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 import org.apache.log4j.Logger;
 
+import com.oddrock.caj2pdf.exception.TransformPdfEncryptException;
 import com.oddrock.common.awt.RobotManager;
 import com.oddrock.common.pic.BufferedImageUtils;
 import com.oddrock.common.pic.PictureComparator;
@@ -14,6 +16,29 @@ import com.oddrock.common.windows.CmdResult;
 
 public class FoxitUtils {
 	private static Logger logger = Logger.getLogger(FoxitUtils.class);
+	
+	// 判断pdf是否被加密
+	public static boolean isEncryted(RobotManager robotMngr) throws InterruptedException, IOException{
+		logger.warn("开始检查PDF文件是否被加密...");
+		boolean flag = false;
+		Common.waitShort();
+		// 打开页面管理菜单
+		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_O);
+		Common.waitShort();
+		// 打开提取页面菜单
+		robotMngr.pressKey(KeyEvent.VK_E);
+		Common.waitM();
+		if(!isExportPageOpenAtExtractPage(robotMngr)) {
+			logger.warn("确认PDF文件被加密");
+			flag = true;
+		}
+		Common.waitShort();
+		// 按下ESC键，恢复原状
+		robotMngr.pressKey(KeyEvent.VK_ESCAPE);
+		Common.waitShort();
+		logger.warn("结束检查PDF文件是否被加密");
+		return flag;
+	}
 	
 	// pdf是否打开
 	public static boolean isOpen(RobotManager robotMngr) throws IOException{
@@ -95,7 +120,7 @@ public class FoxitUtils {
 	}
 	
 	// 用foxit打开一个pdf并等待打开完成
-	public static void openPdf(RobotManager robotMngr, String pdfFilePath) throws IOException, InterruptedException {
+	public static void openPdf(RobotManager robotMngr, String pdfFilePath) throws IOException, InterruptedException, TransformPdfEncryptException {
 		logger.warn("开始用foxit打开文件："+pdfFilePath);
 		CmdExecutor.getSingleInstance().exeCmd(Prop.get("foxit.path") + " \"" + pdfFilePath + "\"");
 		while(!isStart()) {
@@ -108,6 +133,9 @@ public class FoxitUtils {
 			Common.wait(Prop.getInt("interval.waitmillis"));
 		}
 		logger.warn("确认foxit已打开文件："+pdfFilePath);
+		if(isEncryted(robotMngr)) {
+			throw new TransformPdfEncryptException();
+		}
 	}
 	
 	// 等待直到打开提取页面时的导出页面
@@ -137,7 +165,9 @@ public class FoxitUtils {
 		logger.warn("已完成关闭提取页面时的输入文件名页面");
 	}
 	
-	public static void main(String[] args) throws IOException, InterruptedException, AWTException {
-		openPdf(new RobotManager(), "C:\\Users\\qzfeng\\Desktop\\cajwait\\ZX粮油食品有限公司人力资源管理研究_何微.pdf");
+	public static void main(String[] args) throws IOException, InterruptedException, AWTException, TransformPdfEncryptException {
+		RobotManager robotMngr = new RobotManager();
+		openPdf(robotMngr, "D:\\_caj2pdf\\cajwait\\秋季A班笔记9.pdf");
+		System.out.println(isEncryted(robotMngr));
 	}
 }

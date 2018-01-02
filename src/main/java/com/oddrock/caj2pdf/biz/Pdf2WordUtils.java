@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import com.oddrock.caj2pdf.bean.TransformFileSet;
 import com.oddrock.caj2pdf.exception.TransformNofileException;
+import com.oddrock.caj2pdf.exception.TransformPdfEncryptException;
 import com.oddrock.caj2pdf.persist.TransformInfoStater;
 import com.oddrock.caj2pdf.utils.AbbyyUtils;
 import com.oddrock.caj2pdf.utils.Common;
@@ -105,7 +106,7 @@ public class Pdf2WordUtils {
 		}
 	}
 	
-	public static void pdf2word_test(TransformInfoStater tfis) throws TransformNofileException, IOException, InterruptedException {
+	public static void pdf2word_test(TransformInfoStater tfis) throws TransformNofileException, IOException, InterruptedException, TransformPdfEncryptException {
 		if(!tfis.hasFileToTransform()) {
 			tfis.setErrorMsg("目录里没有pdf文件");
 			throw new TransformNofileException("目录里没有pdf文件");

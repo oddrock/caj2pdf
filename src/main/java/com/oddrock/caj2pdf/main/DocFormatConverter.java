@@ -20,6 +20,7 @@ import com.oddrock.caj2pdf.biz.Pdf2WordUtils;
 import com.oddrock.caj2pdf.biz.Txt2MobiUtils;
 import com.oddrock.caj2pdf.exception.TransformNodirException;
 import com.oddrock.caj2pdf.exception.TransformNofileException;
+import com.oddrock.caj2pdf.exception.TransformPdfEncryptException;
 import com.oddrock.caj2pdf.exception.TransformWaitTimeoutException;
 import com.oddrock.caj2pdf.persist.DocBakUtils;
 import com.oddrock.caj2pdf.persist.TransformInfoStater;
@@ -240,7 +241,7 @@ public class DocFormatConverter {
 	}
 	
 	// caj试转pdf
-	public void caj2pdf_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException {
+	public void caj2pdf_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException, TransformPdfEncryptException {
 		TransformInfoStater tfis = new TransformInfoStater("caj2pdf_test",srcDir, dstDir, robotMngr);
 		doBeforeTransform(tfis);
 		Caj2PdfUtils.caj2pdf_test(tfis);
@@ -248,12 +249,12 @@ public class DocFormatConverter {
 	}
 	
 	// caj试转pdf
-	public void caj2pdf_test() throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException {
+	public void caj2pdf_test() throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException, TransformPdfEncryptException {
 		caj2pdf_test(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
 	// caj试转word
-	public void caj2word_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException {
+	public void caj2word_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException, TransformPdfEncryptException {
 		TransformInfoStater tfis = new TransformInfoStater("caj2word_test",srcDir, dstDir, robotMngr);
 		doBeforeTransform(tfis);
 		Caj2WordUtils.caj2word_test(tfis);	
@@ -261,7 +262,7 @@ public class DocFormatConverter {
 	}
 	
 	// caj试转word
-	public void caj2word_test() throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException{
+	public void caj2word_test() throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException, TransformPdfEncryptException{
 		caj2word_test(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
@@ -279,14 +280,14 @@ public class DocFormatConverter {
 	}
 	
 	// pdf试转word
-	public void pdf2word_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformNofileException, TransformNodirException {
+	public void pdf2word_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformNofileException, TransformNodirException, TransformPdfEncryptException {
 		TransformInfoStater tfis = new TransformInfoStater("pdf2word_test",srcDir, dstDir, robotMngr);
 		doBeforeTransform(tfis);
 		Pdf2WordUtils.pdf2word_test(tfis);	
 		doAfterTransform(tfis);
 	}
 	
-	public void pdf2word_test() throws IOException, InterruptedException, MessagingException, TransformNofileException, TransformNodirException {
+	public void pdf2word_test() throws IOException, InterruptedException, MessagingException, TransformNofileException, TransformNodirException, TransformPdfEncryptException {
 		pdf2word_test(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
@@ -306,7 +307,7 @@ public class DocFormatConverter {
 	}
 	
 	// 试转pdf转mobi
-	public void pdf2mobi_bycalibre_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException {
+	public void pdf2mobi_bycalibre_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException, TransformPdfEncryptException {
 		TransformInfoStater tfis = new TransformInfoStater("pdf2mobi_bycalibre_test",srcDir, dstDir, robotMngr);
 		doBeforeTransform(tfis);
 		Pdf2MobiUtils.pdf2mobi_bycalibre_test(tfis);
@@ -314,7 +315,7 @@ public class DocFormatConverter {
 	}
 	
 	// 试转pdf转mobi
-	public void pdf2mobi_bycalibre_test() throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException {
+	public void pdf2mobi_bycalibre_test() throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException, TransformPdfEncryptException {
 		pdf2mobi_bycalibre_test(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
@@ -379,14 +380,14 @@ public class DocFormatConverter {
 	}
 	
 	// 试转pdf转epub
-	public void pdf2epub_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformNofileException, TransformNodirException {
+	public void pdf2epub_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformNofileException, TransformNodirException, TransformPdfEncryptException {
 		TransformInfoStater tfis = new TransformInfoStater("pdf2epub_test",srcDir, dstDir, robotMngr);
 		doBeforeTransform(tfis);
 		Pdf2EpubUtils.pdf2epub_test(tfis);
 		doAfterTransform(tfis);
 	}
 	
-	public void pdf2epub_test() throws IOException, InterruptedException, MessagingException, TransformNofileException, TransformNodirException {
+	public void pdf2epub_test() throws IOException, InterruptedException, MessagingException, TransformNofileException, TransformNodirException, TransformPdfEncryptException {
 		pdf2epub_test(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
@@ -402,19 +403,19 @@ public class DocFormatConverter {
 		pdf2mobi_byabbyy(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
-	public void pdf2mobi_byabbyy_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException {
+	public void pdf2mobi_byabbyy_test(File srcDir, File dstDir) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException, TransformPdfEncryptException {
 		TransformInfoStater tfis = new TransformInfoStater("pdf2mobi_byabbyy_test",srcDir, dstDir, robotMngr);
 		doBeforeTransform(tfis);
 		Pdf2MobiUtils.pdf2mobi_byabbyy_test(tfis);
 		doAfterTransform(tfis);	
 	}
 	
-	public void pdf2mobi_byabbyy_test() throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException {
+	public void pdf2mobi_byabbyy_test() throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException, TransformPdfEncryptException {
 		pdf2mobi_byabbyy_test(new File(Prop.get("srcdirpath")), new File(Prop.get("dstdirpath")));
 	}
 	
 	// 执行单个测试计划
-	private void execSingleSelftestRule(SelftestRule rule) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException{
+	private void execSingleSelftestRule(SelftestRule rule) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException, TransformPdfEncryptException{
 		// 如果规则无效，则直接退出
 		if(rule==null || !rule.isValid()) return;
 		File[] oldFiles = new File(Prop.get("srcdirpath")).listFiles();
@@ -554,14 +555,14 @@ public class DocFormatConverter {
 		}
 	}
 	
-	private void caj2word_test_sendmail() throws TransformNodirException, TransformNofileException, TransformWaitTimeoutException, IOException, InterruptedException, MessagingException {
+	private void caj2word_test_sendmail() throws TransformNodirException, TransformNofileException, TransformWaitTimeoutException, IOException, InterruptedException, MessagingException, TransformPdfEncryptException {
 		Set<MailDir> set = MailDir.scanAndGetMailDir(new File(Prop.get("srcdirpath")));
 		for(MailDir md : set) {
 			caj2word_test_sendmail(md);
 		}
 	}
 
-	private void caj2word_test_sendmail(MailDir md) throws TransformNodirException, TransformNofileException, TransformWaitTimeoutException, IOException, InterruptedException, MessagingException {
+	private void caj2word_test_sendmail(MailDir md) throws TransformNodirException, TransformNofileException, TransformWaitTimeoutException, IOException, InterruptedException, MessagingException, TransformPdfEncryptException {
 		TransformInfoStater tfis = new TransformInfoStater("caj2word_test", md.getDir(), new File(Prop.get("dstdirpath")), robotMngr, new MailDateStrTransformDstDirGenerator());
 		tfis.setNeedDelSrcDir(false);
 		tfis.setNeedSendDstFileMail(true);
@@ -592,14 +593,14 @@ public class DocFormatConverter {
 		doAfterTransform(tfis);
 	}
 	
-	private void caj2pdf_test_sendmail() throws TransformNodirException, TransformWaitTimeoutException, TransformNofileException, IOException, InterruptedException, MessagingException {
+	private void caj2pdf_test_sendmail() throws TransformNodirException, TransformWaitTimeoutException, TransformNofileException, IOException, InterruptedException, MessagingException, TransformPdfEncryptException {
 		Set<MailDir> set = MailDir.scanAndGetMailDir(new File(Prop.get("srcdirpath")));
 		for(MailDir md : set) {
 			caj2pdf_test_sendmail(md);
 		}
 	}
 
-	private void caj2pdf_test_sendmail(MailDir md) throws TransformNodirException, TransformWaitTimeoutException, TransformNofileException, IOException, InterruptedException, MessagingException {
+	private void caj2pdf_test_sendmail(MailDir md) throws TransformNodirException, TransformWaitTimeoutException, TransformNofileException, IOException, InterruptedException, MessagingException, TransformPdfEncryptException {
 		TransformInfoStater tfis = new TransformInfoStater("caj2pdf_test", md.getDir(), new File(Prop.get("dstdirpath")), robotMngr, new MailDateStrTransformDstDirGenerator());
 		tfis.setNeedDelSrcDir(false);
 		tfis.setNeedSendDstFileMail(true);
@@ -630,14 +631,14 @@ public class DocFormatConverter {
 		doAfterTransform(tfis);
 	}
 	
-	private void pdf2word_test_sendmail() throws TransformNofileException, TransformNodirException, IOException, InterruptedException, MessagingException {
+	private void pdf2word_test_sendmail() throws TransformNofileException, TransformNodirException, IOException, InterruptedException, MessagingException, TransformPdfEncryptException {
 		Set<MailDir> set = MailDir.scanAndGetMailDir(new File(Prop.get("srcdirpath")));
 		for(MailDir md : set) {
 			pdf2word_test_sendmail(md);
 		}
 	}
 
-	private void pdf2word_test_sendmail(MailDir md) throws TransformNofileException, IOException, InterruptedException, TransformNodirException, MessagingException {
+	private void pdf2word_test_sendmail(MailDir md) throws TransformNofileException, IOException, InterruptedException, TransformNodirException, MessagingException, TransformPdfEncryptException {
 		TransformInfoStater tfis = new TransformInfoStater("pdf2word_test", md.getDir(), new File(Prop.get("dstdirpath")), robotMngr, new MailDateStrTransformDstDirGenerator());
 		tfis.setNeedDelSrcDir(false);
 		tfis.setNeedSendDstFileMail(true);
@@ -669,14 +670,14 @@ public class DocFormatConverter {
 		doAfterTransform(tfis);
 	}
 	
-	private void pdf2mobi_bycalibre_test_sendmail() throws TransformNodirException, TransformNofileException, TransformWaitTimeoutException, IOException, InterruptedException, MessagingException {
+	private void pdf2mobi_bycalibre_test_sendmail() throws TransformNodirException, TransformNofileException, TransformWaitTimeoutException, IOException, InterruptedException, MessagingException, TransformPdfEncryptException {
 		Set<MailDir> set = MailDir.scanAndGetMailDir(new File(Prop.get("srcdirpath")));
 		for(MailDir md : set) {
 			pdf2mobi_bycalibre_test_sendmail(md);
 		}
 	}
 
-	private void pdf2mobi_bycalibre_test_sendmail(MailDir md) throws TransformNodirException, TransformNofileException, TransformWaitTimeoutException, IOException, InterruptedException, MessagingException {
+	private void pdf2mobi_bycalibre_test_sendmail(MailDir md) throws TransformNodirException, TransformNofileException, TransformWaitTimeoutException, IOException, InterruptedException, MessagingException, TransformPdfEncryptException {
 		TransformInfoStater tfis = new TransformInfoStater("pdf2mobi_bycalibre_test", md.getDir(), new File(Prop.get("dstdirpath")), robotMngr, new MailDateStrTransformDstDirGenerator());
 		tfis.setNeedDelSrcDir(false);
 		tfis.setNeedSendDstFileMail(true);
@@ -785,14 +786,14 @@ public class DocFormatConverter {
 		doAfterTransform(tfis);
 	}
 	
-	private void pdf2epub_test_sendmail() throws TransformNodirException, TransformNofileException, IOException, InterruptedException, MessagingException {
+	private void pdf2epub_test_sendmail() throws TransformNodirException, TransformNofileException, IOException, InterruptedException, MessagingException, TransformPdfEncryptException {
 		Set<MailDir> set = MailDir.scanAndGetMailDir(new File(Prop.get("srcdirpath")));
 		for(MailDir md : set) {
 			pdf2epub_test_sendmail(md);
 		}
 	}
 
-	private void pdf2epub_test_sendmail(MailDir md) throws TransformNodirException, TransformNofileException, IOException, InterruptedException, MessagingException {
+	private void pdf2epub_test_sendmail(MailDir md) throws TransformNodirException, TransformNofileException, IOException, InterruptedException, MessagingException, TransformPdfEncryptException {
 		TransformInfoStater tfis = new TransformInfoStater("pdf2epub_test", md.getDir(), new File(Prop.get("dstdirpath")), robotMngr, new MailDateStrTransformDstDirGenerator());
 		tfis.setNeedDelSrcDir(false);
 		tfis.setNeedSendDstFileMail(true);
@@ -824,14 +825,14 @@ public class DocFormatConverter {
 		doAfterTransform(tfis);
 	}
 
-	private void pdf2mobi_byabbyy_test_sendmail() throws TransformNodirException, TransformNofileException, TransformWaitTimeoutException, IOException, InterruptedException, MessagingException {
+	private void pdf2mobi_byabbyy_test_sendmail() throws TransformNodirException, TransformNofileException, TransformWaitTimeoutException, IOException, InterruptedException, MessagingException, TransformPdfEncryptException {
 		Set<MailDir> set = MailDir.scanAndGetMailDir(new File(Prop.get("srcdirpath")));
 		for(MailDir md : set) {
 			pdf2mobi_byabbyy_test_sendmail(md);
 		}
 	}
 
-	private void pdf2mobi_byabbyy_test_sendmail(MailDir md) throws TransformNodirException, TransformNofileException, TransformWaitTimeoutException, IOException, InterruptedException, MessagingException {
+	private void pdf2mobi_byabbyy_test_sendmail(MailDir md) throws TransformNodirException, TransformNofileException, TransformWaitTimeoutException, IOException, InterruptedException, MessagingException, TransformPdfEncryptException {
 		TransformInfoStater tfis = new TransformInfoStater("pdf2mobi_byabbyy_test", md.getDir(), new File(Prop.get("dstdirpath")), robotMngr, new MailDateStrTransformDstDirGenerator());
 		tfis.setNeedDelSrcDir(false);
 		tfis.setNeedSendDstFileMail(true);
@@ -844,7 +845,7 @@ public class DocFormatConverter {
 		doAfterTransform(tfis);
 	}
 
-	public void execTransform(String[] args) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException, ParseException {
+	public void execTransform(String[] args) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException, ParseException, TransformPdfEncryptException {
 		String method = Prop.get("caj2pdf.start");
 		if(method==null) {
 			method = "caj2word";
@@ -945,9 +946,9 @@ public class DocFormatConverter {
 	public static void main(String[] args) throws AWTException, IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException, ParseException {
 		DocFormatConverter dfc = new DocFormatConverter();
 		if(Prop.getBool("debug")) {		// 调试模式
-			dfc.download_one_qqmailfiles();
+			//dfc.download_one_qqmailfiles();
 			//dfc.caj2word_test_sendmail();
-			//dfc.selftest();
+			dfc.selftest();
 		}else {
 			try {
 				dfc.execTransform(args);
@@ -972,7 +973,13 @@ public class DocFormatConverter {
 				// 声音告警
 				Common.noticeAlertSound();
 				// 邮件告警
-				Common.noticeAlertMail("转换错误：文件夹不存在！！！");
+				Common.noticeAlertMail("转换错误:文件夹不存在！");
+			} catch (TransformPdfEncryptException e) {
+				e.printStackTrace();
+				// 声音告警
+				Common.noticeAlertSound();
+				// 邮件告警
+				Common.noticeAlertMail("转换错误:PDF要先解密！");
 			}
 		}
 	}

@@ -9,6 +9,7 @@ import org.apache.log4j.Logger;
 import com.itextpdf.text.pdf.PdfReader;
 import com.oddrock.caj2pdf.bean.SingleDocCount;
 import com.oddrock.caj2pdf.bean.TransformFileSet;
+import com.oddrock.caj2pdf.exception.TransformPdfEncryptException;
 import com.oddrock.caj2pdf.utils.Common;
 import com.oddrock.caj2pdf.utils.FoxitUtils;
 import com.oddrock.caj2pdf.utils.Prop;
@@ -20,7 +21,7 @@ public class PdfUtils {
 	private static Logger logger = Logger.getLogger(PdfUtils.class);
 	
 	// 提取PDF多少页，从第一页开始提取
-	public static TransformFileSet extractPage(RobotManager robotMngr, String pdfFilePath, int tiquPageCount) throws IOException, InterruptedException {
+	public static TransformFileSet extractPage(RobotManager robotMngr, String pdfFilePath, int tiquPageCount) throws IOException, InterruptedException, TransformPdfEncryptException {
 		// 移开鼠标避免挡事
 		Common.moveMouseAvoidHandicap(robotMngr);
 		TransformFileSet result = new TransformFileSet();
@@ -104,7 +105,7 @@ public class PdfUtils {
 	}
 	
 	
-	public static void main(String[] args) throws IOException, InterruptedException, AWTException {
+	public static void main(String[] args) throws IOException, InterruptedException, AWTException, TransformPdfEncryptException {
 		extractPage(new RobotManager(), "C:\\Users\\qzfeng\\Desktop\\cajwait\\ZX粮油食品有限公司人力资源管理研究_何微.pdf", 10);
 	}
 }

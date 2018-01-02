@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import com.oddrock.caj2pdf.bean.TransformFileSet;
 import com.oddrock.caj2pdf.exception.TransformNofileException;
+import com.oddrock.caj2pdf.exception.TransformPdfEncryptException;
 import com.oddrock.caj2pdf.exception.TransformWaitTimeoutException;
 import com.oddrock.caj2pdf.persist.TransformInfoStater;
 import com.oddrock.caj2pdf.utils.CajViewerUtils;
@@ -112,7 +113,7 @@ public class Caj2PdfUtils {
 		}
 	}
 	
-	public static void caj2pdf_test(TransformInfoStater tfis) throws TransformWaitTimeoutException, IOException, InterruptedException, TransformNofileException {
+	public static void caj2pdf_test(TransformInfoStater tfis) throws TransformWaitTimeoutException, IOException, InterruptedException, TransformNofileException, TransformPdfEncryptException {
 		RobotManager robotMngr = tfis.getRobotMngr();
 		TransformFileSet fileSet = null;
 		if(!tfis.hasFileToTransform()) {

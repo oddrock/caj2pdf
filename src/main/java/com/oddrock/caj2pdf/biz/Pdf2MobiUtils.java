@@ -9,6 +9,7 @@ import org.apache.log4j.Logger;
 
 import com.oddrock.caj2pdf.bean.TransformFileSet;
 import com.oddrock.caj2pdf.exception.TransformNofileException;
+import com.oddrock.caj2pdf.exception.TransformPdfEncryptException;
 import com.oddrock.caj2pdf.exception.TransformWaitTimeoutException;
 import com.oddrock.caj2pdf.persist.TransformInfoStater;
 import com.oddrock.caj2pdf.utils.CalibreUtils;
@@ -180,7 +181,7 @@ public class Pdf2MobiUtils {
 		}	
 	}
 	
-	public static void pdf2mobi_bycalibre_test(TransformInfoStater tfis) throws IOException, TransformNofileException, InterruptedException, TransformWaitTimeoutException {
+	public static void pdf2mobi_bycalibre_test(TransformInfoStater tfis) throws IOException, TransformNofileException, InterruptedException, TransformWaitTimeoutException, TransformPdfEncryptException {
 		if(!tfis.hasFileToTransform()) {
 			tfis.setErrorMsg("目录里没有pdf文件");
 			throw new TransformNofileException("目录里没有pdf文件");
@@ -236,7 +237,7 @@ public class Pdf2MobiUtils {
 		}
 	}
 	
-	public static void pdf2mobi_byabbyy_test(TransformInfoStater tfis) throws IOException, TransformNofileException, InterruptedException, TransformWaitTimeoutException {
+	public static void pdf2mobi_byabbyy_test(TransformInfoStater tfis) throws IOException, TransformNofileException, InterruptedException, TransformWaitTimeoutException, TransformPdfEncryptException {
 		if(!tfis.hasFileToTransform()) {
 			tfis.setErrorMsg("目录里没有pdf文件");
 			throw new TransformNofileException();

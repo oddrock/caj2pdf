@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import com.oddrock.caj2pdf.bean.TransformFileSet;
 import com.oddrock.caj2pdf.exception.TransformNofileException;
+import com.oddrock.caj2pdf.exception.TransformPdfEncryptException;
 import com.oddrock.caj2pdf.exception.TransformWaitTimeoutException;
 import com.oddrock.caj2pdf.persist.TransformInfoStater;
 import com.oddrock.caj2pdf.utils.TransformRuleUtils;
@@ -50,7 +51,7 @@ public class Caj2WordUtils {
 		}
 	}
 	
-	public static void caj2word_test(TransformInfoStater tfis) throws TransformNofileException, IOException, TransformWaitTimeoutException, InterruptedException {
+	public static void caj2word_test(TransformInfoStater tfis) throws TransformNofileException, IOException, TransformWaitTimeoutException, InterruptedException, TransformPdfEncryptException {
 		if(!tfis.hasFileToTransform()) {
 			tfis.setErrorMsg("目录里没有caj文件");
 			throw new TransformNofileException("目录里没有caj文件");
