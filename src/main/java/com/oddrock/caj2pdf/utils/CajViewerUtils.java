@@ -28,6 +28,19 @@ public class CajViewerUtils {
 		return flag;
 	}
 	
+	// 测试pdf是否已保存完成，比对图片，图片不存在说明保存完成
+	public static boolean isPdfSaveFinish(RobotManager robotMngr) throws IOException{
+		boolean flag = false;
+		BufferedImage image = robotMngr.createScreenCapture(Prop.getInt("cajviewer.mark.pdfsavefinish.x")
+				,Prop.getInt("cajviewer.mark.pdfsavefinish.y")
+				,Prop.getInt("cajviewer.mark.pdfsavefinish.width")
+				,Prop.getInt("cajviewer.mark.pdfsavefinish.height"));
+		if(!(PictureComparator.compare(image, BufferedImageUtils.read(Prop.get("cajviewer.mark.pdfsavefinish.picfilepath")))>=0.9)){
+			flag = true;
+		}
+		return flag;
+	}
+	
 	// 测试打印机是否打开
 	public static boolean isPrintReady(RobotManager robotMngr) throws IOException{
 		boolean flag = false;
@@ -162,6 +175,18 @@ public class CajViewerUtils {
 			}
 			logger.warn("等待输入文件名");
 			Common.wait(Prop.getInt("interval.waitmillis"));
+		}
+	}
+	
+	// 等待打印完毕
+	public static void waitPdfSaveFinish(RobotManager robotMngr) throws IOException, InterruptedException {
+		while(true){
+			logger.warn("等待PDF保存...");
+			Common.wait(Prop.getInt("interval.waitlongmillis"));
+			if(isPdfSaveFinish(robotMngr)){
+				logger.warn("PDF保存已完成");
+				break;
+			}
 		}
 	}
 }

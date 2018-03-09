@@ -63,10 +63,10 @@ public class Caj2PdfUtils {
 		}
 		// pdf文件生成在原地，只修改后缀
 		File pdfFile = new File(cajFile.getParent(), cajFile.getName().replaceAll(".caj$", ".pdf"));
-		System.out.println(pdfFile.getName());
 		result.setDstFile(pdfFile);
 		// 将生成的pdf文件名复制到文本框
-		ClipboardUtils.setSysClipboardText(pdfFile.getCanonicalPath());
+		ClipboardUtils.setSysClipboardText(pdfFile.getCanonicalPath());		
+		//System.out.println(pdfFile.getCanonicalPath());
 		Common.wait(Prop.getInt("interval.waitminmillis"));
 		// 全选输入框
 		robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_A);
@@ -79,7 +79,10 @@ public class Caj2PdfUtils {
 		Common.wait(Prop.getInt("interval.waitminmillis"));
 		// 点击确定覆盖按钮
 		robotMngr.pressKey(KeyEvent.VK_ENTER);
-		Common.wait(Prop.getInt("interval.waitlongmillis"));
+		Common.wait(Prop.getInt("interval.waitminmillis"));
+		// 等待PDF保存完成
+		CajViewerUtils.waitPdfSaveFinish(robotMngr);
+		//Common.wait(Prop.getInt("interval.waitlongmillis"));
 		// 关闭cajviewer
 		CajViewerUtils.close();
 		Common.wait(Prop.getInt("interval.waitminmillis"));
