@@ -8,6 +8,7 @@ import java.io.IOException;
 import com.oddrock.caj2pdf.bean.TransformFileSet;
 import com.oddrock.caj2pdf.exception.TransformNofileException;
 import com.oddrock.caj2pdf.exception.TransformPdfEncryptException;
+import com.oddrock.caj2pdf.exception.TransformWaitTimeoutException;
 import com.oddrock.caj2pdf.persist.TransformInfoStater;
 import com.oddrock.caj2pdf.utils.AbbyyUtils;
 import com.oddrock.caj2pdf.utils.CalibreUtils;
@@ -21,7 +22,7 @@ import com.oddrock.common.windows.ClipboardUtils;
 
 public class Pdf2EpubUtils {
 
-	public static TransformFileSet pdf2epub(RobotManager robotMngr, String pdfFilePath) throws IOException, InterruptedException {	
+	public static TransformFileSet pdf2epub(RobotManager robotMngr, String pdfFilePath) throws IOException, InterruptedException, TransformWaitTimeoutException {	
 		// 移开鼠标避免挡事
 		Common.moveMouseAvoidHandicap(robotMngr);
 		TransformFileSet result = new TransformFileSet();
@@ -78,7 +79,7 @@ public class Pdf2EpubUtils {
 		return result;
 	}
 	
-	public static void pdf2epub_batch(TransformInfoStater tfis) throws TransformNofileException, IOException, InterruptedException {
+	public static void pdf2epub_batch(TransformInfoStater tfis) throws TransformNofileException, IOException, InterruptedException, TransformWaitTimeoutException {
 		if(!tfis.hasFileToTransform()) {
 			tfis.setErrorMsg("目录里没有pdf文件");
 			throw new TransformNofileException("目录里没有pdf文件");
@@ -93,7 +94,7 @@ public class Pdf2EpubUtils {
 		}
 	}
 	
-	public static void pdf2epub_test(TransformInfoStater tfis) throws IOException, TransformNofileException, InterruptedException, TransformPdfEncryptException {
+	public static void pdf2epub_test(TransformInfoStater tfis) throws IOException, TransformNofileException, InterruptedException, TransformPdfEncryptException, TransformWaitTimeoutException {
 		if(!tfis.hasFileToTransform()) {
 			tfis.setErrorMsg("目录里没有pdf文件");
 			throw new TransformNofileException("目录里没有pdf文件");
@@ -126,7 +127,7 @@ public class Pdf2EpubUtils {
 		tfis.addDstFile(fileSet.getDstFile());
 	}
 	
-	public static void main(String[] args) throws AWTException, IOException, InterruptedException {
+	public static void main(String[] args) throws AWTException, IOException, InterruptedException, TransformWaitTimeoutException {
 		pdf2epub(new RobotManager(), "C:\\Users\\qzfeng\\Desktop\\cajwait\\装配式建筑施工安全评价体系研究_杨爽.pdf");
 	}
 

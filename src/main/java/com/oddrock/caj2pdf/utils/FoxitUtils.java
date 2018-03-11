@@ -134,7 +134,11 @@ public class FoxitUtils {
 		}
 		logger.warn("确认foxit已打开文件："+pdfFilePath);
 		if(isEncryted(robotMngr)) {
-			throw new TransformPdfEncryptException();
+			// 如果判断加密了，为防止误判，隔几秒再次判断一次
+			Common.wait(Prop.getInt("interval.waitlongmillis"));
+			if(isEncryted(robotMngr)) {
+				throw new TransformPdfEncryptException();
+			}
 		}
 	}
 	

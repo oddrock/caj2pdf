@@ -4,11 +4,12 @@ import java.io.File;
 import java.io.IOException;
 import com.oddrock.caj2pdf.bean.TransformFileSet;
 import com.oddrock.caj2pdf.exception.TransformNofileException;
+import com.oddrock.caj2pdf.exception.TransformWaitTimeoutException;
 import com.oddrock.caj2pdf.persist.TransformInfoStater;
 import com.oddrock.common.awt.RobotManager;
 
 public class Img2WordUtils {
-	public static void img2word_batch(TransformInfoStater tfis) throws IOException, TransformNofileException, InterruptedException {
+	public static void img2word_batch(TransformInfoStater tfis) throws IOException, TransformNofileException, InterruptedException, TransformWaitTimeoutException {
 		if(!tfis.hasFileToTransform()) {
 			tfis.setErrorMsg("目录里没有图片文件");
 			throw new TransformNofileException("目录里没有图片文件");
@@ -30,7 +31,7 @@ public class Img2WordUtils {
 		}
 	}
 	
-	public static void img2word_test(TransformInfoStater tfis) throws IOException, InterruptedException, TransformNofileException {
+	public static void img2word_test(TransformInfoStater tfis) throws IOException, InterruptedException, TransformNofileException, TransformWaitTimeoutException {
 		if(!tfis.hasFileToTransform()) {
 			tfis.setErrorMsg("目录里没有图片文件");
 			throw new TransformNofileException("目录里没有图片文件");

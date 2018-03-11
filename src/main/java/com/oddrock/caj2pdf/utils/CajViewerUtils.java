@@ -182,7 +182,7 @@ public class CajViewerUtils {
 	public static void waitPdfSaveFinish(RobotManager robotMngr) throws IOException, InterruptedException {
 		while(true){
 			logger.warn("等待PDF保存...");
-			Common.wait(Prop.getInt("interval.waitlongmillis"));
+			Common.wait(Prop.getInt("interval.waitmaxlongmillis"));
 			if(isPdfSaveFinish(robotMngr)){
 				logger.warn("PDF保存已完成");
 				break;

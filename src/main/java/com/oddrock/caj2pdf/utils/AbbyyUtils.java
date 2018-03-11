@@ -3,6 +3,7 @@ package com.oddrock.caj2pdf.utils;
 import java.io.IOException;
 import org.apache.log4j.Logger;
 
+import com.oddrock.caj2pdf.exception.TransformWaitTimeoutException;
 import com.oddrock.common.awt.RobotManager;
 import com.oddrock.common.windows.CmdExecutor;
 
@@ -87,14 +88,23 @@ public class AbbyyUtils {
 	 * 关闭并确保ABBYY已关闭
 	 * @throws IOException
 	 * @throws InterruptedException
+	 * @throws TransformWaitTimeoutException 
 	 */
-	public static void close() throws IOException, InterruptedException {
+	public static void close() throws IOException, InterruptedException, TransformWaitTimeoutException {
+		Timer timer = new Timer().start();
 		if(isStart()) {
 			CmdExecutor.getSingleInstance().exeCmd("taskkill /f /im \"" + Prop.get("abbyy.appname") + "\"");
 		}
 		while(isStart()) {
 			logger.warn("等待ABBYY关闭......");
 			Common.wait(Prop.getInt("interval.waitmillis"));
+			if(timer.getSpentTimeMillis()>TimeoutUtils.getTimeout("timeout.long")) {
+				logger.warn("等待ABBYY关闭时间过长，已达到："+timer.getSpentTimeMillis()/1000L+"秒");
+				throw new TransformWaitTimeoutException("ABBYY无法关闭");
+			}else if(timer.getSpentTimeMillis()>TimeoutUtils.getTimeout("timeout.short")) {
+				CmdExecutor.getSingleInstance().exeCmd("taskkill /f /im \"" + Prop.get("abbyy.appname") + "\"");
+				Common.wait(Prop.getInt("interval.waitlongmillis"));
+			}
 		}
 		logger.warn("确认ABBYY已关闭");
 	}

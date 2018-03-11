@@ -45,9 +45,18 @@ public class PdfUtils {
 		// 等待直到打开提取页面时的导出页面
 		FoxitUtils.waitExportPageWhenExracting(robotMngr);
 		Common.wait(Prop.getInt("interval.waitminmillis"));
-		// 两次tab移动到输入数字文本框
+		// 一次tab移动到第一个输入数字文本框
 		robotMngr.pressKey(KeyEvent.VK_TAB);
 		Common.wait(Prop.getInt("interval.waitminmillis"));
+		// 全选输入数字文本框
+		robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_A);
+		// 将1写入粘贴板
+		ClipboardUtils.setSysClipboardText(String.valueOf(1));
+		Common.wait(Prop.getInt("interval.waitminmillis"));
+		// 将数字1复制到输入数字文本框，每次从第一页开始截取
+		robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_V);
+		Common.wait(Prop.getInt("interval.waitminmillis"));
+		// 一次tab移动到第2个输入数字文本框
 		robotMngr.pressKey(KeyEvent.VK_TAB);
 		Common.wait(Prop.getInt("interval.waitminmillis"));
 		// 全选输入数字文本框

@@ -8,6 +8,7 @@ import java.io.IOException;
 import com.oddrock.caj2pdf.bean.TransformFileSet;
 import com.oddrock.caj2pdf.exception.TransformNofileException;
 import com.oddrock.caj2pdf.exception.TransformPdfEncryptException;
+import com.oddrock.caj2pdf.exception.TransformWaitTimeoutException;
 import com.oddrock.caj2pdf.persist.TransformInfoStater;
 import com.oddrock.caj2pdf.utils.AbbyyUtils;
 import com.oddrock.caj2pdf.utils.Common;
@@ -31,8 +32,9 @@ public class Pdf2WordUtils {
 	 * @return
 	 * @throws IOException 
 	 * @throws InterruptedException 
+	 * @throws TransformWaitTimeoutException 
 	 */
-	public static TransformFileSet pdf2word(RobotManager robotMngr, String pdfFilePath) throws IOException, InterruptedException {	
+	public static TransformFileSet pdf2word(RobotManager robotMngr, String pdfFilePath) throws IOException, InterruptedException, TransformWaitTimeoutException {	
 		// 移开鼠标避免挡事
 		Common.moveMouseAvoidHandicap(robotMngr);
 		TransformFileSet result = new TransformFileSet();
@@ -89,7 +91,7 @@ public class Pdf2WordUtils {
 		return result;
 	}
 	
-	public static void pdf2word_batch(TransformInfoStater tfis) throws TransformNofileException, IOException, InterruptedException {
+	public static void pdf2word_batch(TransformInfoStater tfis) throws TransformNofileException, IOException, InterruptedException, TransformWaitTimeoutException {
 		if(!tfis.hasFileToTransform())  {
 			tfis.setErrorMsg("目录里没有pdf文件");
 			throw new TransformNofileException("目录里没有pdf文件");
@@ -106,7 +108,7 @@ public class Pdf2WordUtils {
 		}
 	}
 	
-	public static void pdf2word_test(TransformInfoStater tfis) throws TransformNofileException, IOException, InterruptedException, TransformPdfEncryptException {
+	public static void pdf2word_test(TransformInfoStater tfis) throws TransformNofileException, IOException, InterruptedException, TransformPdfEncryptException, TransformWaitTimeoutException {
 		if(!tfis.hasFileToTransform()) {
 			tfis.setErrorMsg("目录里没有pdf文件");
 			throw new TransformNofileException("目录里没有pdf文件");
@@ -140,7 +142,7 @@ public class Pdf2WordUtils {
 		tfis.addDstFile(fileSet.getDstFile());
 	}
 	
-	public static void main(String[] args) throws AWTException, IOException, InterruptedException {
+	public static void main(String[] args) throws AWTException, IOException, InterruptedException, TransformWaitTimeoutException {
 		pdf2word(new RobotManager(), "C:\\Users\\qzfeng\\Desktop\\cajwait\\ZX粮油食品有限公司人力资源管理研究_何微.pdf");
 	}
 }
