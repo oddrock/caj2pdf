@@ -948,8 +948,8 @@ public class DocFormatConverter {
 		if(Prop.getBool("debug")) {		// 调试模式
 			//dfc.download_one_qqmailfiles();
 			//dfc.caj2word_test_sendmail();
-			dfc.selftest();
-			//dfc.caj2pdf();
+			//dfc.selftest();
+			dfc.pdf2mobi_byabbyy_test();
 		}else {
 			try {
 				dfc.execTransform(args);

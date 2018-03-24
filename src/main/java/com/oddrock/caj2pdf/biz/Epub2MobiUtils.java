@@ -163,7 +163,7 @@ private static Logger logger = Logger.getLogger(Pdf2MobiUtils.class);
 	}
 
 	public static void main(String[] args) throws AWTException, IOException, InterruptedException, TransformWaitTimeoutException {
-		String filePath = "C:\\Users\\qzfeng\\Desktop\\cajwait\\装配式建筑施工安全评价体系研究_杨爽.epub";
+		String filePath = "D:\\_caj2pdf\\cajwait\\不规则动词表.epub";
 		RobotManager robotMngr = new RobotManager();
 		epub2mobiByCalibre(robotMngr, filePath);
 	}

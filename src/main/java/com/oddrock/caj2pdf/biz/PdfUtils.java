@@ -10,9 +10,12 @@ import com.itextpdf.text.pdf.PdfReader;
 import com.oddrock.caj2pdf.bean.SingleDocCount;
 import com.oddrock.caj2pdf.bean.TransformFileSet;
 import com.oddrock.caj2pdf.exception.TransformPdfEncryptException;
+import com.oddrock.caj2pdf.exception.TransformWaitTimeoutException;
 import com.oddrock.caj2pdf.utils.Common;
 import com.oddrock.caj2pdf.utils.FoxitUtils;
 import com.oddrock.caj2pdf.utils.Prop;
+import com.oddrock.caj2pdf.utils.TimeoutUtils;
+import com.oddrock.caj2pdf.utils.Timer;
 import com.oddrock.common.awt.RobotManager;
 import com.oddrock.common.windows.ClipboardUtils;
 
@@ -21,7 +24,7 @@ public class PdfUtils {
 	private static Logger logger = Logger.getLogger(PdfUtils.class);
 	
 	// 提取PDF多少页，从第一页开始提取
-	public static TransformFileSet extractPage(RobotManager robotMngr, String pdfFilePath, int tiquPageCount) throws IOException, InterruptedException, TransformPdfEncryptException {
+	public static TransformFileSet extractPage(RobotManager robotMngr, String pdfFilePath, int tiquPageCount) throws IOException, InterruptedException, TransformPdfEncryptException, TransformWaitTimeoutException {
 		// 移开鼠标避免挡事
 		Common.moveMouseAvoidHandicap(robotMngr);
 		TransformFileSet result = new TransformFileSet();
@@ -94,6 +97,15 @@ public class PdfUtils {
 		// 等待直到关闭提取页面时的输入文件名页面
 		FoxitUtils.waitInputfilenameCloseWhenExracting(robotMngr);
 		Common.wait(Prop.getInt("interval.waitlongmillis"));
+		Timer timer = new Timer().start();
+		while(!dstFile.exists()) {
+			if(timer.getSpentTimeMillis()>TimeoutUtils.getTimeout("timeout.middle")) {
+				logger.warn("等待保存提取文件时间过长，已达到："+timer.getSpentTimeMillis()/1000L+"秒");
+				throw new TransformWaitTimeoutException();
+			}
+			Common.wait(Prop.getInt("interval.waitmillis"));
+			System.out.println("等待文件出现："+dstFile.getCanonicalPath());
+		}
 		FoxitUtils.close();
 		Common.wait(Prop.getInt("interval.waitminmillis"));
 		return result;		 
@@ -114,7 +126,7 @@ public class PdfUtils {
 	}
 	
 	
-	public static void main(String[] args) throws IOException, InterruptedException, AWTException, TransformPdfEncryptException {
+	public static void main(String[] args) throws IOException, InterruptedException, AWTException, TransformPdfEncryptException, TransformWaitTimeoutException {
 		extractPage(new RobotManager(), "C:\\Users\\qzfeng\\Desktop\\cajwait\\ZX粮油食品有限公司人力资源管理研究_何微.pdf", 10);
 	}
 }
