@@ -95,7 +95,7 @@ public class QQMailRcvUtils {
 		// 如果收了一封没有附件的邮件，就继续收下一封
 		while(mail!=null && dstDir!=null && dstDir.listFiles()!=null && dstDir.listFiles().length==0) {
 			try {
-				mail = imr.rcvOneUnreadMail(server, account, passwd, foldername, true, savefolder, generator);
+				mail = imr.rcvOneMailCylclyInSpecDays(server, account, passwd, foldername, true, savefolder, generator, recentDays);
 				if(mail!=null) {
 					downloadQQFileInMail(mail, savefolder, generator);
 					dstDir = generator.generateDir(new File(savefolder), mail);

@@ -949,7 +949,7 @@ public class DocFormatConverter {
 			//dfc.download_one_qqmailfiles();
 			//dfc.caj2word_test_sendmail();
 			//dfc.selftest();
-			dfc.pdf2mobi_byabbyy_test();
+			dfc.caj2pdf();
 		}else {
 			try {
 				dfc.execTransform(args);

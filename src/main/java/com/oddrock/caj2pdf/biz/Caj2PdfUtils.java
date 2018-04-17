@@ -4,6 +4,9 @@ import java.awt.AWTException;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
+
+import org.apache.log4j.Logger;
+
 import com.oddrock.caj2pdf.bean.TransformFileSet;
 import com.oddrock.caj2pdf.exception.TransformNofileException;
 import com.oddrock.caj2pdf.exception.TransformPdfEncryptException;
@@ -19,6 +22,7 @@ import com.oddrock.common.pdf.PdfManager;
 import com.oddrock.common.windows.ClipboardUtils;
 
 public class Caj2PdfUtils {
+	private static Logger logger = Logger.getLogger(Caj2PdfUtils.class);
 	public static void caj2pdf_step1(RobotManager robotMngr, String cajFilePath) throws IOException, InterruptedException {
 		// 关闭cajviewer
 		CajViewerUtils.close();
@@ -46,6 +50,7 @@ public class Caj2PdfUtils {
 	public static TransformFileSet caj2pdf(RobotManager robotMngr, String cajFilePath) throws IOException, InterruptedException, TransformWaitTimeoutException{
 		// 移开鼠标避免挡事
 		Common.moveMouseAvoidHandicap(robotMngr);
+		logger.warn("开始转换："+cajFilePath);
 		TransformFileSet result = new TransformFileSet();
 		File cajFile = new File(cajFilePath);
 		if(!cajFile.exists() || !cajFile.isFile() || !cajFile.getCanonicalPath().toLowerCase().endsWith(".caj")) {
