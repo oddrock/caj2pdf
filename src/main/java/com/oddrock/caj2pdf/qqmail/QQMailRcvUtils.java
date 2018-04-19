@@ -51,6 +51,8 @@ public class QQMailRcvUtils {
 	public static File rcvOneUnreadMailToSrcDir() throws Exception {
 		File mailDir = rcvOneUnreadMail();
 		File maildirInSrcDir = null;
+		logger.warn(mailDir.getCanonicalPath());
+		mailDir.mkdirs();
 		if(mailDir!=null) {
 			File srcDir = new File(Prop.get("srcdirpath"));
 			if(!srcDir.exists()) {
@@ -93,7 +95,7 @@ public class QQMailRcvUtils {
 			throw e;
 		}
 		// 如果收了一封没有附件的邮件，就继续收下一封
-		while(mail!=null && dstDir!=null && (!dstDir.exists() || (dstDir.exists() && dstDir.listFiles()!=null && dstDir.listFiles().length==0))) {
+		/*while(mail!=null && dstDir!=null && (!dstDir.exists() || (dstDir.exists() && dstDir.listFiles()!=null && dstDir.listFiles().length==0))) {
 			try {
 				mail = imr.rcvOneMailCylclyInSpecDays(server, account, passwd, foldername, true, savefolder, generator, recentDays);
 				if(mail!=null) {
@@ -111,7 +113,7 @@ public class QQMailRcvUtils {
 				}
 				throw e;
 			}
-		}
+		}*/
 		return dstDir;
 	}
 
