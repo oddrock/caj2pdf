@@ -51,7 +51,6 @@ public class QQMailRcvUtils {
 	public static File rcvOneUnreadMailToSrcDir() throws Exception {
 		File mailDir = rcvOneUnreadMail();
 		File maildirInSrcDir = null;
-		logger.warn(mailDir.getCanonicalPath());
 		mailDir.mkdirs();
 		if(mailDir!=null) {
 			File srcDir = new File(Prop.get("srcdirpath"));
