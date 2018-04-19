@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 import javax.mail.MessagingException;
@@ -18,6 +19,7 @@ import com.oddrock.caj2pdf.biz.Pdf2EpubUtils;
 import com.oddrock.caj2pdf.biz.Pdf2MobiUtils;
 import com.oddrock.caj2pdf.biz.Pdf2WordUtils;
 import com.oddrock.caj2pdf.biz.Txt2MobiUtils;
+import com.oddrock.caj2pdf.constant.MailFileType;
 import com.oddrock.caj2pdf.exception.TransformNodirException;
 import com.oddrock.caj2pdf.exception.TransformNofileException;
 import com.oddrock.caj2pdf.exception.TransformPdfEncryptException;
@@ -138,14 +140,16 @@ public class DocFormatConverter {
 			try {
 				// 完成后声音通知
 				Common.noticeSound();
-				// 完成后短信通知
-				Common.noticeMail(noticeContent);
+				if(tfis.isNeedNoticeMail()) {
+					// 完成后短信通知
+					Common.noticeMail(noticeContent);
+				}
 			}catch(Exception e) {
 				e.printStackTrace();
 			}
 		}
 		// 如果在自测,且不需要仿真，就不需要打开文件窗口
-		if((!selftest || simureal) && Prop.getBool("needopenfinishedwindows")) {
+		if((!selftest || simureal) && Prop.getBool("needopenfinishedwindows") && tfis.isNeedOpenFinisedWindows()) {
 			// 打开完成后的文件夹窗口
 			if(Prop.getBool("needmove.dstfile")) {		
 				Common.openFinishedWindows(tfis.getDstDir());
@@ -172,8 +176,10 @@ public class DocFormatConverter {
 		if(debug) {
 			tfis.getInfo().setSelftest(1); 		// debug也算测试，避免误导数据
 		}
-		// 保存信息到数据库
-		AsyncDbSaver.saveDb(tfis);
+		if(tfis.isNeedSaveDb()) {
+			// 保存信息到数据库
+			AsyncDbSaver.saveDb(tfis);
+		}
 		if(tfis.isNeedCopyContentOnClipboard()) {
 			ClipboardUtils.setSysClipboardText(tfis.getClipboardContent());
 		}
@@ -503,13 +509,18 @@ public class DocFormatConverter {
 	
 	private void download_one_qqmailfiles() throws IOException, ParseException {
 		logger.warn("开始下载一封含附件的QQ未读邮件...");
-		QQMailArchiveUtils.archive();
+		Random random = new Random();
+		// 取随机数，保证每10次有1次取归档邮件
+		if((random.nextInt(5)+1)==3) {
+			QQMailArchiveUtils.archive();
+		}
+		
 		String noticeContent = "下载QQ邮件成功，请回到电脑继续操作！！！";
 		File dstDir = null;
 		boolean exception = false;
 		try {
 			dstDir = QQMailRcvUtils.rcvOneUnreadMailToSrcDir();
-			if(dstDir!=null) {
+			if(dstDir!=null && dstDir.exists() && dstDir.isDirectory()) {
 				// 检查是否有压缩文件，如果有，解压缩
 				for(File file:dstDir.listFiles()) {
 					if(UnZipUtils.canDeCompress(file.getCanonicalPath())) {
@@ -526,7 +537,9 @@ public class DocFormatConverter {
 		}finally {
 			if(dstDir!=null) {
 				doAfter(noticeContent,dstDir.getParentFile(),exception);
-				FileUtils.copyFileInSrcDirToDstDir(new File(Prop.get("bat.openfinishedwindows.dirpath")), dstDir);
+				if(dstDir.exists()) {
+					FileUtils.copyFileInSrcDirToDstDir(new File(Prop.get("bat.openfinishedwindows.dirpath")), dstDir);
+				}
 				FileUtils.copyFileInSrcDirToDstDir(new File(Prop.get("bat.dirpath")), dstDir.getParentFile());
 			}else {
 				doAfter(noticeContent,null,exception);
@@ -844,6 +857,34 @@ public class DocFormatConverter {
 		Pdf2MobiUtils.pdf2mobi_byabbyy_test(tfis);
 		doAfterTransform(tfis);
 	}
+	
+	private void sendmail(MailFileType mailFileType) throws TransformNodirException, IOException, MessagingException, TransformNofileException {
+		Set<MailDir> set = MailDir.scanAndGetSendMailDir(new File(Prop.get("sendmail.srcdirpath")));
+		for(MailDir md : set) {
+			sendmail(md,mailFileType);
+		}
+	}
+
+	private void sendmail(MailDir md, MailFileType mailFileType) throws TransformNodirException, IOException, MessagingException, TransformNofileException {
+		TransformInfoStater tfis = new TransformInfoStater("sendmail_pdf", md.getDir(), new File(Prop.get("sendmail.dstdirpath")),  robotMngr, new MailDateStrTransformDstDirGenerator());
+		tfis.setMaildir(md);
+		tfis.setNeedSendDstFileMail(false);
+		tfis.setNeedNoticeMail(false);
+		//tfis.setNeedDelSrcDir(true);
+		//tfis.setNeedSaveDb(false);
+		tfis.setNeedOpenFinisedWindows(false);
+		doBeforeTransform(tfis);
+		if(!tfis.hasFileToTransform()) {
+			tfis.setErrorMsg("目录里没有要发送的文件");
+			throw new TransformNofileException();
+		}
+		for(File file : tfis.getQualifiedSrcFileSet()){
+			tfis.addDstFile(file);
+			logger.warn("发送文件："+file.getName());
+		}
+		QQMailSendUtils.sendMailWithFile(tfis);
+		doAfterTransform(tfis);
+	}
 
 	public void execTransform(String[] args) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException, ParseException, TransformPdfEncryptException {
 		String method = Prop.get("caj2pdf.start");
@@ -938,10 +979,22 @@ public class DocFormatConverter {
 				filename = args[2].trim();
 			}
 			CmdExecutor.getSingleInstance().exportTasklistToFile(new File(dstDir, filename));
+		}else if("sendmail_pdf".equalsIgnoreCase(method)) {
+			sendmail(MailFileType.PDF);
+		}else if("sendmail_word".equalsIgnoreCase(method)) {
+			sendmail(MailFileType.WORD);
+		}else if("sendmail_mobi".equalsIgnoreCase(method)) {
+			sendmail(MailFileType.MOBI);
+		}else if("sendmail_excel".equalsIgnoreCase(method)) {
+			sendmail(MailFileType.EXCEL);
+		}else if("sendmail_img".equalsIgnoreCase(method)) {
+			sendmail(MailFileType.IMG);
 		}
 	}
 
 
+
+	
 
 	public static void main(String[] args) throws AWTException, IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException, ParseException, TransformPdfEncryptException {
 		DocFormatConverter dfc = new DocFormatConverter();
@@ -949,8 +1002,13 @@ public class DocFormatConverter {
 			//dfc.download_one_qqmailfiles();
 			//dfc.caj2word_test_sendmail();
 			//dfc.selftest();
-			dfc.caj2pdf();
+			//dfc.sendmail(MailFileType.PDF);
+			dfc.download_one_qqmailfiles();
 		}else {
+			/*dfc.download_one_qqmailfiles();
+			if(1==1) {
+				return;
+			}*/
 			try {
 				dfc.execTransform(args);
 			} catch (TransformWaitTimeoutException e) {
@@ -981,6 +1039,9 @@ public class DocFormatConverter {
 				Common.noticeAlertSound();
 				// 邮件告警
 				Common.noticeAlertMail("转换错误:PDF要先解密！");
+			}catch(Exception e) {
+				e.printStackTrace();
+				logger.warn(e.getStackTrace());
 			}
 		}
 	}

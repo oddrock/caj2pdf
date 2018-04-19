@@ -76,7 +76,8 @@ public class TransformRuleUtils {
 				|| transformType.equalsIgnoreCase("pdf2mobi_byabbyy")
 				|| transformType.equalsIgnoreCase("pdf2mobi_byabbyy_test")
 				|| transformType.equalsIgnoreCase("pdf2mobi_bycalibre")
-				|| transformType.equalsIgnoreCase("pdf2mobi_bycalibre_test")) {
+				|| transformType.equalsIgnoreCase("pdf2mobi_bycalibre_test")
+				|| transformType.equalsIgnoreCase("sendmail_pdf")) {
 			if(filePathInLowerCase.endsWith(".pdf")) {
 				// 如果不是以小写pdf结尾，就替换为小写，否则用ABBYY转换会有问题
 				if(!file.getCanonicalPath().endsWith("pdf")) {
@@ -94,8 +95,25 @@ public class TransformRuleUtils {
 				return file;
 			}
 		}
+		if(transformType.equalsIgnoreCase("sendmail_word")) {
+			if(filePathInLowerCase.endsWith(".doc") 
+					|| filePathInLowerCase.endsWith(".docx")) {
+				return file;
+			}
+		}
+		if(transformType.equalsIgnoreCase("sendmail_mobi")) {
+			if(filePathInLowerCase.endsWith(".mobi")) {
+				return file;
+			}
+		}
+		if(transformType.equalsIgnoreCase("sendmail_excel")) {
+			if(filePathInLowerCase.endsWith(".xls")||filePathInLowerCase.endsWith(".xlsx")) {
+				return file;
+			}
+		}
 		if(transformType.equalsIgnoreCase("img2word") 
-				|| transformType.equalsIgnoreCase("img2word_test")) {
+				|| transformType.equalsIgnoreCase("img2word_test")
+				|| transformType.equalsIgnoreCase("sendmail_img")) {
 			if(Common.isImgFile(file)) {
 				return file;
 			}

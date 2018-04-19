@@ -34,6 +34,7 @@ public class TransformInfoStater {
 	private DiffernetBatchDocCount docCount;
 	private String errorMsg;
 	private MailDir maildir;
+	private boolean needNoticeMail;
 	private boolean needCopyContentOnClipboard;
 	private String clipboardContent;
 	private boolean needSendDstFileMail;			// 是否需要发含目标文件邮件
@@ -41,6 +42,7 @@ public class TransformInfoStater {
 	private boolean needMoveMidFile;
 	private boolean needMoveDstFile;
 	private boolean needDelMidFile;
+	private boolean needSaveDb;
 	private boolean testtransformNeedMoveSrcFile;
 	private TransformInfo info;
 	private RobotManager robotMngr;
@@ -53,6 +55,7 @@ public class TransformInfoStater {
 	private File dstParentDir;			// 目标地址父路径
 	private TransformDstDirGenerator dstDirgenerator;		// 目标路径生成器
 	private boolean needDelSrcDir;
+	private boolean needOpenFinisedWindows;
 	public DiffernetBatchDocCount getDocCount() {
 		return docCount;
 	}
@@ -188,6 +191,7 @@ public class TransformInfoStater {
 		needDelSrcDir = false;
 		needSendDstFileMail = false;
 		needCopyContentOnClipboard = false;
+		needOpenFinisedWindows = true;
 		dstDirgenerator = new DateStrTransformDstDirGenerator();
 		needMoveSrcFile = Prop.getBool("needmove.srcfile");
 		needMoveMidFile = Prop.getBool("needmove.midfile");
@@ -201,9 +205,29 @@ public class TransformInfoStater {
 		info = new TransformInfo();
 		info.setStart_time(new Date());
 		docCount = new DiffernetBatchDocCount();
+		needNoticeMail = true;
+		needSaveDb = true;
 	}
 	
-
+	
+	public boolean isNeedOpenFinisedWindows() {
+		return needOpenFinisedWindows;
+	}
+	public void setNeedOpenFinisedWindows(boolean needOpenFinisedWindows) {
+		this.needOpenFinisedWindows = needOpenFinisedWindows;
+	}
+	public boolean isNeedSaveDb() {
+		return needSaveDb;
+	}
+	public void setNeedSaveDb(boolean needSaveDb) {
+		this.needSaveDb = needSaveDb;
+	}
+	public boolean isNeedNoticeMail() {
+		return needNoticeMail;
+	}
+	public void setNeedNoticeMail(boolean needNoticeMail) {
+		this.needNoticeMail = needNoticeMail;
+	}
 	public TransformInfoStater(String transformType, File srcDir, File dstParentDir, RobotManager robotMngr) {
 		this();
 		/*if(transformType.contains("caj2word_test") || transformType.contains("caj2pdf_test")) {

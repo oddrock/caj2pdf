@@ -93,7 +93,7 @@ public class QQMailRcvUtils {
 			throw e;
 		}
 		// 如果收了一封没有附件的邮件，就继续收下一封
-		while(mail!=null && dstDir!=null && dstDir.listFiles()!=null && dstDir.listFiles().length==0) {
+		while(mail!=null && dstDir!=null && (!dstDir.exists() || (dstDir.exists() && dstDir.listFiles()!=null && dstDir.listFiles().length==0))) {
 			try {
 				mail = imr.rcvOneMailCylclyInSpecDays(server, account, passwd, foldername, true, savefolder, generator, recentDays);
 				if(mail!=null) {
@@ -117,6 +117,8 @@ public class QQMailRcvUtils {
 
 	private static File downloadQQFileInMail(MailRecv mail, String localBaseDirPath, AttachDownloadDirGenerator generator) throws TransformWaitTimeoutException, IOException, InterruptedException, AWTException {
 		List<QQFileDownloadPage> list = QQFileDownloader.parseQQFileDownloadPageFromQQMail(mail.getPlainContent());
+		File localDir = generator.generateDir(new File(localBaseDirPath), mail);
+		localDir.mkdirs();
 		if(list.size()==0) return null;
 		logger.warn("开始下载【"+mail.getFrom()+"】主题为【"+mail.getSubject()+"】的邮件中的QQ中转站文件...");
 		String[] urlArr = new String[list.size()];
@@ -125,8 +127,6 @@ public class QQMailRcvUtils {
 			urlArr[i] = page.getPageUrl();
 			i++;
 		}
-		File localDir = generator.generateDir(new File(localBaseDirPath), mail);
-		localDir.mkdirs();
 		QQFileDownloadUtils.download(new RobotManager(), localDir, urlArr);
 		logger.warn("结束下载【"+mail.getFrom()+"】主题为【"+mail.getSubject()+"】的邮件中的QQ中转站文件");
 		return localDir;

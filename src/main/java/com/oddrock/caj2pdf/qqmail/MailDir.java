@@ -67,6 +67,39 @@ public class MailDir {
 		return set;
 	}
 	
+	public static Set<MailDir> scanAndGetSendMailDir(File dir) {
+		Set<MailDir> set = new HashSet<MailDir>();
+		for(File sonDir : dir.listFiles()) {
+			if(sonDir==null || !sonDir.exists() || !sonDir.isDirectory()) continue;
+			Pattern pattern1 = Pattern.compile("(\\d{4}年\\d{2}月\\d{2}日\\d{2}时\\d{2}分)\\]-{1,}\\[(.*)\\]-{1,}\\[(.*@.*)\\]-{1,}\\[(.*)");
+	        Matcher matcher = pattern1.matcher(sonDir.getName());
+	        if(matcher.matches()) {
+	        	MailDir md = new MailDir();
+	        	md.setTimeStr(matcher.group(1));
+	        	md.setFromNick(matcher.group(2));
+	        	md.setFromEmail(matcher.group(3));
+	        	md.setSubject(matcher.group(4));
+	        	md.setDir(sonDir);
+	        	set.add(md);
+	        }
+ 		}
+		for(File sonDir : dir.listFiles()) {
+			if(sonDir==null || !sonDir.exists() || !sonDir.isDirectory()) continue;
+			Pattern pattern1 = Pattern.compile("(\\d{4}年\\d{2}月\\d{2}日\\d{2}时\\d{2}分)\\]-{1,}\\[(.*)\\]-{1,}\\[(.*@.*)\\]-{1,}\\[(.*)");
+			Matcher matcher1 = pattern1.matcher(sonDir.getName());
+			Pattern pattern2 = Pattern.compile("(.*@.*)");
+	        Matcher matcher2 = pattern2.matcher(sonDir.getName());
+	        if(!matcher1.matches() && matcher2.matches()) {
+	        	MailDir md = new MailDir();
+	        	md.setFromEmail(matcher2.group(1));
+	        	md.setDir(sonDir);
+	        	set.add(md);
+	        }
+ 		}
+		return set;
+	}
+	
+	
 	public static void main(String[] args) {
 		String path = "C:\\Users\\qzfeng\\Desktop\\cajwait";
 		scanAndGetMailDir(new File(path));
