@@ -13,6 +13,7 @@ import javax.mail.MessagingException;
 import org.apache.log4j.Logger;
 import org.codehaus.plexus.util.ExceptionUtils;
 
+import com.oddrock.caj2pdf.bean.TransformFileSetEx;
 import com.oddrock.caj2pdf.biz.Caj2PdfUtils;
 import com.oddrock.caj2pdf.biz.Caj2WordUtils;
 import com.oddrock.caj2pdf.biz.Img2WordUtils;
@@ -21,6 +22,7 @@ import com.oddrock.caj2pdf.biz.Pdf2MobiUtils;
 import com.oddrock.caj2pdf.biz.Pdf2WordUtils;
 import com.oddrock.caj2pdf.biz.Txt2MobiUtils;
 import com.oddrock.caj2pdf.constant.MailFileType;
+import com.oddrock.caj2pdf.constant.TransformType;
 import com.oddrock.caj2pdf.exception.TransformNodirException;
 import com.oddrock.caj2pdf.exception.TransformNofileException;
 import com.oddrock.caj2pdf.exception.TransformPdfEncryptException;
@@ -889,19 +891,28 @@ public class DocFormatConverter {
 	}
 
 	// 空闲时工作
-	private void idleWork() throws IOException {
+	private void idleWork() throws IOException, TransformWaitTimeoutException, InterruptedException {
+		logger.warn("开始进行空闲时转换工作，工作随时可以结束");
 		File srcDirParentDir = new File(Prop.get("idlework.srcdirpath"));
 		if(srcDirParentDir.exists() && srcDirParentDir.isDirectory() 
 				&& srcDirParentDir.listFiles()!=null && srcDirParentDir.listFiles().length>0) {
-			for(File srcDir : srcDirParentDir.listFiles()) {
-				if(srcDir.isDirectory()) {
-					idleWork(srcDir);
+			for(File typeSrcDir : srcDirParentDir.listFiles()) {
+				if(typeSrcDir.isDirectory()) {
+					TransformType transformType  = TransformType.str2type(typeSrcDir.getName());
+					if(transformType!=null) {
+						for(File srcDir : typeSrcDir.listFiles()) {
+							idleWork(srcDir,transformType);
+						}
+					}
 				}
 			}
 		}
+		logger.warn("已完成所有空闲时转换工作");
 	}
 	
-	private void idleWork(File srcDir) throws IOException {
+	private void idleWork(File srcDir, TransformType transformType) throws IOException, TransformWaitTimeoutException, InterruptedException {	
+		logger.warn("开始空闲时转换本文件夹下内容："+srcDir.getCanonicalPath());
+		FileUtils.deleteHiddenFiles(srcDir);
 		File[] files = srcDir.listFiles();
 		String transformRecordFileName = Prop.get("idlework.transformrecordfilename");
 		File transformRecordFile = new File(srcDir, transformRecordFileName);
@@ -911,12 +922,37 @@ public class DocFormatConverter {
 		}
 		for(File file: files) {
 			if(transformRecordFileName.equalsIgnoreCase(file.getName())) {	// 是记录文件就跳过。
+				logger.warn("记录文件不转换:"+file.getCanonicalPath());
 				continue;
 			}
-			if(finishFileNameSet.contains(file.getName())) {				// 已经转过了就跳过
+			if(finishFileNameSet.contains(file.getCanonicalPath())) {				// 已经转过了就跳过
+				logger.warn("转换过的不转换:"+file.getCanonicalPath());
 				continue;
+			}
+			if(TransformType.caj2word.equals(transformType)) {
+				TransformFileSetEx transformFileSetEx = Caj2WordUtils.caj2word_single(file, robotMngr);
+				if(transformFileSetEx.isSuccess()) {
+					for (File finishedFile : transformFileSetEx.getSrcFile()) {
+						saveFileName2TransformRecordFile(finishedFile, transformRecordFile);
+					}
+				}
+			}else if(TransformType.pdf2word.equals(transformType)) {
+				TransformFileSetEx transformFileSetEx = Pdf2WordUtils.pdf2word_single(file, robotMngr);
+				if(transformFileSetEx.isSuccess()) {
+					for (File finishedFile : transformFileSetEx.getSrcFile()) {
+						saveFileName2TransformRecordFile(finishedFile, transformRecordFile);
+					}
+				}
 			}
 		}
+		logger.warn("结束空闲时转换本文件夹下内容："+srcDir.getCanonicalPath());
+	}
+	
+	
+
+	private void saveFileName2TransformRecordFile(File file, File transformRecordFile) throws IOException {
+		String content = file.getCanonicalPath();
+		FileUtils.writeLineToFile(transformRecordFile.getCanonicalPath(), content, true);
 	}
 
 	public void execTransform(String[] args) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException, ParseException, TransformPdfEncryptException {
@@ -1039,8 +1075,9 @@ public class DocFormatConverter {
 			//dfc.download_one_qqmailfiles();
 			//dfc.caj2word_test_sendmail();
 			//dfc.selftest();
-			dfc.sendmail(MailFileType.WORD);
+			//dfc.sendmail(MailFileType.WORD);
 			//dfc.caj2pdf_sendmail();
+			dfc.idleWork();
 		}else {
 			/*dfc.download_one_qqmailfiles();
 			if(1==1) {

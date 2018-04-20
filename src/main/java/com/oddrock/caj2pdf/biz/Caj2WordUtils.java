@@ -2,7 +2,11 @@ package com.oddrock.caj2pdf.biz;
 
 import java.io.File;
 import java.io.IOException;
+
+import org.apache.log4j.Logger;
+
 import com.oddrock.caj2pdf.bean.TransformFileSet;
+import com.oddrock.caj2pdf.bean.TransformFileSetEx;
 import com.oddrock.caj2pdf.exception.TransformNofileException;
 import com.oddrock.caj2pdf.exception.TransformPdfEncryptException;
 import com.oddrock.caj2pdf.exception.TransformWaitTimeoutException;
@@ -12,6 +16,38 @@ import com.oddrock.common.awt.RobotManager;
 import com.oddrock.common.pdf.PdfManager;
 
 public class Caj2WordUtils {
+	private static Logger logger = Logger.getLogger(Caj2WordUtils.class);
+	
+	public static TransformFileSetEx caj2word_single(File file, RobotManager robotMngr) throws IOException, TransformWaitTimeoutException, InterruptedException {
+		logger.warn("开始转换:"+file.getCanonicalPath());
+		TransformFileSetEx result = new TransformFileSetEx();
+		if(file==null || !file.exists() || !file.isFile()) {
+			logger.warn("文件不存在或文件为空");
+			return result;
+		}
+		File srcFile = TransformRuleUtils.isQualifiedSrcFile(file, "caj2word");
+		if(srcFile==null) {
+			logger.warn("文件不是要转换的类型："+file.getCanonicalPath());
+			return result;
+		}
+		result.addSrcFile(srcFile);
+		File pdfFile = null;
+		TransformFileSet tmpFileSet = Caj2PdfUtils.caj2pdf(robotMngr, file.getCanonicalPath());
+		if(tmpFileSet!=null && tmpFileSet.getDstFile()!=null) {
+			pdfFile = tmpFileSet.getDstFile();
+		}
+		if(pdfFile!=null && pdfFile.exists()) {
+			result.addMidFile(pdfFile);
+			tmpFileSet = Pdf2WordUtils.pdf2word(robotMngr, pdfFile.getCanonicalPath());
+			if(tmpFileSet!=null && tmpFileSet.getDstFile()!=null) {
+				result.addDstFile(tmpFileSet.getDstFile());
+				result.setSuccess(true);
+			}
+		}
+		logger.warn("结束转换:"+file.getCanonicalPath());
+		return result;
+	}
+	
 	public static void caj2word_batch(TransformInfoStater tfis) throws TransformWaitTimeoutException, IOException, InterruptedException, TransformNofileException {
 		TransformFileSet fileSet;
 		RobotManager robotMngr = tfis.getRobotMngr();

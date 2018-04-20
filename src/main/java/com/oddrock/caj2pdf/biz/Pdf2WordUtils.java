@@ -5,7 +5,10 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 
+import org.apache.log4j.Logger;
+
 import com.oddrock.caj2pdf.bean.TransformFileSet;
+import com.oddrock.caj2pdf.bean.TransformFileSetEx;
 import com.oddrock.caj2pdf.exception.TransformNofileException;
 import com.oddrock.caj2pdf.exception.TransformPdfEncryptException;
 import com.oddrock.caj2pdf.exception.TransformWaitTimeoutException;
@@ -25,6 +28,7 @@ import com.oddrock.common.windows.ClipboardUtils;
  *
  */
 public class Pdf2WordUtils {
+	private static Logger logger = Logger.getLogger(Pdf2WordUtils.class);
 	
 	/**
 	 * 单个pdf转word
@@ -35,6 +39,7 @@ public class Pdf2WordUtils {
 	 * @throws TransformWaitTimeoutException 
 	 */
 	public static TransformFileSet pdf2word(RobotManager robotMngr, String pdfFilePath) throws IOException, InterruptedException, TransformWaitTimeoutException {	
+		logger.warn("sda"+pdfFilePath);
 		// 移开鼠标避免挡事
 		Common.moveMouseAvoidHandicap(robotMngr);
 		TransformFileSet result = new TransformFileSet();
@@ -144,5 +149,27 @@ public class Pdf2WordUtils {
 	
 	public static void main(String[] args) throws AWTException, IOException, InterruptedException, TransformWaitTimeoutException {
 		pdf2word(new RobotManager(), "C:\\Users\\qzfeng\\Desktop\\cajwait\\ZX粮油食品有限公司人力资源管理研究_何微.pdf");
+	}
+
+	public static TransformFileSetEx pdf2word_single(File file, RobotManager robotMngr) throws IOException, TransformWaitTimeoutException, InterruptedException {
+		logger.warn("开始转换:"+file.getCanonicalPath());
+		TransformFileSetEx result = new TransformFileSetEx();
+		if(file==null || !file.exists() || !file.isFile()) {
+			logger.warn("文件不存在或文件为空");
+			return result;
+		}
+		File srcFile = TransformRuleUtils.isQualifiedSrcFile(file, "pdf2word");
+		if(srcFile==null) {
+			logger.warn("文件不是要转换的类型："+file.getCanonicalPath());
+			return result;
+		}
+		result.addSrcFile(srcFile);
+		TransformFileSet tmpFileSet = Pdf2WordUtils.pdf2word(robotMngr, srcFile.getCanonicalPath());
+		if(tmpFileSet!=null && tmpFileSet.getDstFile()!=null) {
+			result.addDstFile(tmpFileSet.getDstFile());
+			result.setSuccess(true);
+		}
+		logger.warn("结束转换:"+file.getCanonicalPath());
+		return result;
 	}
 }
