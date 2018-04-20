@@ -867,7 +867,8 @@ public class DocFormatConverter {
 	}
 
 	private void sendmail(MailDir md, MailFileType mailFileType) throws TransformNodirException, IOException, MessagingException, TransformNofileException {
-		TransformInfoStater tfis = new TransformInfoStater("sendmail_pdf", md.getDir(), new File(Prop.get("sendmail.dstdirpath")),  robotMngr, new MailDateStrTransformDstDirGenerator());
+		String transformType = "sendmail_"+mailFileType.toString().toLowerCase();
+		TransformInfoStater tfis = new TransformInfoStater(transformType, md.getDir(), new File(Prop.get("sendmail.dstdirpath")),  robotMngr, new MailDateStrTransformDstDirGenerator());
 		tfis.setMaildir(md);
 		tfis.setNeedSendDstFileMail(false);
 		tfis.setNeedNoticeMail(false);
@@ -1038,8 +1039,8 @@ public class DocFormatConverter {
 			//dfc.download_one_qqmailfiles();
 			//dfc.caj2word_test_sendmail();
 			//dfc.selftest();
-			//dfc.sendmail(MailFileType.PDF);
-			dfc.caj2pdf_sendmail();
+			dfc.sendmail(MailFileType.WORD);
+			//dfc.caj2pdf_sendmail();
 		}else {
 			/*dfc.download_one_qqmailfiles();
 			if(1==1) {
