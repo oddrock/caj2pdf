@@ -1039,7 +1039,7 @@ public class DocFormatConverter {
 			//dfc.caj2word_test_sendmail();
 			//dfc.selftest();
 			//dfc.sendmail(MailFileType.PDF);
-			dfc.caj2word_sendmail();
+			dfc.caj2pdf_sendmail();
 		}else {
 			/*dfc.download_one_qqmailfiles();
 			if(1==1) {
