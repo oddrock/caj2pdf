@@ -4,6 +4,7 @@ import java.awt.AWTException;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -886,6 +887,37 @@ public class DocFormatConverter {
 		doAfterTransform(tfis);
 	}
 
+	// 空闲时工作
+	private void idleWork() throws IOException {
+		File srcDirParentDir = new File(Prop.get("idlework.srcdirpath"));
+		if(srcDirParentDir.exists() && srcDirParentDir.isDirectory() 
+				&& srcDirParentDir.listFiles()!=null && srcDirParentDir.listFiles().length>0) {
+			for(File srcDir : srcDirParentDir.listFiles()) {
+				if(srcDir.isDirectory()) {
+					idleWork(srcDir);
+				}
+			}
+		}
+	}
+	
+	private void idleWork(File srcDir) throws IOException {
+		File[] files = srcDir.listFiles();
+		String transformRecordFileName = Prop.get("idlework.transformrecordfilename");
+		File transformRecordFile = new File(srcDir, transformRecordFileName);
+		Set<String> finishFileNameSet = new HashSet<String>();
+		if(transformRecordFile.exists()) {
+			finishFileNameSet = FileUtils.readFileContentPerLine(transformRecordFile.getCanonicalPath());
+		}
+		for(File file: files) {
+			if(transformRecordFileName.equalsIgnoreCase(file.getName())) {	// 是记录文件就跳过。
+				continue;
+			}
+			if(finishFileNameSet.contains(file.getName())) {				// 已经转过了就跳过
+				continue;
+			}
+		}
+	}
+
 	public void execTransform(String[] args) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException, ParseException, TransformPdfEncryptException {
 		String method = Prop.get("caj2pdf.start");
 		if(method==null) {
@@ -989,10 +1021,14 @@ public class DocFormatConverter {
 			sendmail(MailFileType.EXCEL);
 		}else if("sendmail_img".equalsIgnoreCase(method)) {
 			sendmail(MailFileType.IMG);
+		}else if("idlework".equalsIgnoreCase(method)) {
+			idleWork();
 		}
 	}
 
 
+
+	
 
 	
 
@@ -1003,7 +1039,7 @@ public class DocFormatConverter {
 			//dfc.caj2word_test_sendmail();
 			//dfc.selftest();
 			//dfc.sendmail(MailFileType.PDF);
-			dfc.download_one_qqmailfiles();
+			dfc.caj2word_sendmail();
 		}else {
 			/*dfc.download_one_qqmailfiles();
 			if(1==1) {

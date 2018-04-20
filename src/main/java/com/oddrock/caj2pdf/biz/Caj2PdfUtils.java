@@ -53,7 +53,11 @@ public class Caj2PdfUtils {
 		logger.warn("开始转换："+cajFilePath);
 		TransformFileSet result = new TransformFileSet();
 		File cajFile = new File(cajFilePath);
-		if(!cajFile.exists() || !cajFile.isFile() || !cajFile.getCanonicalPath().toLowerCase().endsWith(".caj")) {
+		if(!cajFile.exists() || !cajFile.isFile() || (
+				!cajFile.getCanonicalPath().toLowerCase().endsWith(".caj")
+				&& !cajFile.getCanonicalPath().toLowerCase().endsWith(".nh")
+				&& !cajFile.getCanonicalPath().toLowerCase().endsWith(".caa")
+				)) {
 			return result;
 		}
 		result.setSrcFile(cajFile);
@@ -67,7 +71,14 @@ public class Caj2PdfUtils {
 			CajViewerUtils.waitInputfilename(robotMngr);
 		}
 		// pdf文件生成在原地，只修改后缀
-		File pdfFile = new File(cajFile.getParent(), cajFile.getName().replaceAll(".caj$", ".pdf"));
+		File pdfFile = null;
+		if(cajFile.getName().toLowerCase().endsWith("caj")) {
+			pdfFile = new File(cajFile.getParent(), cajFile.getName().replaceAll("(?i).caj$", ".pdf"));
+		}else if(cajFile.getName().toLowerCase().endsWith("caa")) {
+			pdfFile = new File(cajFile.getParent(), cajFile.getName().replaceAll("(?i).caa$", ".pdf"));
+		}if(cajFile.getName().toLowerCase().endsWith("nh")) {
+			pdfFile = new File(cajFile.getParent(), cajFile.getName().replaceAll("(?i).nh$", ".pdf"));
+		}
 		result.setDstFile(pdfFile);
 		// 将生成的pdf文件名复制到文本框
 		ClipboardUtils.setSysClipboardText(pdfFile.getCanonicalPath());		

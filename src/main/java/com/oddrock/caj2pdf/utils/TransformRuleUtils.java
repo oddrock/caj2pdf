@@ -65,7 +65,7 @@ public class TransformRuleUtils {
 				|| transformType.equalsIgnoreCase("caj2pdf_test")
 				|| transformType.equalsIgnoreCase("caj2word")
 				|| transformType.equalsIgnoreCase("caj2word_test")) {
-			if(filePathInLowerCase.endsWith(".caj") || filePathInLowerCase.endsWith(".nh")) {
+			if(filePathInLowerCase.endsWith(".caj") || filePathInLowerCase.endsWith(".nh")|| filePathInLowerCase.endsWith(".caa")) {
 				return file;
 			}
 		}

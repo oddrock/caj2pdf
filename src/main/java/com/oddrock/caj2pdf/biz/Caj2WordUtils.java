@@ -22,9 +22,16 @@ public class Caj2WordUtils {
 		// 先全部caj转pdf
 		for(File file : tfis.getQualifiedSrcFileSet()){
 			if(file==null) continue;
-			File pdfFile = new File(file.getParent(), file.getName().replaceAll(".caj$", ".pdf"));
+			File pdfFile = null;
+			if(file.getName().toLowerCase().endsWith("caj")) {
+				pdfFile = new File(file.getParent(), file.getName().replaceAll("(?i).caj$", ".pdf"));
+			}else if(file.getName().toLowerCase().endsWith("caa")) {
+				pdfFile = new File(file.getParent(), file.getName().replaceAll("(?i).caa$", ".pdf"));
+			}if(file.getName().toLowerCase().endsWith("nh")) {
+				pdfFile = new File(file.getParent(), file.getName().replaceAll("(?i).nh$", ".pdf"));
+			}
 			// 如果pdf文件已经存在，则不必再转换，跳过这一步
-			if(pdfFile.exists()) {
+			if(pdfFile!=null && pdfFile.exists()) {
 				fileSet = new TransformFileSet();
 				fileSet.setSrcFile(file);
 				fileSet.setDstFile(pdfFile);
