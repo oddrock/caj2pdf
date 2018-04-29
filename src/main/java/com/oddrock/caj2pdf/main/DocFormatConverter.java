@@ -37,6 +37,7 @@ import com.oddrock.caj2pdf.selftest.SelftestFilesPool;
 import com.oddrock.caj2pdf.selftest.SelftestRuleUtils;
 import com.oddrock.caj2pdf.selftest.bean.SelftestRule;
 import com.oddrock.caj2pdf.utils.Common;
+import com.oddrock.caj2pdf.utils.DateStrTransformDstDirGenerator;
 import com.oddrock.caj2pdf.utils.MailDateStrTransformDstDirGenerator;
 import com.oddrock.caj2pdf.utils.AsnycHiddenFileDeleter;
 import com.oddrock.caj2pdf.utils.AsyncDbSaver;
@@ -930,21 +931,34 @@ public class DocFormatConverter {
 				continue;
 			}
 			if(TransformType.caj2word.equals(transformType)) {
+				TransformInfoStater tfis = new TransformInfoStater("caj2word_idlework", srcDir, srcDir,  robotMngr, new DateStrTransformDstDirGenerator());
+				tfis.addSrcFile(file);
 				TransformFileSetEx transformFileSetEx = Caj2WordUtils.caj2word_single(file, robotMngr);
 				if(transformFileSetEx.isSuccess()) {
 					for (File finishedFile : transformFileSetEx.getSrcFile()) {
 						saveFileName2TransformRecordFile(finishedFile, transformRecordFile);
+						for(File dstFile : transformFileSetEx.getDstFile()) {
+							tfis.addDstFile(dstFile);
+						}
+						AsyncDbSaver.saveDb(tfis);
 					}
 				}
 			}else if(TransformType.pdf2word.equals(transformType)) {
+				TransformInfoStater tfis = new TransformInfoStater("pdf2word_idlework", srcDir, srcDir,  robotMngr, new DateStrTransformDstDirGenerator());
+				tfis.addSrcFile(file);
 				TransformFileSetEx transformFileSetEx = Pdf2WordUtils.pdf2word_single(file, robotMngr);
 				if(transformFileSetEx.isSuccess()) {
 					for (File finishedFile : transformFileSetEx.getSrcFile()) {
-						saveFileName2TransformRecordFile(finishedFile, transformRecordFile);
+						saveFileName2TransformRecordFile(finishedFile, transformRecordFile);	
+						for(File dstFile : transformFileSetEx.getDstFile()) {
+							tfis.addDstFile(dstFile);
+						}
+						AsyncDbSaver.saveDb(tfis);
 					}
 				}
 			}
 		}
+		
 		logger.warn("结束空闲时转换本文件夹下内容："+srcDir.getCanonicalPath());
 	}
 	
