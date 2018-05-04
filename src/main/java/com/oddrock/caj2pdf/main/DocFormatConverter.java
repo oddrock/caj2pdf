@@ -16,6 +16,7 @@ import org.codehaus.plexus.util.ExceptionUtils;
 import com.oddrock.caj2pdf.bean.TransformFileSetEx;
 import com.oddrock.caj2pdf.biz.Caj2PdfUtils;
 import com.oddrock.caj2pdf.biz.Caj2WordUtils;
+import com.oddrock.caj2pdf.biz.Html2PdfUtils;
 import com.oddrock.caj2pdf.biz.Img2WordUtils;
 import com.oddrock.caj2pdf.biz.Pdf2EpubUtils;
 import com.oddrock.caj2pdf.biz.Pdf2MobiUtils;
@@ -892,7 +893,7 @@ public class DocFormatConverter {
 	}
 
 	// 空闲时工作
-	private void idleWork() throws IOException, TransformWaitTimeoutException, InterruptedException {
+	private void idleWork() throws IOException, TransformWaitTimeoutException, InterruptedException, TransformNodirException {
 		logger.warn("开始进行空闲时转换工作，工作随时可以结束");
 		File srcDirParentDir = new File(Prop.get("idlework.srcdirpath"));
 		if(srcDirParentDir.exists() && srcDirParentDir.isDirectory() 
@@ -911,7 +912,7 @@ public class DocFormatConverter {
 		logger.warn("已完成所有空闲时转换工作");
 	}
 	
-	private void idleWork(File srcDir, TransformType transformType) throws IOException, TransformWaitTimeoutException, InterruptedException {	
+	private void idleWork(File srcDir, TransformType transformType) throws IOException, TransformWaitTimeoutException, InterruptedException, TransformNodirException {	
 		logger.warn("开始空闲时转换本文件夹下内容："+srcDir.getCanonicalPath());
 		FileUtils.deleteHiddenFiles(srcDir);
 		File[] files = srcDir.listFiles();
@@ -932,6 +933,7 @@ public class DocFormatConverter {
 			}
 			if(TransformType.caj2word.equals(transformType)) {
 				TransformInfoStater tfis = new TransformInfoStater("caj2word_idlework", srcDir, srcDir,  robotMngr, new DateStrTransformDstDirGenerator());
+				doBeforeTransform(tfis);
 				tfis.addSrcFile(file);
 				TransformFileSetEx transformFileSetEx = Caj2WordUtils.caj2word_single(file, robotMngr);
 				if(transformFileSetEx.isSuccess()) {
@@ -945,6 +947,7 @@ public class DocFormatConverter {
 				}
 			}else if(TransformType.pdf2word.equals(transformType)) {
 				TransformInfoStater tfis = new TransformInfoStater("pdf2word_idlework", srcDir, srcDir,  robotMngr, new DateStrTransformDstDirGenerator());
+				doBeforeTransform(tfis);
 				tfis.addSrcFile(file);
 				TransformFileSetEx transformFileSetEx = Pdf2WordUtils.pdf2word_single(file, robotMngr);
 				if(transformFileSetEx.isSuccess()) {
@@ -968,6 +971,25 @@ public class DocFormatConverter {
 		String content = file.getCanonicalPath();
 		FileUtils.writeLineToFile(transformRecordFile.getCanonicalPath(), content, true);
 	}
+	
+	private void html2pdf_sendmail() throws TransformNodirException, IOException, MessagingException, TransformNofileException, TransformWaitTimeoutException, InterruptedException {
+		Set<MailDir> set = MailDir.scanAndGetMailDir(new File(Prop.get("srcdirpath")));
+		for(MailDir md : set) {
+			html2pdf_sendmail(md);
+		}
+	}
+
+	private void html2pdf_sendmail(MailDir md) throws TransformNodirException, IOException, MessagingException, TransformNofileException, TransformWaitTimeoutException, InterruptedException {
+		TransformInfoStater tfis = new TransformInfoStater("html2pdf", md.getDir(), new File(Prop.get("dstdirpath")), robotMngr, new MailDateStrTransformDstDirGenerator());
+		tfis.setNeedDelSrcDir(true);
+		tfis.setNeedSendDstFileMail(true);
+		tfis.setMaildir(md);
+		tfis.setNeedCopyContentOnClipboard(true);
+		tfis.setClipboardContent("您的文件已经转好发到您的邮箱了。");
+		doBeforeTransform(tfis);
+		Html2PdfUtils.html2pdf_batch(tfis);
+		doAfterTransform(tfis);
+	}
 
 	public void execTransform(String[] args) throws IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException, ParseException, TransformPdfEncryptException {
 		String method = Prop.get("caj2pdf.start");
@@ -989,6 +1011,8 @@ public class DocFormatConverter {
 			pdf2word_sendmail();
 		}else if("pdf2word_test_sendmail".equalsIgnoreCase(method)) {
 			pdf2word_test_sendmail();
+		}else if("html2pdf_sendmail".equalsIgnoreCase(method)) {
+			html2pdf_sendmail();
 		}else if("pdf2mobi_bycalibre_sendmail".equalsIgnoreCase(method)) {
 			pdf2mobi_bycalibre_sendmail();
 		}else if("pdf2mobi_bycalibre_test_sendmail".equalsIgnoreCase(method)) {
@@ -1078,6 +1102,8 @@ public class DocFormatConverter {
 	}
 
 
+
+	
 
 	
 

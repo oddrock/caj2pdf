@@ -169,9 +169,11 @@ public class CajViewerUtils {
 	public static void waitInputfilename(RobotManager robotMngr) throws IOException, InterruptedException, TransformWaitTimeoutException {
 		Timer timer = new Timer().start();
 		while(!isInputfilename(robotMngr)){
-			if(timer.getSpentTimeMillis()>TimeoutUtils.getTimeout("timeout.cajviewer.waitinputfilename")) {
-				logger.warn("等待输入文件名时间过长，已达到："+timer.getSpentTimeMillis()/1000L+"秒");
-				throw new TransformWaitTimeoutException();
+			if(TimeoutUtils.getTimeout("timeout.cajviewer.waitinputfilename")>0) {
+				if(timer.getSpentTimeMillis()>TimeoutUtils.getTimeout("timeout.cajviewer.waitinputfilename")) {
+					logger.warn("等待输入文件名时间过长，已达到："+timer.getSpentTimeMillis()/1000L+"秒");
+					throw new TransformWaitTimeoutException();
+				}
 			}
 			logger.warn("等待输入文件名");
 			Common.wait(Prop.getInt("interval.waitmillis"));

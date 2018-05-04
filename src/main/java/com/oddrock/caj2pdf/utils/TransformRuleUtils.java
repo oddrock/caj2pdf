@@ -69,6 +69,12 @@ public class TransformRuleUtils {
 				return file;
 			}
 		}
+		if(transformType.equalsIgnoreCase("html2pdf") 
+				|| transformType.equalsIgnoreCase("html2pdf_test")) {
+			if(filePathInLowerCase.endsWith(".html") || filePathInLowerCase.endsWith(".htm")) {
+				return file;
+			}
+		}
 		if(transformType.equalsIgnoreCase("pdf2word") 
 				|| transformType.equalsIgnoreCase("pdf2word_test")
 				|| transformType.equalsIgnoreCase("pdf2epub")
