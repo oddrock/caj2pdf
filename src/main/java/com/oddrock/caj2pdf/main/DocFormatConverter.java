@@ -913,6 +913,8 @@ public class DocFormatConverter {
 	}
 	
 	private void idleWork(File srcDir, TransformType transformType) throws IOException, TransformWaitTimeoutException, InterruptedException, TransformNodirException {	
+		TransformInfoStater tfis = new TransformInfoStater("caj2word_idlework", srcDir, srcDir,  robotMngr, new DateStrTransformDstDirGenerator());
+		doBeforeTransform(tfis);
 		logger.warn("开始空闲时转换本文件夹下内容："+srcDir.getCanonicalPath());
 		FileUtils.deleteHiddenFiles(srcDir);
 		File[] files = srcDir.listFiles();
@@ -932,8 +934,6 @@ public class DocFormatConverter {
 				continue;
 			}
 			if(TransformType.caj2word.equals(transformType)) {
-				TransformInfoStater tfis = new TransformInfoStater("caj2word_idlework", srcDir, srcDir,  robotMngr, new DateStrTransformDstDirGenerator());
-				doBeforeTransform(tfis);
 				tfis.addSrcFile(file);
 				TransformFileSetEx transformFileSetEx = Caj2WordUtils.caj2word_single(file, robotMngr);
 				if(transformFileSetEx.isSuccess()) {
@@ -946,8 +946,7 @@ public class DocFormatConverter {
 					}
 				}
 			}else if(TransformType.pdf2word.equals(transformType)) {
-				TransformInfoStater tfis = new TransformInfoStater("pdf2word_idlework", srcDir, srcDir,  robotMngr, new DateStrTransformDstDirGenerator());
-				doBeforeTransform(tfis);
+				tfis.getInfo().setTransform_type("pdf2word_idlework");
 				tfis.addSrcFile(file);
 				TransformFileSetEx transformFileSetEx = Pdf2WordUtils.pdf2word_single(file, robotMngr);
 				if(transformFileSetEx.isSuccess()) {
