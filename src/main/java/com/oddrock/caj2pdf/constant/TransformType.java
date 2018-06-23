@@ -15,6 +15,8 @@ public enum TransformType {
 			return caj2word;
 		}else if("pdf转word".equalsIgnoreCase(name)) {
 			return pdf2word;
+		}else if("pdf转mobi(abbyy)".equalsIgnoreCase(name)) {
+			return pdf2mobi_byabbyy;
 		}
 		return null;
 	}

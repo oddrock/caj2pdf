@@ -8,6 +8,7 @@ import java.io.IOException;
 import org.apache.log4j.Logger;
 
 import com.oddrock.caj2pdf.bean.TransformFileSet;
+import com.oddrock.caj2pdf.bean.TransformFileSetEx;
 import com.oddrock.caj2pdf.exception.TransformNofileException;
 import com.oddrock.caj2pdf.exception.TransformPdfEncryptException;
 import com.oddrock.caj2pdf.exception.TransformWaitTimeoutException;
@@ -235,6 +236,31 @@ public class Pdf2MobiUtils {
 			fileSet = Epub2MobiUtils.epub2mobiByCalibre(robotMngr, file.getCanonicalPath());
 			tfis.addDstFile(fileSet.getDstFile());
 		}
+	}
+	
+	public static TransformFileSetEx pdf2mobi_byabbyy_single(File file, RobotManager robotMngr) throws IOException, TransformWaitTimeoutException, InterruptedException  {
+		logger.warn("开始转换:"+file.getCanonicalPath());
+		TransformFileSetEx result = new TransformFileSetEx();
+		if(file==null || !file.exists() || !file.isFile()) {
+			logger.warn("文件不存在或文件为空");
+			return result;
+		}
+		File srcFile = TransformRuleUtils.isQualifiedSrcFile(file, "pdf2mobi_byabbyy");
+		if(srcFile==null) {
+			logger.warn("文件不是要转换的类型："+file.getCanonicalPath());
+			return result;
+		}
+		result.addSrcFile(srcFile);
+		TransformFileSet tmpFileSet = Pdf2EpubUtils.pdf2epub(robotMngr, file.getCanonicalPath());
+		if(tmpFileSet.getDstFile()!=null) {
+			tmpFileSet = Epub2MobiUtils.epub2mobiByCalibre(robotMngr, tmpFileSet.getDstFile().getCanonicalPath());
+			if(tmpFileSet!=null && tmpFileSet.getDstFile()!=null) {
+				result.addDstFile(tmpFileSet.getDstFile());
+				result.setSuccess(true);
+			}
+		}
+		logger.warn("结束转换:"+file.getCanonicalPath());
+		return result;
 	}
 	
 	public static void pdf2mobi_byabbyy_test(TransformInfoStater tfis) throws IOException, TransformNofileException, InterruptedException, TransformWaitTimeoutException, TransformPdfEncryptException {

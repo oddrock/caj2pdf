@@ -922,7 +922,7 @@ public class DocFormatConverter {
 		File transformRecordFile = new File(srcDir, transformRecordFileName);
 		Set<String> finishFileNameSet = new HashSet<String>();
 		if(transformRecordFile.exists()) {
-			finishFileNameSet = FileUtils.readFileContentPerLine(transformRecordFile.getCanonicalPath());
+			finishFileNameSet = FileUtils.readFileContentPerLineEncoding(transformRecordFile.getCanonicalPath());
 		}
 		for(File file: files) {
 			if(transformRecordFileName.equalsIgnoreCase(file.getName())) {	// 是记录文件就跳过。
@@ -949,6 +949,19 @@ public class DocFormatConverter {
 				tfis.getInfo().setTransform_type("pdf2word_idlework");
 				tfis.addSrcFile(file);
 				TransformFileSetEx transformFileSetEx = Pdf2WordUtils.pdf2word_single(file, robotMngr);
+				if(transformFileSetEx.isSuccess()) {
+					for (File finishedFile : transformFileSetEx.getSrcFile()) {
+						saveFileName2TransformRecordFile(finishedFile, transformRecordFile);	
+						for(File dstFile : transformFileSetEx.getDstFile()) {
+							tfis.addDstFile(dstFile);
+						}
+						AsyncDbSaver.saveDb(tfis);
+					}
+				}
+			}else if(TransformType.pdf2mobi_byabbyy.equals(transformType)) {
+				tfis.getInfo().setTransform_type("pdf2mobi_byabbyy_idlework");
+				tfis.addSrcFile(file);
+				TransformFileSetEx transformFileSetEx = Pdf2MobiUtils.pdf2mobi_byabbyy_single(file, robotMngr);
 				if(transformFileSetEx.isSuccess()) {
 					for (File finishedFile : transformFileSetEx.getSrcFile()) {
 						saveFileName2TransformRecordFile(finishedFile, transformRecordFile);	
@@ -1101,12 +1114,6 @@ public class DocFormatConverter {
 	}
 
 
-
-	
-
-	
-
-	
 
 	public static void main(String[] args) throws AWTException, IOException, InterruptedException, MessagingException, TransformWaitTimeoutException, TransformNofileException, TransformNodirException, ParseException, TransformPdfEncryptException {
 		DocFormatConverter dfc = new DocFormatConverter();
