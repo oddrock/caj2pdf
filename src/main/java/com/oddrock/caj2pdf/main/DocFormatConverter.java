@@ -1122,8 +1122,8 @@ public class DocFormatConverter {
 			//dfc.caj2word_test_sendmail();
 			//dfc.selftest();
 			//dfc.sendmail(MailFileType.WORD);
-			//dfc.caj2pdf_sendmail();
-			dfc.idleWork();
+			dfc.caj2word_sendmail();
+			//dfc.pdf2word_test();
 		}else {
 			/*dfc.download_one_qqmailfiles();
 			if(1==1) {
